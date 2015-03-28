@@ -75,22 +75,26 @@ class StartupCommand extends \CliTools\Console\Command\AbstractCommand implement
      * @return string
      */
     protected function cleanupMysql() {
-        // ############################
-        // Clear general log
-        // ############################
+        try {
+            // ############################
+            // Clear general log
+            // ############################
 
-        // Disable general log
-        $query = 'SET GLOBAL general_log = \'OFF\'';
-        DatabaseConnection::exec($query);
+            // Disable general log
+            $query = 'SET GLOBAL general_log = \'OFF\'';
+            DatabaseConnection::exec($query);
 
-        // Fetch log file
-        $query = 'SHOW VARIABLES LIKE \'general_log_file\'';
-        $logFileRow = DatabaseConnection::getRow($query);
+            // Fetch log file
+            $query = 'SHOW VARIABLES LIKE \'general_log_file\'';
+            $logFileRow = DatabaseConnection::getRow($query);
 
-        if (!empty($logFileRow['Value'])) {
-            // Remove logfile
-            $output = '';
-            CommandExecutionUtility::exec('rm', $output, '-f %s', array($logFileRow['Value']));
+            if (!empty($logFileRow['Value'])) {
+                // Remove logfile
+                $output = '';
+                CommandExecutionUtility::exec('rm', $output, '-f %s', array($logFileRow['Value']));
+            }
+        } catch (\Exception $e) {
+            // do nothing if no mysql is running
         }
 
     }
