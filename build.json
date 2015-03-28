@@ -1,0 +1,19 @@
+{
+    "chmod": "0755",
+    "directories": [
+        "src"
+    ],
+    "files": [
+        "LICENSE"
+    ],
+    "finder": [
+        {
+            "name": "*.php",
+            "exclude": ["Tests"],
+            "in": "src/vendor"
+        }
+    ],
+    "main": "src/command.php",
+    "output": "clitools.phar",
+    "stub": true
+}

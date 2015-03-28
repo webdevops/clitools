@@ -1,0 +1,7 @@
+{
+    "require": {
+        "symfony/console": "2.*",
+        "symfony/class-loader": "2.*",
+        "symfony/dependency-injection": "2.*"
+    }
+}
