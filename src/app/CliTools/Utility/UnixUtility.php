@@ -168,6 +168,18 @@ abstract class UnixUtility {
     }
 
     /**
+     * Get ip of default gateway
+     *
+     * @return null
+     */
+    public static function defaultGateway() {
+        $output = null;
+        CommandExecutionUtility::execRaw('ip route show | grep \'default\' | awk \'{print $3}\'', $output);
+        $output = trim(implode('', $output));
+        return $output;
+    }
+
+    /**
      * Send wall message
      *
      * @param  string $message Message

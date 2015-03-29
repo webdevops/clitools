@@ -20,6 +20,7 @@
  */
 
 define('CLITOOLS_COMMAND_VERSION', '1.4.0');
+define('CLITOOLS_ROOT_FS', __DIR__);
 
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/app/bootstrap.php';

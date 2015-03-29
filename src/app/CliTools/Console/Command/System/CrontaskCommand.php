@@ -87,12 +87,40 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
         $this->systemCheckDiskUsage();
 
         if (!empty($this->sysCheckMessageList)) {
+            // Growl notification
+            $message = 'WARNING:' . "\n\n" . implode("\n", $this->sysCheckMessageList);
+            $this->sendGrowlMessage('CliTools :: System Check Warnings', $message);
+
+            // Local wall message
             $msgPrefix = ' [WARNING] ';
             $message = ' -- CliTools :: System Check Warnings --' . "\n\n";
             $message .= $msgPrefix .implode("\n" . $msgPrefix, $this->sysCheckMessageList);
             $message .= "\n\n" . '(This warning can be disabled in /etc/clitools.ini)';
-
             UnixUtility::sendWallMessage($message);
+        }
+    }
+
+    /**
+     * Send growl message
+     *
+     * @param string $title    Notification title
+     * @param string $message  Notification message
+     */
+    protected function sendGrowlMessage($title, $message) {
+        require CLITOOLS_ROOT_FS . '/vendor/jamiebicknell/Growl-GNTP/growl.gntp.php';
+
+        $growlServer   = (string)$this->getApplication()->getConfigValue('growl', 'server', NULL);
+        $growlPassword = (string)$this->getApplication()->getConfigValue('growl', 'password', NULL);
+
+        if (!empty($growlServer)) {
+            $growl = new \Growl($growlServer, $growlPassword);
+            $growl->setApplication('Vagrant VM', 'Vagrant Development VM');
+
+            // Only need to use the following method on first use or change of icon
+            $growl->registerApplication();
+
+            // Basic Notification
+            $growl->notify($title, $message);
         }
     }
 
