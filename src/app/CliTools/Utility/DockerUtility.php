@@ -23,12 +23,45 @@ namespace CliTools\Utility;
 class DockerUtility {
 
     /**
+     * Search docker-compose.yml recursive
+     *
+     * @param  NULL|string $path Docker path
+     * @return bool|string
+     */
+    public static function searchDockerDirectoryRecursive($path = NULL) {
+        $ret = FALSE;
+
+        if ($path === NULL) {
+            $path = getcwd();
+        }
+
+
+        if( !empty($path) && $path !== '/') {
+            // Check if current path is docker directory
+            if (self::isDockerDirectory($path)) {
+                // Docker found
+                $ret = $path;
+            } else {
+                // go up in directory
+                $path .= '/../';
+                $path = realpath($path);
+                $ret = self::searchDockerDirectoryRecursive($path);
+            }
+        }
+
+        return $ret;
+    }
+
+    /**
      * Check if current working directory is a docker instance directory
      *
+     * @param  NULL|string $path Docker path
      * @return bool
      */
-    public static function isDockerDirectory() {
-        $workDir = getcwd();
+    public static function isDockerDirectory($path = NULL) {
+        if ($path === NULL) {
+            $path = getcwd();
+        }
 
         $dockerFileList = array(
            'docker-compose.yml',
@@ -36,7 +69,7 @@ class DockerUtility {
         );
 
         foreach($dockerFileList as $dockerFile) {
-            $filePath = $workDir . '/' . $dockerFile;
+            $filePath = $path . '/' . $dockerFile;
 
             if(file_exists($filePath)) {
                 return TRUE;
@@ -49,12 +82,15 @@ class DockerUtility {
     /**
      * Get docker instance prefix
      *
+     * @param  NULL|string $path Docker path
      * @return mixed|string
      */
-    public static function getDockerInstancePrefix() {
-        $workDir = getcwd();
+    public static function getDockerInstancePrefix($path = NULL) {
+        if ($path === NULL) {
+            $path = getcwd();
+        }
 
-        $ret = strtolower(basename($workDir));
+        $ret = strtolower(basename($path));
 
         $ret = preg_replace('/[^a-z0-9]/', '', $ret);
 
@@ -64,13 +100,14 @@ class DockerUtility {
     /**
      * Get docker instance name
      *
-     * @param  string $containerName   Container name
-     * @param  int    $containerNumber Container number
+     * @param  string      $containerName   Container name
+     * @param  int         $containerNumber Container number
+     * @param  NULL|string $path            Docker path
      * @return string
      */
-    public static function getDockerInstanceName($containerName, $containerNumber = 1) {
+    public static function getDockerInstanceName($containerName, $containerNumber = 1, $path = NULL) {
         $dockerName = array(
-            \CliTools\Utility\DockerUtility::getDockerInstancePrefix(),
+            \CliTools\Utility\DockerUtility::getDockerInstancePrefix($path),
             (string)$containerName,
             (int)$containerNumber,
         );

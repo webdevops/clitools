@@ -37,14 +37,20 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @return int|null|void
      */
     protected function executeDockerExec($containerName, $cmd) {
-        if(\CliTools\Utility\DockerUtility::isDockerDirectory()) {
-            $dockerName = \CliTools\Utility\DockerUtility::getDockerInstanceName($containerName);
+        $path = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
 
-            $this->output->writeln('<info>Execeuting "' . $cmd .'" in docker container "' . $dockerName . '" ...</info>');
+        if (!empty($path)) {
+            $dockerContainerName = \CliTools\Utility\DockerUtility::getDockerInstanceName($containerName, 1, $path);
 
-            CommandExecutionUtility::passthru('docker', 'exec -ti %s %s', array($dockerName, $cmd));
+            $this->output->writeln('<comment>Found docker directory: ' . $path . '</comment>');
+            chdir($path);
+
+            $this->output->writeln('<info>Execeuting "' . $cmd . '" in docker container "' . $dockerContainerName . '" ...</info>');
+
+            CommandExecutionUtility::passthru('docker', 'exec -ti %s %s', array($dockerContainerName, $cmd));
         } else {
-            $this->output->writeln('<error>No docker instance found in this directory</error>');
+            $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
+            return 1;
         }
 
         return 0;

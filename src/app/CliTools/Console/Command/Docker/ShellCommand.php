@@ -51,7 +51,7 @@ class ShellCommand extends AbstractCommand {
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
-        $container = 'web';
+        $container = 'main';
 
         if($input->getArgument('container')) {
             $container = $input->getArgument('container');
