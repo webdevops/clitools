@@ -63,7 +63,7 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
 
             // Get process name and swap
 
-            $processName      = file_get_contents($processStatsPath . '/comm');
+            $processName      = trim(file_get_contents($processStatsPath . '/comm'));
             $processSwap      = $this->getProcessSwap($processStatsPath);
 
             if (!empty($processSwap)) {
