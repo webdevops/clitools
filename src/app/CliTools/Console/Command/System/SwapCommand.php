@@ -51,7 +51,7 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
 
-        $dirIterator = new \DirectoryIterator('/proc/');
+        $dirIterator = new \DirectoryIterator('/proc');
         $dirIterator = new ProcProcessDirectoryFilter($dirIterator);
 
         $procList  = array();
@@ -62,19 +62,36 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
             $processStatsPath = $dirEntry->getRealPath();
 
             // Get process name and swap
+
             $processName      = file_get_contents($processStatsPath . '/comm');
             $processSwap      = $this->getProcessSwap($processStatsPath);
 
             if (!empty($processSwap)) {
                 $swapTotal += $processSwap;
 
-                $procList[] = array(
-                    'name' => $processName,
-                    'swap' => $processSwap,
-                );
+                if (!empty($procList[$processName])) {
+                    // existing proc
+                    $procList[$processName]['swap'] += $processSwap;
+                } else {
+                    // new proc
+                    $procList[$processName] = array(
+                        'name' => $processName,
+                        'swap' => $processSwap,
+                    );
+                }
             }
         }
 
+        // ########################
+        // Sort
+        // ########################
+
+        uasort(
+            $procList,
+            function ($a, $b) {
+                return $a['swap'] < $b['swap'];
+            }
+        );
 
         // ########################
         // Output
@@ -111,7 +128,7 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
      * @return int|null
      */
     protected function getProcessSwap($processStatsPath) {
-        $ret = null;
+        $ret = 0;
         $smapsFile = $processStatsPath . '/smaps';
 
         if (is_readable($smapsFile)) {
@@ -121,9 +138,8 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
                 $smaps = explode("\n", $smaps);
 
                 foreach ($smaps as $smapsLine) {
-                    if (preg_match('/^Swap:[\s]+([0-9]+) kB/i', $smapsLine, $matches)) {
-                        $ret = $matches[1];
-                        break;
+                    if (preg_match('/^Swap:[\s]*([0-9]+)[\s]*kB/i', $smapsLine, $matches)) {
+                        $ret += $matches[1];
                     }
                 }
             } else {
