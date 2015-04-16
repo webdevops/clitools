@@ -68,7 +68,7 @@ class SchedulerCommand extends \CliTools\Console\Command\AbstractCommand {
 
             try {
                 $typo3CliPath = $dirPath.'/typo3/cli_dispatch.phpsh';
-                CommandExecutionUtility::passthru('php', '%s %s', array($typo3CliPath, 'scheduler'));
+                CommandExecutionUtility::execInteractive('php', '%s %s', array($typo3CliPath, 'scheduler'));
             } catch (\Exception $e) {
                 $output->writeln('<error>Failed TYPO3 scheduler on ' . $dirPath . '</error>');
             }

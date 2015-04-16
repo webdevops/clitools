@@ -75,7 +75,7 @@ abstract class AbstractCommand extends Command {
             try {
                 $parameterList = $_SERVER['argv'];
                 $paramArgList = str_repeat('%s ', count($parameterList));
-                CommandExecutionUtility::passthru('sudo', $paramArgList . ' --ansi', $parameterList);
+                CommandExecutionUtility::execInteractive('sudo', $paramArgList . ' --ansi', $parameterList);
             } catch (\Exception $e) {
                 // do not display exception here because it's a child process
             }
@@ -131,7 +131,7 @@ abstract class AbstractCommand extends Command {
         try {
             // Execute command
             $paramTemplate = implode(' ', $paramTemplate);
-            CommandExecutionUtility::passthru('multitail', $paramTemplate, $paramList);
+            CommandExecutionUtility::execInteractive('multitail', $paramTemplate, $paramList);
 
         } catch (\Exception $e) {
             $elapsedTime = time() - $startTime;

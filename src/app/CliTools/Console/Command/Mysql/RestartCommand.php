@@ -47,7 +47,7 @@ class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
-        CommandExecutionUtility::passthru('service', '%s %s', array('mysql', 'restart'));
+        CommandExecutionUtility::execInteractive('service', '%s %s', array('mysql', 'restart'));
     }
 
 }

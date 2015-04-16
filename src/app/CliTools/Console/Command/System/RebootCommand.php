@@ -48,7 +48,7 @@ class RebootCommand extends \CliTools\Console\Command\AbstractCommand {
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
-        CommandExecutionUtility::passthru('reboot');
+        CommandExecutionUtility::execInteractive('reboot');
     }
 
 }

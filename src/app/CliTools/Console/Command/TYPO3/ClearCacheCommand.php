@@ -81,7 +81,7 @@ class ClearCacheCommand extends \CliTools\Console\Command\AbstractCommand {
 
             $output->writeln('<info>Running clearcache command on ' . $dirPath . '</info>');
             try {
-                CommandExecutionUtility::passthru('php', null, $params);
+                CommandExecutionUtility::execInteractive('php', null, $params);
             } catch (\Exception $e) {
                 $output->writeln('<error> Failed with exception: ' . $e->getMessage() .'</error>');
             }

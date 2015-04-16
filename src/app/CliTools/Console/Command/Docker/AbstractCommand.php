@@ -47,7 +47,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
             $this->output->writeln('<info>Execeuting "' . $cmd . '" in docker container "' . $dockerContainerName . '" ...</info>');
 
-            CommandExecutionUtility::passthru('docker', 'exec -ti %s %s', array($dockerContainerName, $cmd));
+            CommandExecutionUtility::execInteractive('docker', 'exec -ti %s %s', array($dockerContainerName, $cmd));
         } else {
             $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
             return 1;

@@ -48,7 +48,7 @@ class ShutdownCommand extends \CliTools\Console\Command\AbstractCommand {
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
-        CommandExecutionUtility::passthru('shutdown', '%s %s', array('-h', 'now'));
+        CommandExecutionUtility::execInteractive('shutdown', '%s %s', array('-h', 'now'));
     }
 
 }

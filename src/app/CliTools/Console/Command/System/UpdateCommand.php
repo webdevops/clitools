@@ -82,10 +82,10 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
             try {
                 // Update git repository
                 $this->outputBlock($output, 'Running git update of ' . $reposDirectory);
-                CommandExecutionUtility::passthru('git', 'pull' );
+                CommandExecutionUtility::execInteractive('git', 'pull' );
 
                 // Rebuild ssh config
-                CommandExecutionUtility::passthru(CLITOOLS_COMMAND_CLI, 'user:rebuildsshconfig');
+                CommandExecutionUtility::execInteractive(CLITOOLS_COMMAND_CLI, 'user:rebuildsshconfig');
             } catch (\RuntimeException $e) {
                 $msg = 'Running git update of ' . $reposDirectory . '... FAILED';
                 $output->writeln('<error>' . $msg . '</error>');
@@ -112,10 +112,10 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
         // ##################
         try {
             $this->outputBlock($output, 'Running system package update');
-            CommandExecutionUtility::passthru('apt-get', '%s --quiet', array('clean'));
-            CommandExecutionUtility::passthru('apt-get', '%s --quiet', array('update'));
-            CommandExecutionUtility::passthru('apt-get', '%s --fix-broken --assume-yes --quiet', array('dist-upgrade') );
-            CommandExecutionUtility::passthru('apt-get', '%s --quiet', array('autoclean'));
+            CommandExecutionUtility::execInteractive('apt-get', '%s --quiet', array('clean'));
+            CommandExecutionUtility::execInteractive('apt-get', '%s --quiet', array('update'));
+            CommandExecutionUtility::execInteractive('apt-get', '%s --fix-broken --assume-yes --quiet', array('dist-upgrade') );
+            CommandExecutionUtility::execInteractive('apt-get', '%s --quiet', array('autoclean'));
         } catch (\RuntimeException $e) {
             $msg = 'Running system package update... FAILED';
             $output->writeln('<error>' . $msg . '</error>');
@@ -127,7 +127,7 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
         // ##################
         //try {
         //	$this->outputBlock($output, 'Running npm update');
-        //	CommandExecutionUtility::passthru('npm', 'update -g');
+        //	CommandExecutionUtility::execInteractive('npm', 'update -g');
         //} catch (\RuntimeException $e) {
         //	$msg = 'Running npm update... FAILED';
         //	$output->writeln('<error>' . $msg . '</error>');
@@ -152,7 +152,7 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
         // ##################
         try {
             $this->outputBlock($output, 'Running composer update');
-            CommandExecutionUtility::passthru('composer', '%s', array('self-update') );
+            CommandExecutionUtility::execInteractive('composer', '%s', array('self-update') );
         } catch (\RuntimeException $e) {
             $msg = 'Running composer update... FAILED';
             $output->writeln('<error>' . $msg . '</error>');
@@ -164,7 +164,7 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
         // ##################
         try {
             $this->outputBlock($output, 'Running box.phar update');
-            CommandExecutionUtility::passthru('box.phar', '%s', array('update') );
+            CommandExecutionUtility::execInteractive('box.phar', '%s', array('update') );
         } catch (\RuntimeException $e) {
             $msg = 'Running box.phar update... FAILED';
             $output->writeln('<error>' . $msg . '</error>');

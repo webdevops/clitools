@@ -86,15 +86,15 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
 
         switch ($dumpFileType) {
             case 'application/x-bzip2':
-                CommandExecutionUtility::passthru('bzcat', '%s | mysql --user=%s %s', array($dumpFile, DatabaseConnection::getDbUsername(), $database));
+                CommandExecutionUtility::execInteractive('bzcat', '%s | mysql --user=%s %s', array($dumpFile, DatabaseConnection::getDbUsername(), $database));
                 break;
 
             case 'application/gzip':
-                CommandExecutionUtility::passthru('gzcat', '%s | mysql --user=%s %s', array($dumpFile, DatabaseConnection::getDbUsername(), $database));
+                CommandExecutionUtility::execInteractive('gzcat', '%s | mysql --user=%s %s', array($dumpFile, DatabaseConnection::getDbUsername(), $database));
                 break;
 
             default:
-                CommandExecutionUtility::passthru('cat', '%s | mysql --user=%s %s', array($dumpFile, DatabaseConnection::getDbUsername(), $database));
+                CommandExecutionUtility::execInteractive('cat', '%s | mysql --user=%s %s', array($dumpFile, DatabaseConnection::getDbUsername(), $database));
                 break;
         }
 

@@ -139,9 +139,9 @@ class TraceCommand extends \CliTools\Console\Command\AbstractCommand {
 
             if (!empty($grep)) {
                 $cmdArgs[] = $grep;
-                CommandExecutionUtility::passthru('sudo', 'strace ' . $straceOpts .' -p %s 2>&1  | grep --color=auto %s', $cmdArgs);
+                CommandExecutionUtility::execInteractive('sudo', 'strace ' . $straceOpts .' -p %s 2>&1  | grep --color=auto %s', $cmdArgs);
             } else {
-                CommandExecutionUtility::passthru('sudo', 'strace ' . $straceOpts .' -p %s', $cmdArgs);
+                CommandExecutionUtility::execInteractive('sudo', 'strace ' . $straceOpts .' -p %s', $cmdArgs);
             }
         }
 

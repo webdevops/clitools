@@ -116,12 +116,22 @@ class CommandExecutionUtility {
      * @param array|null  $parameter         Parameter List
      * @throws CommandExecutionException
      */
-    public static function passthru($command, $parameterTemplate = null, $parameter = null) {
+    public static function execInteractive($command, $parameterTemplate = null, $parameter = null) {
         $execCommand = self::buildCommand($command, $parameterTemplate, $parameter);
 
         ConsoleUtility::verboseWriteln('EXEC::PASSTHRU', $execCommand);
 
-        passthru($execCommand, $execStatus);
+        $descriptorSpec = array(
+            0 => array('file', 'php://stdin',  'r'),  // stdin is a file that the child will read from
+            1 => array('file', 'php://stdout', 'w'),  // stdout is a file that the child will write to
+            2 => array('file', '/dev/null',    'w')   // stderr is a file that the child will write to
+        );
+
+        $process = @proc_open($execCommand, $descriptorSpec, $pipes);
+
+        if (is_resource( $process )) {
+            $execStatus = proc_close($process);
+        }
 
         if ($execStatus !== 0) {
             $e = new CommandExecutionException('Process ' . $execCommand . ' did not finished successfully');
