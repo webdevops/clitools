@@ -1,9 +1,9 @@
 #!/usr/bin/env php
 <?php
 
-/**
+/*
  * CliTools Command
- * Copyright (C) 2014 Markus Blaschke <markus@familie-blaschke.net>
+ * Copyright (C) 2015 Markus Blaschke <markus@familie-blaschke.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-define('CLITOOLS_COMMAND_VERSION', '1.6.2');
+define('CLITOOLS_COMMAND_VERSION', '1.6.3');
 define('CLITOOLS_ROOT_FS', __DIR__);
 
 require __DIR__ . '/vendor/autoload.php';
