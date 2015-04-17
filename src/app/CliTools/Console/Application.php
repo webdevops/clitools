@@ -199,8 +199,6 @@ class Application extends \Symfony\Component\Console\Application {
                     }
 
                     $this->add(new $class);
-                } else {
-                    // TODO: show error
                 }
             }
         }
