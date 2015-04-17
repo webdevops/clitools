@@ -127,7 +127,7 @@ class CommandExecutionUtility {
             2 => array('file', '/dev/null',    'w')   // stderr is a file that the child will write to
         );
 
-        $process = @proc_open($execCommand, $descriptorSpec, $pipes);
+        $process = proc_open($execCommand, $descriptorSpec, $pipes);
 
         if (is_resource( $process )) {
             $execStatus = proc_close($process);
