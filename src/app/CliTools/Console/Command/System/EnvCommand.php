@@ -57,10 +57,7 @@ class EnvCommand extends \CliTools\Console\Command\AbstractCommand {
         foreach ($envNameList as $envName) {
             $envValue = getenv($envName);
 
-            if (!empty($envValue)) {
-                // TODO: escape
-                $envValue = $envValue;
-            } else {
+            if (empty($envValue)) {
                 $envValue = '<comment>(empty)</comment>';
             }
 
