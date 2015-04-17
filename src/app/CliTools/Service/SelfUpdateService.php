@@ -58,8 +58,13 @@ class SelfUpdateService {
      */
     protected $application = null;
 
+    /**
+     * Constructor
+     *
+     * @param $app
+     * @param $output
+     */
     public function __construct($app, $output) {
-        // FIXME: Dependency injection
         $this->application = $app;
         $this->output      = $output;
     }
