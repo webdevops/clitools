@@ -23,7 +23,6 @@ namespace CliTools\Console\Command\Mysql;
 use CliTools\Database\DatabaseConnection;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ClearCommand extends \CliTools\Console\Command\AbstractCommand {

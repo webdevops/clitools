@@ -24,7 +24,6 @@ use CliTools\Database\DatabaseConnection;
 use CliTools\Utility\CommandExecutionUtility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {

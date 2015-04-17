@@ -22,7 +22,6 @@ namespace CliTools\Console\Command\Log;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class DebugCommand extends \CliTools\Console\Command\Log\AbstractCommand {

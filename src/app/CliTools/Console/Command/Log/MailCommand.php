@@ -20,10 +20,8 @@ namespace CliTools\Console\Command\Log;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class MailCommand extends \CliTools\Console\Command\Log\AbstractCommand {
