@@ -30,14 +30,14 @@ abstract class ConsoleUtility {
      *
      * @var InputInterface
      */
-    static protected $input = NULL;
+    static protected $input = null;
 
     /**
      * Input
      *
      * @var OutputInterface
      */
-    static protected $output = NULL;
+    static protected $output = null;
 
     /**
      * Initializes the command just after the input has been validated.
@@ -83,13 +83,13 @@ abstract class ConsoleUtility {
             // Special stuff if line is exception
             if ($line instanceof \Exception) {
                 /** @var \Exception $e */
-                $e = $line;
-                $line = array();
+                $e      = $line;
+                $line   = array();
                 $line[] = '--- EXCEPTION ---';
                 $line[] = $e->getMessage();
                 $line[] = ' FILE: ' . $e->getFile();
                 $line[] = ' LINE: ' . $e->getLine();
-                $line = implode("\n", $line);
+                $line   = implode("\n", $line);
             }
 
             // Process lines

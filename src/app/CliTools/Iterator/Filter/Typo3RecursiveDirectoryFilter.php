@@ -60,11 +60,10 @@ class Typo3RecursiveDirectoryFilter extends \CliTools\Iterator\Filter\RecursiveD
         $dirName  = $dirEntry->getFilename();
 
         // Limit some known directory to optimize searching
-        if (in_array( strtolower($dirName), $this->ignoreDirectoryList)) {
+        if (in_array(strtolower($dirName), $this->ignoreDirectoryList)) {
             return false;
         }
 
         return true;
     }
-
 }

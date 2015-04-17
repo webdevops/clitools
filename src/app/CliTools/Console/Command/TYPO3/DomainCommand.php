@@ -33,15 +33,8 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('typo3:domain')
-            ->setDescription('Add common development domains to database')
-            ->addArgument(
-                'db',
-                InputArgument::OPTIONAL,
-                'Database name'
-            );
-
+        $this->setName('typo3:domain')->setDescription('Add common development domains to database')->addArgument('db',
+                InputArgument::OPTIONAL, 'Database name');
     }
 
     /**
@@ -49,13 +42,14 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         // ##################
         // Init
         // ##################
-        $dbName   = $input->getArgument('db');
+        $dbName = $input->getArgument('db');
 
         // ##############
         // Loop through databases
@@ -67,7 +61,7 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
             // ##############
 
             // Get list of databases
-            $query = 'SELECT SCHEMA_NAME
+            $query        = 'SELECT SCHEMA_NAME
                     FROM information_schema.SCHEMATA';
             $databaseList = DatabaseConnection::getCol($query);
 
@@ -78,9 +72,9 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
                 }
 
                 // Check if database is TYPO3 instance
-                $query = 'SELECT COUNT(*) as count
+                $query           = 'SELECT COUNT(*) as count
                             FROM information_schema.tables
-                           WHERE table_schema = '. DatabaseConnection::quote($dbName) . '
+                           WHERE table_schema = ' . DatabaseConnection::quote($dbName) . '
                              AND table_name = \'sys_domain\'';
                 $isTypo3Database = DatabaseConnection::getOne($query);
 
@@ -88,7 +82,6 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
                     $this->setupDevelopmentDomainsForDatabase($dbName);
                 }
             }
-
         } else {
             // ##############
             // One databases
@@ -103,6 +96,7 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
      * Set development domains for TYPO3 database
      *
      * @param  string $database Database
+     *
      * @return void
      */
     protected function setupDevelopmentDomainsForDatabase($database) {
@@ -123,7 +117,7 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
         // ##################
         $isMultiSite = false;
 
-        $query = 'SELECT uid
+        $query            = 'SELECT uid
                     FROM ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.pages
                    WHERE is_siteroot = 1
                      AND deleted = 0';
@@ -160,7 +154,7 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
                 }
 
                 // Check if we have already an entry
-                $query = 'SELECT uid
+                $query       = 'SELECT uid
                             FROM ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.sys_domain
                            WHERE pid = ' . (int)$rootPageUid . '
                              AND domainName = ' . DatabaseConnection::quote($rootPageDomain);
@@ -195,5 +189,4 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
             }
         }
     }
-
 }

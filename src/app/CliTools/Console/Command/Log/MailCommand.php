@@ -34,14 +34,8 @@ class MailCommand extends \CliTools\Console\Command\Log\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('log:mail')
-            ->setDescription('Show up mail log')
-            ->addArgument(
-                'grep',
-                InputArgument::OPTIONAL,
-                'Grep'
-            );
+        $this->setName('log:mail')->setDescription('Show up mail log')->addArgument('grep', InputArgument::OPTIONAL,
+                'Grep');
     }
 
     /**
@@ -49,6 +43,7 @@ class MailCommand extends \CliTools\Console\Command\Log\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {

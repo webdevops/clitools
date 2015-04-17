@@ -33,15 +33,8 @@ class DebugCommand extends \CliTools\Console\Command\Log\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('log:debug')
-            ->setAliases(array('debug'))
-            ->setDescription('Show up debugging log')
-            ->addArgument(
-                'grep',
-                InputArgument::OPTIONAL,
-                'Grep'
-            );
+        $this->setName('log:debug')->setAliases(array('debug'))->setDescription('Show up debugging log')->addArgument('grep',
+                InputArgument::OPTIONAL, 'Grep');
     }
 
     /**
@@ -49,6 +42,7 @@ class DebugCommand extends \CliTools\Console\Command\Log\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -61,7 +55,7 @@ class DebugCommand extends \CliTools\Console\Command\Log\AbstractCommand {
 
         // Show log
         $logList = array(
-        //	'/var/log/apache2/access.log',
+            //	'/var/log/apache2/access.log',
             '/var/log/apache2/error.log',
             '/var/log/php-fpm/dev.error.log',
         );

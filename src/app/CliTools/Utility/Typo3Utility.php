@@ -31,14 +31,15 @@ class Typo3Utility {
     /**
      * Generate TYPO3 password
      *
-     * @param	string	$password	Password
-     * @param	string	$type		Type of password (see constants)
-     * @return	null|string
+     * @param    string $password Password
+     * @param    string $type     Type of password (see constants)
+     *
+     * @return    null|string
      */
-    public static function generatePassword($password, $type = NULL) {
-        $ret = NULL;
+    public static function generatePassword($password, $type = null) {
+        $ret = null;
 
-        if ($type === NULL) {
+        if ($type === null) {
             $type = self::PASSWORD_TYPE_MD5_SALTED;
         }
 
@@ -50,8 +51,8 @@ class Typo3Utility {
             case self::PASSWORD_TYPE_MD5_SALTED:
                 // Salted md5
                 $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                $salt = '$1$' . substr(str_shuffle($chars),0,6) . '$';
-                $ret = crypt($password, $salt);
+                $salt  = '$1$' . substr(str_shuffle($chars), 0, 6) . '$';
+                $ret   = crypt($password, $salt);
                 break;
 
             // ##############
@@ -69,9 +70,10 @@ class Typo3Utility {
     /**
      * Guess best TYPO3 base path
      *
-     * @param  string          $basePath     System base path
-     * @param  InputInterface  $input        Input instance
-     * @param  null|string     $inputArgName Input option name for base path
+     * @param  string         $basePath     System base path
+     * @param  InputInterface $input        Input instance
+     * @param  null|string    $inputArgName Input option name for base path
+     *
      * @return null|string
      * @throws \RuntimeException
      */
@@ -80,7 +82,7 @@ class Typo3Utility {
 
         $userPath = null;
 
-        if ( $input !== null && $input instanceof InputInterface && $inputArgName !== null) {
+        if ($input !== null && $input instanceof InputInterface && $inputArgName !== null) {
             if ($input->hasArgument($inputArgName)) {
                 $userPath = $input->getArgument($inputArgName);
             }
@@ -116,6 +118,7 @@ class Typo3Utility {
      *
      * @param  string $basePath Base path
      * @param  int    $maxDepth Max depth
+     *
      * @return array
      */
     public static function getTypo3InstancePathList($basePath, $maxDepth = 3) {
@@ -139,7 +142,7 @@ class Typo3Utility {
             $dirPath = $dirEntry->getRealPath();
 
             // Check if current dir is possible typo3 instance
-            if (is_dir( $dirPath . '/typo3conf/')) {
+            if (is_dir($dirPath . '/typo3conf/')) {
                 // seems to be a valid typo3 path
                 $ret[] = $dirPath;
             }

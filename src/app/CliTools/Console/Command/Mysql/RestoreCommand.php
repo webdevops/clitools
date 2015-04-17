@@ -33,19 +33,8 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('mysql:restore')
-            ->setDescription('Restore database')
-            ->addArgument(
-                'db',
-                InputArgument::REQUIRED,
-                'Database name'
-            )
-            ->addArgument(
-                'file',
-                InputArgument::REQUIRED,
-                'File (mysql dump)'
-            );
+        $this->setName('mysql:restore')->setDescription('Restore database')->addArgument('db', InputArgument::REQUIRED,
+                'Database name')->addArgument('file', InputArgument::REQUIRED, 'File (mysql dump)');
     }
 
     /**
@@ -53,6 +42,7 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -61,11 +51,12 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
 
         if (!is_file($dumpFile) || !is_readable($dumpFile)) {
             $output->writeln('<error>File is not readable</error>');
+
             return 1;
         }
 
         // Get mime type from file
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $finfo        = finfo_open(FILEINFO_MIME_TYPE);
         $dumpFileType = finfo_file($finfo, $dumpFile);
         finfo_close($finfo);
 
@@ -86,15 +77,18 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
 
         switch ($dumpFileType) {
             case 'application/x-bzip2':
-                CommandExecutionUtility::execInteractive('bzcat', '%s | mysql --user=%s %s', array($dumpFile, DatabaseConnection::getDbUsername(), $database));
+                CommandExecutionUtility::execInteractive('bzcat', '%s | mysql --user=%s %s',
+                    array($dumpFile, DatabaseConnection::getDbUsername(), $database));
                 break;
 
             case 'application/gzip':
-                CommandExecutionUtility::execInteractive('gzcat', '%s | mysql --user=%s %s', array($dumpFile, DatabaseConnection::getDbUsername(), $database));
+                CommandExecutionUtility::execInteractive('gzcat', '%s | mysql --user=%s %s',
+                    array($dumpFile, DatabaseConnection::getDbUsername(), $database));
                 break;
 
             default:
-                CommandExecutionUtility::execInteractive('cat', '%s | mysql --user=%s %s', array($dumpFile, DatabaseConnection::getDbUsername(), $database));
+                CommandExecutionUtility::execInteractive('cat', '%s | mysql --user=%s %s',
+                    array($dumpFile, DatabaseConnection::getDbUsername(), $database));
                 break;
         }
 
@@ -102,5 +96,4 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
 
         return 0;
     }
-
 }

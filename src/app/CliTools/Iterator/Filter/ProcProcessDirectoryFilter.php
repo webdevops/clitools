@@ -44,5 +44,4 @@ class ProcProcessDirectoryFilter extends DirectoryFilter {
 
         return false;
     }
-
 }

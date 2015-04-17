@@ -114,7 +114,7 @@ class DatabaseConnection {
 
                 self::$connection = $con;
             } catch (\Exception $e) {
-                throw new \PDOException('Cannot connect to "' . self::$dbDsn . '" with user "' . self::$dbUsername . '" and password "' . self::$dbPassword .'", error was:' .$e->getMessage() );
+                throw new \PDOException('Cannot connect to "' . self::$dbDsn . '" with user "' . self::$dbUsername . '" and password "' . self::$dbPassword . '", error was:' . $e->getMessage());
             }
         }
 
@@ -125,6 +125,7 @@ class DatabaseConnection {
      * Execute SELECT query
      *
      * @param  string $query SQL query
+     *
      * @return \PDOStatement
      * @throws \PDOException
      */
@@ -145,6 +146,7 @@ class DatabaseConnection {
      * Execute INSERT/DELETE/UPDATE query
      *
      * @param  string $query SQL query
+     *
      * @return int
      * @throws \PDOException
      */
@@ -165,6 +167,7 @@ class DatabaseConnection {
      * Quote
      *
      * @param   mixed $value Quot value
+     *
      * @return string
      * @throws \PDOException
      */
@@ -177,6 +180,7 @@ class DatabaseConnection {
      * Quote array with values
      *
      * @param   array $valueList Values
+     *
      * @return  array
      */
     public static function quoteArray($valueList) {
@@ -192,6 +196,7 @@ class DatabaseConnection {
      * Get one (first value of first row)
      *
      * @param  string $query SQL query
+     *
      * @return mixed|null
      */
     public static function getOne($query) {
@@ -210,6 +215,7 @@ class DatabaseConnection {
      * Get first row
      *
      * @param  string $query SQL query
+     *
      * @return mixed|null
      * @throws \PDOException
      */
@@ -229,6 +235,7 @@ class DatabaseConnection {
      * Get all rows
      *
      * @param  string $query SQL query
+     *
      * @return array
      * @throws \PDOException
      */
@@ -248,8 +255,9 @@ class DatabaseConnection {
     /**
      * Get All with index (first value)
      *
-     * @param  string $query SQL query
+     * @param  string $query    SQL query
      * @param  string $indexCol Index column name
+     *
      * @return array
      * @throws \PDOException
      */
@@ -277,6 +285,7 @@ class DatabaseConnection {
      * Get column
      *
      * @param  string $query SQL uery
+     *
      * @return array
      * @throws \PDOException
      */
@@ -296,6 +305,7 @@ class DatabaseConnection {
      * Get column (with index)
      *
      * @param  string $query SQL query
+     *
      * @return array
      * @throws \PDOException
      */
@@ -305,7 +315,7 @@ class DatabaseConnection {
         $res = self::query($query);
 
         foreach ($res as $row) {
-            $value = reset($row);
+            $value       = reset($row);
             $ret[$value] = $value;
         }
 
@@ -316,6 +326,7 @@ class DatabaseConnection {
      * Get list
      *
      * @param  string $query SQL query
+     *
      * @return array
      * @throws \PDOException
      */
@@ -325,8 +336,8 @@ class DatabaseConnection {
         $res = self::query($query);
 
         foreach ($res as $row) {
-            $key = reset($row);
-            $value = next($row);
+            $key       = reset($row);
+            $value     = next($row);
             $ret[$key] = $value;
         }
 
@@ -362,6 +373,7 @@ class DatabaseConnection {
      * Add condition to query
      *
      * @param  array|string $condition Condition
+     *
      * @return string
      */
     public static function addCondition($condition) {
@@ -381,9 +393,10 @@ class DatabaseConnection {
     /**
      * Create condition WHERE field IN (1,2,3,4)
      *
-     * @param  string $field SQL field
-     * @param  array $values Values
+     * @param  string  $field    SQL field
+     * @param  array   $values   Values
      * @param  boolean $required Required
+     *
      * @return string
      */
     public static function conditionIn($field, $values, $required = true) {
@@ -408,6 +421,7 @@ class DatabaseConnection {
      * @param  string  $field    SQL field
      * @param  array   $values   Values
      * @param  boolean $required Required
+     *
      * @return string
      */
     public static function conditionNotIn($field, $values, $required = true) {
@@ -430,6 +444,7 @@ class DatabaseConnection {
      * Sanitize field for sql usage
      *
      * @param   string $field SQL Field/Attribut
+     *
      * @return  string
      */
     public static function sanitizeSqlField($field) {
@@ -440,6 +455,7 @@ class DatabaseConnection {
      * Sanitize table for sql usage
      *
      * @param  string $table SQL Table
+     *
      * @return string
      */
     public static function sanitizeSqlTable($table) {
@@ -450,10 +466,10 @@ class DatabaseConnection {
      * Sanitize database for sql usage
      *
      * @param  string $database SQL Database
+     *
      * @return string
      */
     public static function sanitizeSqlDatabase($database) {
         return preg_replace('/[^_a-zA-Z0-9]/', '', $database);
     }
-
 }

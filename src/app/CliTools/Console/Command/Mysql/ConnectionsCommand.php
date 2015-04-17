@@ -34,9 +34,7 @@ class ConnectionsCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('mysql:connections')
-            ->setDescription('List current connections');
+        $this->setName('mysql:connections')->setDescription('List current connections');
     }
 
     /**
@@ -44,6 +42,7 @@ class ConnectionsCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -51,7 +50,7 @@ class ConnectionsCommand extends \CliTools\Console\Command\AbstractCommand {
         $query = 'SELECT CONNECTION_ID()';
         $conId = DatabaseConnection::getOne($query);
 
-        $query = 'SHOW PROCESSLIST';
+        $query       = 'SHOW PROCESSLIST';
         $processList = DatabaseConnection::getAll($query);
 
         // ########################
@@ -75,5 +74,4 @@ class ConnectionsCommand extends \CliTools\Console\Command\AbstractCommand {
 
         return 0;
     }
-
 }

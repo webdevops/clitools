@@ -20,8 +20,8 @@ namespace CliTools\Console\Command\System;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\CommandExecutionUtility;
 use CliTools\Database\DatabaseConnection;
+use CliTools\Utility\CommandExecutionUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -34,9 +34,7 @@ class StartupCommand extends \CliTools\Console\Command\AbstractCommand implement
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('system:startup')
-            ->setDescription('System startup task');
+        $this->setName('system:startup')->setDescription('System startup task');
     }
 
     /**
@@ -44,6 +42,7 @@ class StartupCommand extends \CliTools\Console\Command\AbstractCommand implement
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -85,7 +84,7 @@ class StartupCommand extends \CliTools\Console\Command\AbstractCommand implement
             DatabaseConnection::exec($query);
 
             // Fetch log file
-            $query = 'SHOW VARIABLES LIKE \'general_log_file\'';
+            $query      = 'SHOW VARIABLES LIKE \'general_log_file\'';
             $logFileRow = DatabaseConnection::getRow($query);
 
             if (!empty($logFileRow['Value'])) {
@@ -96,9 +95,5 @@ class StartupCommand extends \CliTools\Console\Command\AbstractCommand implement
         } catch (\Exception $e) {
             // do nothing if no mysql is running
         }
-
     }
-
-
-
 }

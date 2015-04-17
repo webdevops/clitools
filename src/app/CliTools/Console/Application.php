@@ -51,7 +51,7 @@ class Application extends \Symfony\Component\Console\Application {
     /**
      * Load config
      *
-     * @param string $file	Config file (.ini)
+     * @param string $file Config file (.ini)
      */
     public function loadConfig($file) {
         if (is_readable($file)) {
@@ -63,9 +63,10 @@ class Application extends \Symfony\Component\Console\Application {
     /**
      * Get config value
      *
-     * @param  string  $area         Area
-     * @param  string  $confKey      Config Key
-     * @param  null    $defaultValue Default value
+     * @param  string $area         Area
+     * @param  string $confKey      Config Key
+     * @param  null   $defaultValue Default value
+     *
      * @return null
      */
     public function getConfigValue($area, $confKey, $defaultValue = null) {
@@ -127,6 +128,7 @@ class Application extends \Symfony\Component\Console\Application {
         }
 
         $this->callTearDown();
+
         return $ret;
     }
 
@@ -192,7 +194,8 @@ class Application extends \Symfony\Component\Console\Application {
                 if (class_exists($class)) {
 
                     // check OnlyRoot filter
-                    if (!$isRunningAsRoot && is_subclass_of($class, '\CliTools\Console\Filter\OnlyRootFilterInterface')) {
+                    if (!$isRunningAsRoot && is_subclass_of($class, '\CliTools\Console\Filter\OnlyRootFilterInterface')
+                    ) {
                         // class only useable for root
                         continue;
                     }
@@ -215,5 +218,4 @@ class Application extends \Symfony\Component\Console\Application {
 
         return $currentUid === 0;
     }
-
 }

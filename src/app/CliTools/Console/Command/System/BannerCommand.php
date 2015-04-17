@@ -35,9 +35,7 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('system:banner')
-            ->setDescription('Banner generator for /etc/issue');
+        $this->setName('system:banner')->setDescription('Banner generator for /etc/issue');
     }
 
     /**
@@ -45,6 +43,7 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -113,7 +112,7 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
         $bytesPadding = 10;
 
         $cpuCount      = UnixUtility::cpuCount();
-        $memSize       = FormatUtility::bytes( UnixUtility::memorySize() );
+        $memSize       = FormatUtility::bytes(UnixUtility::memorySize());
         $kernelVersion = UnixUtility::kernelVersion();
         $dockerVersion = UnixUtility::dockerVersion();
         $mountInfoList = UnixUtility::mountInfoList();
@@ -122,11 +121,11 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
         $memSize = str_pad($memSize, $bytesPadding, ' ', STR_PAD_LEFT);
 
         // Basic sys informations
-        $leftCol[] = str_pad('Linux',  $labelLength, ' ', STR_PAD_LEFT) . ': ' . $kernelVersion;
+        $leftCol[] = str_pad('Linux', $labelLength, ' ', STR_PAD_LEFT) . ': ' . $kernelVersion;
         if (!empty($dockerVersion)) {
             $leftCol[] = str_pad('Docker', $labelLength, ' ', STR_PAD_LEFT) . ': ' . $dockerVersion;
         }
-        $leftCol[] = str_pad('CPU',    $labelLength, ' ', STR_PAD_LEFT) . ': ' . $cpuCount . ' Cores';
+        $leftCol[] = str_pad('CPU', $labelLength, ' ', STR_PAD_LEFT) . ': ' . $cpuCount . ' Cores';
         $leftCol[] = str_pad('Memory', $labelLength, ' ', STR_PAD_LEFT) . ': ' . $memSize;
 
         // Mount info list
@@ -139,7 +138,7 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
             }
 
             // padding
-            $mount    = str_pad($mount,    $labelLength, ' ', STR_PAD_LEFT);
+            $mount    = str_pad($mount, $labelLength, ' ', STR_PAD_LEFT);
             $capacity = str_pad($capacity, $bytesPadding, ' ', STR_PAD_LEFT);
 
             $leftCol[] = $mount . ': ' . $capacity . ' (' . $usage . ' in use)';
@@ -155,7 +154,7 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
         foreach ($netInterfaceList as $netName => $netConf) {
             $netName = str_pad($netName, $labelLength, ' ', STR_PAD_LEFT);
 
-            $rightCol[] = $netName . ': '. $netConf['ipaddress'];
+            $rightCol[] = $netName . ': ' . $netConf['ipaddress'];
         }
 
         // ##################
@@ -168,7 +167,7 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
         $colLeftWidth  = 54;
         $colRightWidth = 30;
 
-        for ($i=0; $i<$maxLines; $i++) {
+        for ($i = 0; $i < $maxLines; $i++) {
             $leftColLine  = '';
             $rightColLine = '';
 
@@ -196,6 +195,4 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
 
         return implode("\n", $ret);
     }
-
-
 }

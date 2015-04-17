@@ -33,31 +33,10 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('typo3:beuser')
-            ->setDescription('Add backend admin user to database')
-            ->addArgument(
-                'db',
-                InputArgument::OPTIONAL,
-                'Database name'
-            )
-            ->addArgument(
-                'user',
-                InputArgument::OPTIONAL,
-                'Username'
-            )
-            ->addArgument(
-                'password',
-                InputArgument::OPTIONAL,
-                'Password'
-            )
-            ->addOption(
-                'plain',
-                null,
-                InputOption::VALUE_NONE,
-                'Do not crypt password (non salted password)'
-            );
-
+        $this->setName('typo3:beuser')->setDescription('Add backend admin user to database')->addArgument('db',
+                InputArgument::OPTIONAL, 'Database name')->addArgument('user', InputArgument::OPTIONAL,
+                'Username')->addArgument('password', InputArgument::OPTIONAL, 'Password')->addOption('plain', null,
+                InputOption::VALUE_NONE, 'Do not crypt password (non salted password)');
     }
 
     /**
@@ -65,6 +44,7 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -83,6 +63,7 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
         // check username
         if (!preg_match('/^[-_a-zA-Z0-9\.]+$/', $username)) {
             $output->writeln('<error>Invalid username</error>');
+
             return 1;
         }
 
@@ -118,11 +99,11 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
             // ##############
 
             // Get list of databases
-            $query = 'SELECT SCHEMA_NAME
+            $query        = 'SELECT SCHEMA_NAME
                     FROM information_schema.SCHEMATA';
             $databaseList = DatabaseConnection::getCol($query);
 
-            $dbFound = FALSE;
+            $dbFound = false;
             foreach ($databaseList as $dbName) {
                 // Skip internal mysql databases
                 if (in_array(strtolower($dbName), array('mysql', 'information_schema', 'performance_schema'))) {
@@ -130,22 +111,21 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
                 }
 
                 // Check if database is TYPO3 instance
-                $query = 'SELECT COUNT(*) as count
+                $query           = 'SELECT COUNT(*) as count
                             FROM information_schema.tables
-                           WHERE table_schema = '. DatabaseConnection::quote($dbName) . '
+                           WHERE table_schema = ' . DatabaseConnection::quote($dbName) . '
                              AND table_name = \'be_users\'';
                 $isTypo3Database = DatabaseConnection::getOne($query);
 
                 if ($isTypo3Database) {
                     $this->setTypo3UserForDatabase($dbName, $username, $password);
-                    $dbFound = TRUE;
+                    $dbFound = true;
                 }
             }
 
             if (!$dbFound) {
                 $output->writeln('<error>No valid TYPO3 database found</error>');
             }
-
         } else {
             // ##############
             // One databases
@@ -178,12 +158,10 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
             'options.pageTree.showPageIdWithTitle = 1',
             'options.pageTree.showPathAboveMounts = 1',
             'options.pageTree.showDomainNameWithTitle = 1',
-
             // adm panel
             'admPanel.enable.edit = 1',
             'admPanel.module.edit.forceDisplayFieldIcons = 1',
             'admPanel.hide = 0',
-
             // Setup defaults
             'setup.default.thumbnailsByDefault = 1',
             'setup.default.enableFlashUploader = 0',
@@ -192,13 +170,11 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
             'setup.default.resizeTextareas_Flexible = 1',
             'setup.default.copyLevels = 99',
             'setup.default.rteResize = 99',
-
             // Web list
             'setup.default.moduleData.web_list.bigControlPanel = 1',
             'setup.default.moduleData.web_list.clipBoard = 1',
             'setup.default.moduleData.web_list.localization = 1',
             'setup.default.moduleData.web_list.showPalettes = 1',
-
             // File list
             'setup.default.moduleData.file_list.bigControlPanel = 1',
             'setup.default.moduleData.file_list.clipBoard = 1',
@@ -210,7 +186,7 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
 
         try {
             // Get uid from current dev user (if already existing)
-            $query = 'SELECT uid
+            $query    = 'SELECT uid
                         FROM `' . DatabaseConnection::sanitizeSqlDatabase($database) . '`.be_users
                        WHERE username = ' . DatabaseConnection::quote($username) . '
                          AND deleted = 0';
@@ -249,5 +225,4 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
             $this->output->writeln('<error>User adding failed</error>');
         }
     }
-
 }

@@ -33,9 +33,7 @@ class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('samba:restart')
-            ->setDescription('Restart Samba SMB daemon');
+        $this->setName('samba:restart')->setDescription('Restart Samba SMB daemon');
     }
 
     /**
@@ -43,6 +41,7 @@ class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -50,5 +49,4 @@ class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
         CommandExecutionUtility::execInteractive('service', '%s %s', array('smbd', 'restart'));
         CommandExecutionUtility::execInteractive('service', '%s %s', array('nmbd', 'restart'));
     }
-
 }

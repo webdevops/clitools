@@ -33,9 +33,7 @@ class UpgradeCommand extends AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('docker:upgrade')
-            ->setDescription('Upgrade docker version');
+        $this->setName('docker:upgrade')->setDescription('Upgrade docker version');
     }
 
     /**
@@ -43,12 +41,13 @@ class UpgradeCommand extends AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
         CommandExecutionUtility::execInteractive('wget -N https://get.docker.com/ | sh');
+
         return 0;
     }
-
 }

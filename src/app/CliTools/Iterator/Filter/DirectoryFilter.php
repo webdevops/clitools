@@ -47,5 +47,4 @@ class DirectoryFilter extends \FilterIterator {
 
         return true;
     }
-
 }

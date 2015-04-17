@@ -33,9 +33,7 @@ class MysqlCommand extends AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('docker:mysql')
-            ->setDescription('Enter mysql in docker container');
+        $this->setName('docker:mysql')->setDescription('Enter mysql in docker container');
     }
 
     /**
@@ -43,12 +41,12 @@ class MysqlCommand extends AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->executeDockerExec('db', 'mysql');
+
         return 0;
     }
-
-
 }

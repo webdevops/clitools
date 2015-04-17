@@ -40,7 +40,7 @@ class RecursiveDirectoryFilter extends \RecursiveFilterIterator {
         $dirPath = $dirEntry->getPathname();
 
         // skip dot files/dirs
-        if (strpos( $dirName, '.' ) === 0) {
+        if (strpos($dirName, '.') === 0) {
             return false;
         }
 
@@ -52,5 +52,4 @@ class RecursiveDirectoryFilter extends \RecursiveFilterIterator {
         // Seems to be a valid directory
         return true;
     }
-
 }

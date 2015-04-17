@@ -35,14 +35,14 @@ abstract class AbstractCommand extends Command {
      *
      * @var InputInterface
      */
-    protected $input = NULL;
+    protected $input = null;
 
     /**
      * Input
      *
      * @var OutputInterface
      */
-    protected $output = NULL;
+    protected $output = null;
 
     /**
      * Initializes the command just after the input has been validated.
@@ -65,6 +65,7 @@ abstract class AbstractCommand extends Command {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     protected function elevateProcess(InputInterface $input, OutputInterface $output) {
@@ -74,7 +75,7 @@ abstract class AbstractCommand extends Command {
 
             try {
                 $parameterList = $_SERVER['argv'];
-                $paramArgList = str_repeat('%s ', count($parameterList));
+                $paramArgList  = str_repeat('%s ', count($parameterList));
                 CommandExecutionUtility::execInteractive('sudo', $paramArgList . ' --ansi', $parameterList);
             } catch (\Exception $e) {
                 // do not display exception here because it's a child process
@@ -88,11 +89,12 @@ abstract class AbstractCommand extends Command {
     /**
      * Show log, passthru multitail
      *
-     * @param  array           $logList     List of log files
-     * @param  InputInterface  $input       Input instance
-     * @param  OutputInterface $output      Output instance
-     * @param  string          $grep        Grep value
-     * @param  array           $optionList  Additional option list for multitail
+     * @param  array           $logList    List of log files
+     * @param  InputInterface  $input      Input instance
+     * @param  OutputInterface $output     Output instance
+     * @param  string          $grep       Grep value
+     * @param  array           $optionList Additional option list for multitail
+     *
      * @return int|null|void
      * @throws \Exception
      */
@@ -101,20 +103,21 @@ abstract class AbstractCommand extends Command {
 
         // check if logfiles are accessable
         foreach ($logList as $log) {
-            if (!is_readable($log) ) {
+            if (!is_readable($log)) {
                 $output->writeln('<error>Can\'t read ' . $log . '</error>');
+
                 return 1;
             }
         }
 
         // Default params
-        $paramList = array();
+        $paramList     = array();
         $paramTemplate = array('--follow-all');
 
         // Add grep
         if ($grep !== null) {
             $paramTemplate[] = '-E %s';
-            $paramList[] = $grep;
+            $paramList[]     = $grep;
         }
 
         // Add additional option list
@@ -123,7 +126,7 @@ abstract class AbstractCommand extends Command {
         }
 
         // Add log
-        $paramList = array_merge($paramList, $logList);
+        $paramList       = array_merge($paramList, $logList);
         $paramTemplate[] = str_repeat('%s ', count($logList));
 
         $startTime = time();
@@ -132,10 +135,9 @@ abstract class AbstractCommand extends Command {
             // Execute command
             $paramTemplate = implode(' ', $paramTemplate);
             CommandExecutionUtility::execInteractive('multitail', $paramTemplate, $paramList);
-
         } catch (\Exception $e) {
             $elapsedTime = time() - $startTime;
-    
+
             if ($elapsedTime <= 1) {
                 // less than 1 seconds, must be an error
                 // if the cmd runs longer the user must be pressed CTRL+C
@@ -145,5 +147,4 @@ abstract class AbstractCommand extends Command {
 
         return 0;
     }
-
 }

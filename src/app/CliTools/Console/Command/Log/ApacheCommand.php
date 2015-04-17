@@ -33,15 +33,8 @@ class ApacheCommand extends \CliTools\Console\Command\Log\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('log:apache')
-            ->setAliases(array('apache:log'))
-            ->setDescription('Show up apache log')
-            ->addArgument(
-                'grep',
-                InputArgument::OPTIONAL,
-                'Grep'
-            );
+        $this->setName('log:apache')->setAliases(array('apache:log'))->setDescription('Show up apache log')->addArgument('grep',
+                InputArgument::OPTIONAL, 'Grep');
     }
 
     /**
@@ -49,6 +42,7 @@ class ApacheCommand extends \CliTools\Console\Command\Log\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {

@@ -33,14 +33,8 @@ class ShellCommand extends AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('docker:shell')
-            ->setDescription('Enter shell in docker container')
-            ->addArgument(
-                'container',
-                InputArgument::OPTIONAL,
-                'Container'
-            );
+        $this->setName('docker:shell')->setDescription('Enter shell in docker container')->addArgument('container',
+                InputArgument::OPTIONAL, 'Container');
     }
 
     /**
@@ -48,18 +42,18 @@ class ShellCommand extends AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $container = 'main';
 
-        if($input->getArgument('container')) {
+        if ($input->getArgument('container')) {
             $container = $input->getArgument('container');
         }
 
         $this->executeDockerExec($container, 'bash');
+
         return 0;
     }
-
-
 }

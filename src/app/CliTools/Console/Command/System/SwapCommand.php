@@ -36,9 +36,7 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('system:swap')
-            ->setDescription('List swap usage');
+        $this->setName('system:swap')->setDescription('List swap usage');
     }
 
     /**
@@ -46,6 +44,7 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -63,8 +62,8 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
 
             // Get process name and swap
 
-            $processName      = trim(file_get_contents($processStatsPath . '/comm'));
-            $processSwap      = $this->getProcessSwap($processStatsPath);
+            $processName = trim(file_get_contents($processStatsPath . '/comm'));
+            $processSwap = $this->getProcessSwap($processStatsPath);
 
             if (!empty($processSwap)) {
                 $swapTotal += $processSwap;
@@ -86,12 +85,9 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
         // Sort
         // ########################
 
-        uasort(
-            $procList,
-            function ($a, $b) {
-                return $a['swap'] > $b['swap'];
-            }
-        );
+        uasort($procList, function ($a, $b) {
+            return $a['swap'] > $b['swap'];
+        });
 
         // ########################
         // Output
@@ -107,8 +103,8 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
             }
 
             // Stats: average
-            $table->addRow( new TableSeparator() );
-            $statsRow = array();
+            $table->addRow(new TableSeparator());
+            $statsRow                = array();
             $statsRow['name']        = 'Total';
             $statsRow['table_count'] = FormatUtility::bytes($swapTotal);
             $table->addRow(array_values($statsRow));
@@ -125,10 +121,11 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
      * Get swap from process (in bytes)
      *
      * @param  string $processStatsPath Path to process (eg. /proc/123)
+     *
      * @return int|null
      */
     protected function getProcessSwap($processStatsPath) {
-        $ret = 0;
+        $ret       = 0;
         $smapsFile = $processStatsPath . '/smaps';
 
         if (is_readable($smapsFile)) {
@@ -154,5 +151,4 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
 
         return $ret;
     }
-
 }

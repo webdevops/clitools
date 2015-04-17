@@ -61,7 +61,7 @@ class SelfUpdateService {
     public function __construct($app, $output) {
         // FIXME: Dependency injection
         $this->application = $app;
-        $this->output = $output;
+        $this->output      = $output;
     }
 
     /**
@@ -176,6 +176,5 @@ class SelfUpdateService {
      * Cleanup
      */
     protected function cleanup() {
-
     }
 }

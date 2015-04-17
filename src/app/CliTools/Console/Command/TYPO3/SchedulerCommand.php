@@ -33,14 +33,8 @@ class SchedulerCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('typo3:scheduler')
-            ->setDescription('Run scheduler on all (or one specific) TYPO3 instances')
-            ->addArgument(
-                'path',
-                InputArgument::OPTIONAL,
-                'Path to TYPO3 instance'
-            );
+        $this->setName('typo3:scheduler')->setDescription('Run scheduler on all (or one specific) TYPO3 instances')->addArgument('path',
+                InputArgument::OPTIONAL, 'Path to TYPO3 instance');
     }
 
     /**
@@ -48,6 +42,7 @@ class SchedulerCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -67,7 +62,7 @@ class SchedulerCommand extends \CliTools\Console\Command\AbstractCommand {
             $output->writeln('<info>Running TYPO3 scheduler on ' . $dirPath . '</info>');
 
             try {
-                $typo3CliPath = $dirPath.'/typo3/cli_dispatch.phpsh';
+                $typo3CliPath = $dirPath . '/typo3/cli_dispatch.phpsh';
                 CommandExecutionUtility::execInteractive('php', '%s %s', array($typo3CliPath, 'scheduler'));
             } catch (\Exception $e) {
                 $output->writeln('<error>Failed TYPO3 scheduler on ' . $dirPath . '</error>');
@@ -76,5 +71,4 @@ class SchedulerCommand extends \CliTools\Console\Command\AbstractCommand {
 
         return 0;
     }
-
 }

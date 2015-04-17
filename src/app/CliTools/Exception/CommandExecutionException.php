@@ -48,5 +48,4 @@ class CommandExecutionException extends \RuntimeException {
     public function setReturnCode($returnCode) {
         $this->returnCode = $returnCode;
     }
-
 }

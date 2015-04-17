@@ -33,10 +33,7 @@ class ShutdownCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('system:shutdown')
-            ->setAliases( array('shutdown') )
-            ->setDescription('Shutdown system');
+        $this->setName('system:shutdown')->setAliases(array('shutdown'))->setDescription('Shutdown system');
     }
 
     /**
@@ -44,11 +41,11 @@ class ShutdownCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
         CommandExecutionUtility::execInteractive('shutdown', '%s %s', array('-h', 'now'));
     }
-
 }

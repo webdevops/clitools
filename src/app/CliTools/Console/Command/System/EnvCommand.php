@@ -35,9 +35,7 @@ class EnvCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('system:env')
-            ->setDescription('List environment variables');
+        $this->setName('system:env')->setDescription('List environment variables');
     }
 
     /**
@@ -45,6 +43,7 @@ class EnvCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -58,7 +57,7 @@ class EnvCommand extends \CliTools\Console\Command\AbstractCommand {
             'https_proxy',
         );
 
-        $envList  = array();
+        $envList = array();
 
         foreach ($envNameList as $envName) {
             $envValue = getenv($envName);
@@ -91,5 +90,4 @@ class EnvCommand extends \CliTools\Console\Command\AbstractCommand {
 
         return 0;
     }
-
 }

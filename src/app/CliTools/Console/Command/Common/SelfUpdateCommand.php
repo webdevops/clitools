@@ -33,10 +33,7 @@ class SelfUpdateCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('self-update')
-            ->setAliases(array('selfupdate'))
-            ->setDescription('Self update of CliTools Command');
+        $this->setName('self-update')->setAliases(array('selfupdate'))->setDescription('Self update of CliTools Command');
     }
 
     /**
@@ -44,6 +41,7 @@ class SelfUpdateCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -52,5 +50,4 @@ class SelfUpdateCommand extends \CliTools\Console\Command\AbstractCommand {
         $updateService = new SelfUpdateService($this->getApplication(), $output);
         $updateService->update();
     }
-
 }

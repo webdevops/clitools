@@ -20,14 +20,14 @@ namespace CliTools\Console\Command\System;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\CommandExecutionUtility;
 use CliTools\Database\DatabaseConnection;
+use CliTools\Utility\CommandExecutionUtility;
+use CliTools\Utility\UnixUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Utility\UnixUtility;
 
 class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implements \CliTools\Console\Filter\OnlyRootFilterInterface {
 
@@ -42,9 +42,7 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('system:crontask')
-            ->setDescription('System cron task');
+        $this->setName('system:crontask')->setDescription('System cron task');
     }
 
     /**
@@ -52,12 +50,13 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->setupBanner();
 
-        if ($this->getApplication()->getConfigValue('syscheck', 'enabled', TRUE)) {
+        if ($this->getApplication()->getConfigValue('syscheck', 'enabled', true)) {
             $this->systemCheck();
         }
 
@@ -93,8 +92,8 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
 
             // Local wall message
             $msgPrefix = ' [WARNING] ';
-            $message = ' -- CliTools :: System Check Warnings --' . "\n\n";
-            $message .= $msgPrefix .implode("\n" . $msgPrefix, $this->sysCheckMessageList);
+            $message   = ' -- CliTools :: System Check Warnings --' . "\n\n";
+            $message .= $msgPrefix . implode("\n" . $msgPrefix, $this->sysCheckMessageList);
             $message .= "\n\n" . '(This warning can be disabled in /etc/clitools.ini)';
             UnixUtility::sendWallMessage($message);
         }
@@ -103,14 +102,14 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
     /**
      * Send growl message
      *
-     * @param string $title    Notification title
-     * @param string $message  Notification message
+     * @param string $title   Notification title
+     * @param string $message Notification message
      */
     protected function sendGrowlMessage($title, $message) {
         require CLITOOLS_ROOT_FS . '/vendor/jamiebicknell/Growl-GNTP/growl.gntp.php';
 
-        $growlServer   = (string)$this->getApplication()->getConfigValue('growl', 'server', NULL);
-        $growlPassword = (string)$this->getApplication()->getConfigValue('growl', 'password', NULL);
+        $growlServer   = (string)$this->getApplication()->getConfigValue('growl', 'server', null);
+        $growlPassword = (string)$this->getApplication()->getConfigValue('growl', 'password', null);
 
         if (!empty($growlServer)) {
             $growl = new \Growl($growlServer, $growlPassword);
@@ -141,5 +140,4 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
             }
         }
     }
-
 }

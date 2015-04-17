@@ -35,14 +35,8 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('mysql:debug')
-            ->setDescription('Debug mysql connections')
-            ->addArgument(
-                'grep',
-                InputArgument::OPTIONAL,
-                'Grep'
-            );
+        $this->setName('mysql:debug')->setDescription('Debug mysql connections')->addArgument('grep',
+                InputArgument::OPTIONAL, 'Grep');
     }
 
     /**
@@ -50,6 +44,7 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -64,7 +59,7 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
         }
 
         // Fetch log file
-        $query = 'SHOW VARIABLES LIKE \'general_log_file\'';
+        $query      = 'SHOW VARIABLES LIKE \'general_log_file\'';
         $logFileRow = DatabaseConnection::getRow($query);
 
         if (!empty($logFileRow['Value'])) {
@@ -103,9 +98,11 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
             );
 
             $this->showLog($logList, $input, $output, $grep, $optionList);
+
             return 0;
         } else {
             $output->writeln('<error>MySQL general_log_file not set</error>');
+
             return 1;
         }
     }

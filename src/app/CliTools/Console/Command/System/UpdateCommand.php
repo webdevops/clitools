@@ -34,10 +34,7 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('system:update')
-            ->setAliases( array('update') )
-            ->setDescription('Update system');
+        $this->setName('system:update')->setAliases(array('update'))->setDescription('Update system');
     }
 
     /**
@@ -45,6 +42,7 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -55,6 +53,7 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
         $this->elevateProcess($input, $output);
 
         $output->writeln('<info>Running system update...</info>');
+
         return $this->systemUpdate($input, $output);
     }
 
@@ -63,6 +62,7 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     protected function userUpdate(InputInterface $input, OutputInterface $output) {
@@ -71,7 +71,7 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
         // ##################
         // SSH Git repo update
         // ##################
-        $reposDirectory  = $this->getApplication()->getConfigValue('config', 'ssh_conf_path', '/opt/conf/ssh');
+        $reposDirectory = $this->getApplication()->getConfigValue('config', 'ssh_conf_path', '/opt/conf/ssh');
 
         if (is_dir($reposDirectory) && is_dir($reposDirectory . '/.git')) {
             // SSH Git repo exists, update now
@@ -82,7 +82,7 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
             try {
                 // Update git repository
                 $this->outputBlock($output, 'Running git update of ' . $reposDirectory);
-                CommandExecutionUtility::execInteractive('git', 'pull' );
+                CommandExecutionUtility::execInteractive('git', 'pull');
 
                 // Rebuild ssh config
                 CommandExecutionUtility::execInteractive(CLITOOLS_COMMAND_CLI, 'user:rebuildsshconfig');
@@ -94,7 +94,6 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
 
             chdir($originalCwd);
         }
-
     }
 
     /**
@@ -102,6 +101,7 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     protected function systemUpdate(InputInterface $input, OutputInterface $output) {
@@ -114,7 +114,8 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
             $this->outputBlock($output, 'Running system package update');
             CommandExecutionUtility::execInteractive('apt-get', '%s --quiet', array('clean'));
             CommandExecutionUtility::execInteractive('apt-get', '%s --quiet', array('update'));
-            CommandExecutionUtility::execInteractive('apt-get', '%s --fix-broken --assume-yes --quiet', array('dist-upgrade') );
+            CommandExecutionUtility::execInteractive('apt-get', '%s --fix-broken --assume-yes --quiet',
+                array('dist-upgrade'));
             CommandExecutionUtility::execInteractive('apt-get', '%s --quiet', array('autoclean'));
         } catch (\RuntimeException $e) {
             $msg = 'Running system package update... FAILED';
@@ -152,7 +153,7 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
         // ##################
         try {
             $this->outputBlock($output, 'Running composer update');
-            CommandExecutionUtility::execInteractive('composer', '%s', array('self-update') );
+            CommandExecutionUtility::execInteractive('composer', '%s', array('self-update'));
         } catch (\RuntimeException $e) {
             $msg = 'Running composer update... FAILED';
             $output->writeln('<error>' . $msg . '</error>');
@@ -164,7 +165,7 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
         // ##################
         try {
             $this->outputBlock($output, 'Running box.phar update');
-            CommandExecutionUtility::execInteractive('box.phar', '%s', array('update') );
+            CommandExecutionUtility::execInteractive('box.phar', '%s', array('update'));
         } catch (\RuntimeException $e) {
             $msg = 'Running box.phar update... FAILED';
             $output->writeln('<error>' . $msg . '</error>');
@@ -205,7 +206,7 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
         list($termWidth, $termHeight) = $this->getApplication()->getTerminalDimensions();
         $separator = '<info>' . str_repeat('-', $termWidth) . '</info>';
 
-        $msg = str_repeat(' ', $termWidth - strlen($msg) -10 ) . $msg;
+        $msg = str_repeat(' ', $termWidth - strlen($msg) - 10) . $msg;
 
         $output->writeln($separator);
         $output->writeln('<info>' . $msg . '</info>');

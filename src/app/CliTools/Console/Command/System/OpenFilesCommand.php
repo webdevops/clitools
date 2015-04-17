@@ -36,9 +36,7 @@ class OpenFilesCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('system:openfiles')
-            ->setDescription('List swap usage');
+        $this->setName('system:openfiles')->setDescription('List swap usage');
     }
 
     /**
@@ -46,19 +44,20 @@ class OpenFilesCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
 
-        $procList  = array();
+        $procList       = array();
         $openFilesTotal = 0;
 
         $execOutput = '';
         CommandExecutionUtility::execRaw('lsof -n|grep -oE \'^[a-z]+\'|sort|uniq -c|sort -n', $execOutput);
         foreach ($execOutput as $execOutputLine) {
             // get open files and proc name from output
-            list( $procOpenFiles, $procName) = explode(' ', trim($execOutputLine), 2 );
+            list($procOpenFiles, $procName) = explode(' ', trim($execOutputLine), 2);
 
             // add to total stats
             $openFilesTotal += $procOpenFiles;
@@ -82,8 +81,8 @@ class OpenFilesCommand extends \CliTools\Console\Command\AbstractCommand {
         }
 
         // Stats: average
-        $table->addRow( new TableSeparator() );
-        $statsRow = array();
+        $table->addRow(new TableSeparator());
+        $statsRow               = array();
         $statsRow['name']       = 'Total';
         $statsRow['open_files'] = FormatUtility::number($openFilesTotal);
         $table->addRow(array_values($statsRow));
@@ -92,5 +91,4 @@ class OpenFilesCommand extends \CliTools\Console\Command\AbstractCommand {
 
         return 0;
     }
-
 }

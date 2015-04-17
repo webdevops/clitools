@@ -32,15 +32,8 @@ class ClearCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('mysql:clear')
-            ->setAliases(array('mysql:create'))
-            ->setDescription('Clear (recreate) database')
-            ->addArgument(
-                'db',
-                InputArgument::REQUIRED,
-                'Database name'
-            );
+        $this->setName('mysql:clear')->setAliases(array('mysql:create'))->setDescription('Clear (recreate) database')->addArgument('db',
+                InputArgument::REQUIRED, 'Database name');
     }
 
     /**
@@ -48,6 +41,7 @@ class ClearCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -65,5 +59,4 @@ class ClearCommand extends \CliTools\Console\Command\AbstractCommand {
 
         return 0;
     }
-
 }

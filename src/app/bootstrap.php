@@ -24,9 +24,7 @@ error_reporting(E_ALL);
 // ####################################
 
 $loader = new Symfony\Component\ClassLoader\UniversalClassLoader();
-$loader->registerNamespaces(
-    array(
+$loader->registerNamespaces(array(
         'CliTools' => __DIR__
-    )
-);
+    ));
 $loader->register();

@@ -36,9 +36,7 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('system:version')
-            ->setDescription('List common version');
+        $this->setName('system:version')->setDescription('List common version');
     }
 
     /**
@@ -46,11 +44,12 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
 
-        $versionList  = array();
+        $versionList = array();
 
         // ############################
         // System (LSB Version)
@@ -65,7 +64,7 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
         CommandExecutionUtility::execRaw('lsb_release -a 2> /dev/null', $execOutput);
         foreach ($execOutput as $execOutputLine) {
             if (strpos($execOutputLine, ':') !== false) {
-                list($tmpKey, $tmpVersion) = explode(':', trim($execOutputLine), 2 );
+                list($tmpKey, $tmpVersion) = explode(':', trim($execOutputLine), 2);
 
                 switch (strtolower($tmpKey)) {
                     case 'description':
@@ -81,13 +80,14 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
         // PHP
         // ############################
         $versionList[] = array(
-            'PHP', phpversion()
+            'PHP',
+            phpversion()
         );
 
         // ############################
         // MySQL
         // ############################
-        $query = 'SHOW VARIABLES LIKE \'version\'';
+        $query      = 'SHOW VARIABLES LIKE \'version\'';
         $versionRow = DatabaseConnection::getList($query);
 
         $versionList[] = array(
@@ -106,7 +106,7 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
         CommandExecutionUtility::execRaw('apache2ctl -v', $execOutput);
         foreach ($execOutput as $execOutputLine) {
             if (strpos($execOutputLine, ':') !== false) {
-                list($tmpKey, $tmpVersion) = explode(':', trim($execOutputLine), 2 );
+                list($tmpKey, $tmpVersion) = explode(':', trim($execOutputLine), 2);
 
                 switch (strtolower($tmpKey)) {
                     case 'server version':
@@ -131,7 +131,7 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
             $execOutput = '';
             CommandExecutionUtility::execRaw('docker --version', $execOutput);
 
-            $versionRow['version'] = trim(implode('',$execOutput));
+            $versionRow['version'] = trim(implode('', $execOutput));
         } catch (\Exception $e) {
             // no docker installed?!
         }
@@ -163,5 +163,4 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
 
         return 0;
     }
-
 }

@@ -32,20 +32,9 @@ class InstallerCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('typo3:installer')
-            ->setDescription('Enable installer on all (or one specific) TYPO3 instances')
-            ->addArgument(
-                'path',
-                InputArgument::OPTIONAL,
-                'Path to TYPO3 instance'
-            )
-            ->addOption(
-                'remove',
-                'r',
-                InputOption::VALUE_NONE,
-                'Remove installer file'
-            );
+        $this->setName('typo3:installer')->setDescription('Enable installer on all (or one specific) TYPO3 instances')->addArgument('path',
+                InputArgument::OPTIONAL, 'Path to TYPO3 instance')->addOption('remove', 'r', InputOption::VALUE_NONE,
+                'Remove installer file');
     }
 
     /**
@@ -53,6 +42,7 @@ class InstallerCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -85,11 +75,11 @@ class InstallerCommand extends \CliTools\Console\Command\AbstractCommand {
                 // Check if install tool file is already there
                 if (is_file($installFilePath)) {
                     // Already existing, just update timestamp
-                    touch( $installFilePath );
+                    touch($installFilePath);
                     $output->writeln('<comment>Already enabled on ' . $dirPath . '</comment>');
                 } else {
                     // Not existing, create file
-                    touch( $installFilePath );
+                    touch($installFilePath);
                     $output->writeln('<info>Enabled on ' . $dirPath . '</info>');
                 }
             } else {

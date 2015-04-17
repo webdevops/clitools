@@ -33,14 +33,8 @@ class ListCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('typo3:list')
-            ->setDescription('List all TYPO3 instances')
-            ->addArgument(
-                'path',
-                InputArgument::OPTIONAL,
-                'Path to TYPO3 instance'
-            );
+        $this->setName('typo3:list')->setDescription('List all TYPO3 instances')->addArgument('path',
+                InputArgument::OPTIONAL, 'Path to TYPO3 instance');
     }
 
     /**
@@ -48,6 +42,7 @@ class ListCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -63,9 +58,8 @@ class ListCommand extends \CliTools\Console\Command\AbstractCommand {
         $versionFileList = array(
             // 6.x version
             '/typo3/sysext/core/Classes/Core/SystemEnvironmentBuilder.php' => '/define\(\'TYPO3_version\',[\s]*\'([^\']+)\'\)/i',
-
             // 4.x version
-            '/t3lib/config_default.php'	=> '/\$TYPO_VERSION[\s]*=[\s]*\'([^\']+)\'/i',
+            '/t3lib/config_default.php'                                    => '/\$TYPO_VERSION[\s]*=[\s]*\'([^\']+)\'/i',
         );
 
         // ####################
@@ -93,7 +87,7 @@ class ListCommand extends \CliTools\Console\Command\AbstractCommand {
             if (strpos($typo3Version, '6') === 0) {
                 // TYPO3 6.x
                 $typo3Version = '<info>' . $typo3Version . '</info>';
-            } elseif(!empty($typo3Version)) {
+            } elseif (!empty($typo3Version)) {
                 // TYPO3 4.x
                 $typo3Version = '<comment>' . $typo3Version . '</comment>';
             } else {
@@ -117,5 +111,4 @@ class ListCommand extends \CliTools\Console\Command\AbstractCommand {
 
         return 0;
     }
-
 }

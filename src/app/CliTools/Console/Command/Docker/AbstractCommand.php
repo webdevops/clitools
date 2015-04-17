@@ -34,6 +34,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @param  string $containerName Container name
      * @param  string $cmd           Command
+     *
      * @return int|null|void
      */
     protected function executeDockerExec($containerName, $cmd) {
@@ -50,11 +51,10 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             CommandExecutionUtility::execInteractive('docker', 'exec -ti %s %s', array($dockerContainerName, $cmd));
         } else {
             $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
+
             return 1;
         }
 
         return 0;
     }
-
-
 }

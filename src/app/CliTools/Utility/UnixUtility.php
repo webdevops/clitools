@@ -103,7 +103,8 @@ abstract class UnixUtility {
      */
     public static function mountInfoList() {
         $discList = '';
-        CommandExecutionUtility::execRaw('df -a --type=ext3 --type=ext4 --portability | tail --lines=+2 | awk \'{ print $6 " " $4 " " $5 }\'', $discList);
+        CommandExecutionUtility::execRaw('df -a --type=ext3 --type=ext4 --portability | tail --lines=+2 | awk \'{ print $6 " " $4 " " $5 }\'',
+            $discList);
 
         $ret = array();
         foreach ($discList as $line) {
@@ -120,13 +121,14 @@ abstract class UnixUtility {
      * Get network interfaces as list
      *
      * @param  string $regExp Regular expression for matching
+     *
      * @return array
      */
     public static function networkInterfaceList($regExp) {
         $sysDir = '/sys/class/net/';
 
         $netInterfaceList = array();
-        $dirIterator = new \DirectoryIterator($sysDir);
+        $dirIterator      = new \DirectoryIterator($sysDir);
         foreach ($dirIterator as $dirEntry) {
             /** @var \DirectoryIterator $dirEntry */
 
@@ -136,7 +138,7 @@ abstract class UnixUtility {
             }
 
             // skip virtual interfaces
-            if(strpos($dirEntry->getFilename(), 'veth') === 0) {
+            if (strpos($dirEntry->getFilename(), 'veth') === 0) {
                 continue;
             }
 
@@ -176,6 +178,7 @@ abstract class UnixUtility {
         $output = null;
         CommandExecutionUtility::execRaw('ip route show | grep \'default\' | awk \'{print $3}\'', $output);
         $output = trim(implode('', $output));
+
         return $output;
     }
 
@@ -188,5 +191,4 @@ abstract class UnixUtility {
         $output = '';
         CommandExecutionUtility::exec('echo', $output, '%s | wall 2> /dev/null', array($message));
     }
-
 }

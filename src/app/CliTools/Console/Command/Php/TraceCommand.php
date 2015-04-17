@@ -34,26 +34,9 @@ class TraceCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('php:trace')
-            ->setDescription('Debug PHP process with strace')
-            ->addArgument(
-                'grep',
-                InputArgument::OPTIONAL,
-                'Grep'
-            )
-            ->addOption(
-                'c',
-                NULL,
-                InputOption::VALUE_NONE,
-                'SysCall statistics'
-            )
-            ->addOption(
-                'r',
-                NULL,
-                InputOption::VALUE_NONE,
-                'Relative time'
-            );
+        $this->setName('php:trace')->setDescription('Debug PHP process with strace')->addArgument('grep',
+                InputArgument::OPTIONAL, 'Grep')->addOption('c', null, InputOption::VALUE_NONE,
+                'SysCall statistics')->addOption('r', null, InputOption::VALUE_NONE, 'Relative time');
     }
 
     /**
@@ -61,6 +44,7 @@ class TraceCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -78,33 +62,30 @@ class TraceCommand extends \CliTools\Console\Command\AbstractCommand {
 
             $pidList = array();
             foreach ($cmdOutput as $outputLine) {
-                $outputLine = trim($outputLine);
+                $outputLine      = trim($outputLine);
                 $outputLineParts = preg_split('/[\s]+/', $outputLine);
                 list($pid, $cmd) = $outputLineParts;
 
                 $pid = (int)$pid;
 
-                unset($outputLineParts[0],$outputLineParts[1]);
+                unset($outputLineParts[0], $outputLineParts[1]);
                 $args = implode(' ', $outputLineParts);
 
-                $cmd = $pid . ' [' . $cmd . '] ' .$args;
+                $cmd = $pid . ' [' . $cmd . '] ' . $args;
 
                 // don't show current pid
                 if ($pid === $currentPid) {
                     continue;
                 }
 
-                $pidList[] = (int)$pid;
+                $pidList[]            = (int)$pid;
                 $phpProcessList[$cmd] = (int)$pid;
             }
 
-            $question = new ChoiceQuestion(
-                'Please choose PHP process for tracing',
-                $phpProcessList
-            );
+            $question = new ChoiceQuestion('Please choose PHP process for tracing', $phpProcessList);
 
             $questionDialog = new QuestionHelper();
-            $pid = $questionDialog->ask($input, $output, $question);
+            $pid            = $questionDialog->ask($input, $output, $question);
         }
 
 
@@ -139,13 +120,13 @@ class TraceCommand extends \CliTools\Console\Command\AbstractCommand {
 
             if (!empty($grep)) {
                 $cmdArgs[] = $grep;
-                CommandExecutionUtility::execInteractive('sudo', 'strace ' . $straceOpts .' -p %s 2>&1  | grep --color=auto %s', $cmdArgs);
+                CommandExecutionUtility::execInteractive('sudo',
+                    'strace ' . $straceOpts . ' -p %s 2>&1  | grep --color=auto %s', $cmdArgs);
             } else {
-                CommandExecutionUtility::execInteractive('sudo', 'strace ' . $straceOpts .' -p %s', $cmdArgs);
+                CommandExecutionUtility::execInteractive('sudo', 'strace ' . $straceOpts . ' -p %s', $cmdArgs);
             }
         }
 
         return 0;
     }
-
 }

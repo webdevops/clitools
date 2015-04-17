@@ -33,15 +33,8 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('typo3:cleanup')
-            ->setDescription('Cleanup caches, logs and indexed search')
-            ->addArgument(
-                'db',
-                InputArgument::REQUIRED,
-                'Database name'
-            );
-
+        $this->setName('typo3:cleanup')->setDescription('Cleanup caches, logs and indexed search')->addArgument('db',
+                InputArgument::REQUIRED, 'Database name');
     }
 
     /**
@@ -49,13 +42,14 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         // ##################
         // Init
         // ##################
-        $dbName   = $input->getArgument('db');
+        $dbName = $input->getArgument('db');
 
         // ##############
         // Loop through databases
@@ -67,7 +61,7 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
             // ##############
 
             // Get list of databases
-            $query = 'SELECT SCHEMA_NAME
+            $query        = 'SELECT SCHEMA_NAME
                     FROM information_schema.SCHEMATA';
             $databaseList = DatabaseConnection::getCol($query);
 
@@ -78,9 +72,9 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
                 }
 
                 // Check if database is TYPO3 instance
-                $query = 'SELECT COUNT(*) as count
+                $query           = 'SELECT COUNT(*) as count
                             FROM information_schema.tables
-                           WHERE table_schema = '. DatabaseConnection::quote($dbName) . '
+                           WHERE table_schema = ' . DatabaseConnection::quote($dbName) . '
                              AND table_name = \'be_users\'';
                 $isTypo3Database = DatabaseConnection::getOne($query);
 
@@ -88,7 +82,6 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
                     $this->cleanupTypo3Database($dbName);
                 }
             }
-
         } else {
             // ##############
             // One databases
@@ -108,9 +101,9 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
         $cleanupTableList = array();
 
         // Check if database is TYPO3 instance
-        $query = 'SELECT table_name
+        $query     = 'SELECT table_name
                     FROM information_schema.tables
-                   WHERE table_schema = '. DatabaseConnection::quote($database);
+                   WHERE table_schema = ' . DatabaseConnection::quote($database);
         $tableList = DatabaseConnection::getCol($query);
 
         foreach ($tableList as $table) {
@@ -118,14 +111,14 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
 
             // Caching und indexing tables
             switch (true) {
-                case (strpos($table,'cache_') === 0):
-                case (strpos($table,'cachingframework_') === 0):
-                case (strpos($table,'cf_') === 0):
+                case (strpos($table, 'cache_') === 0):
+                case (strpos($table, 'cachingframework_') === 0):
+                case (strpos($table, 'cf_') === 0):
                     // Caching framework
                     $clearTable = true;
                     break;
 
-                case (strpos($table,'index_') === 0):
+                case (strpos($table, 'index_') === 0):
                     // EXT:indexed_search
                     $clearTable = true;
                     break;
@@ -169,7 +162,7 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
             }
         }
 
-        $this->output->writeln('<info>Starting cleanup of database ' . $database .'...');
+        $this->output->writeln('<info>Starting cleanup of database ' . $database . '...');
 
         DatabaseConnection::exec('USE `' . $database . '`');
 
@@ -184,5 +177,4 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
 
         $this->output->writeln('<info>  -> finished</info>');
     }
-
 }

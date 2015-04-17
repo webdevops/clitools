@@ -33,9 +33,7 @@ class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('mysql:restart')
-            ->setDescription('Restart MySQL');
+        $this->setName('mysql:restart')->setDescription('Restart MySQL');
     }
 
     /**
@@ -43,11 +41,11 @@ class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
         CommandExecutionUtility::execInteractive('service', '%s %s', array('mysql', 'restart'));
     }
-
 }

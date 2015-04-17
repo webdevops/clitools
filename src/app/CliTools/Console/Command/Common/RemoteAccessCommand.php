@@ -32,10 +32,7 @@ class RemoteAccessCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this
-            ->setName('remote-access')
-            ->setAliases(array('remoteaccess'))
-            ->setDescription('Enable remote access to local webserver');
+        $this->setName('remote-access')->setAliases(array('remoteaccess'))->setDescription('Enable remote access to local webserver');
     }
 
     /**
@@ -43,6 +40,7 @@ class RemoteAccessCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param  InputInterface  $input  Input instance
      * @param  OutputInterface $output Output instance
+     *
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
@@ -53,5 +51,4 @@ class RemoteAccessCommand extends \CliTools\Console\Command\AbstractCommand {
 
         throw new \Exception('Not implemented right now');
     }
-
 }
