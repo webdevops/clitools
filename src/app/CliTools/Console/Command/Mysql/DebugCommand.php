@@ -21,12 +21,8 @@ namespace CliTools\Console\Command\Mysql;
  */
 
 use CliTools\Database\DatabaseConnection;
-use CliTools\Utility\CommandExecutionUtility;
-use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
@@ -71,10 +67,6 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
 
             // Setup teardown cleanup
             $tearDownFunc = function () use ($output, $logFileRow) {
-                // Remove logfile
-                //$output = '';
-                //CommandExecutionUtility::exec('rm', $output, '-f %s', array($logFileRow['Value']));
-
                 // Disable general log
                 $output->write('<comment>Disabling general log</comment>');
                 $query = 'SET GLOBAL general_log = \'OFF\'';

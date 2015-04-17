@@ -21,10 +21,7 @@ namespace CliTools\Console\Command\Common;
  */
 
 use CliTools\Service\SelfUpdateService;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class SelfUpdateCommand extends \CliTools\Console\Command\AbstractCommand {
