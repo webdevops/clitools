@@ -1,5 +1,8 @@
 # CliTools for Vagrant VM
 
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416/big.png)](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416)
+
+
 Documentation is still WIP :)
 
 ## Special commands
