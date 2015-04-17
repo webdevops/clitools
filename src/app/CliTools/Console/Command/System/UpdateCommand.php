@@ -86,7 +86,6 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
             } catch (\RuntimeException $e) {
                 $msg = 'Running git update of ' . $reposDirectory . '... FAILED';
                 $output->writeln('<error>' . $msg . '</error>');
-                $errorMsgList[] = $msg;
             }
 
             chdir($originalCwd);
@@ -200,7 +199,7 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
      * @param string          $msg    Message
      */
     protected function outputBlock($output, $msg) {
-        list($termWidth, $termHeight) = $this->getApplication()->getTerminalDimensions();
+        list($termWidth) = $this->getApplication()->getTerminalDimensions();
         $separator = '<info>' . str_repeat('-', $termWidth) . '</info>';
 
         $msg = str_repeat(' ', $termWidth - strlen($msg) - 10) . $msg;

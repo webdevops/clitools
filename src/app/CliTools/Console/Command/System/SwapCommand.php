@@ -54,7 +54,6 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
         $swapTotal = 0;
         foreach ($dirIterator as $dirEntry) {
             /** @var \DirectoryIterator $dirEntry */
-            $processId        = $dirEntry->getFilename();
             $processStatsPath = $dirEntry->getRealPath();
 
             // Get process name and swap

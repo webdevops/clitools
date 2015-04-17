@@ -50,7 +50,6 @@ class ListCommand extends \CliTools\Console\Command\AbstractCommand {
         // ####################
         $basePath        = $this->getApplication()->getConfigValue('config', 'www_base_path', '/var/www/');
         $maxDepth        = 3;
-        $enableInstaller = true;
 
         $basePath = Typo3Utility::guessBestTypo3BasePath($basePath, $input, 'path');
 

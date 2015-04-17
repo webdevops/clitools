@@ -66,7 +66,7 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
             DatabaseConnection::exec($query);
 
             // Setup teardown cleanup
-            $tearDownFunc = function () use ($output, $logFileRow) {
+            $tearDownFunc = function () use ($output) {
                 // Disable general log
                 $output->write('<comment>Disabling general log</comment>');
                 $query = 'SET GLOBAL general_log = \'OFF\'';
