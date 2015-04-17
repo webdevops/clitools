@@ -88,10 +88,18 @@ class Application extends \Symfony\Component\Console\Application {
         define('CLITOOLS_COMMAND_CLI', $_SERVER['argv'][0]);
     }
 
+    /**
+     * Register tear down callback
+     *
+     * @param callable $func
+     */
     public function registerTearDown(callable $func) {
         $this->tearDownFuncList[] = $func;
     }
 
+    /**
+     * Call teardown callbacks
+     */
     public function callTearDown() {
         foreach ($this->tearDownFuncList as $func) {
             call_user_func($func);
