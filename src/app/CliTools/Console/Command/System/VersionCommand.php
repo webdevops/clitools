@@ -119,6 +119,26 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
         $versionList[] = array_values($versionRow);
 
         // ############################
+        // Docker
+        // ############################
+        $versionRow = array(
+            'system'  => 'Docker',
+            'version' => 'Unknown',
+        );
+
+
+        try {
+            $execOutput = '';
+            CommandExecutionUtility::execRaw('docker --version', $execOutput);
+
+            $versionRow['version'] = trim(implode('',$execOutput));
+        } catch (\Exception $e) {
+            // no docker installed?!
+        }
+
+        $versionList[] = array_values($versionRow);
+
+        // ############################
         // CliTools
         // ############################
 
