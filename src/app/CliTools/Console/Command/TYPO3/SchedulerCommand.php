@@ -24,7 +24,6 @@ use CliTools\Utility\CommandExecutionUtility;
 use CliTools\Utility\Typo3Utility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class SchedulerCommand extends \CliTools\Console\Command\AbstractCommand {

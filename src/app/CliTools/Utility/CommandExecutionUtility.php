@@ -21,7 +21,6 @@ namespace CliTools\Utility;
  */
 
 use CliTools\Exception\CommandExecutionException;
-use Symfony\Component\Console\Output\OutputInterface;
 
 class CommandExecutionUtility {
 

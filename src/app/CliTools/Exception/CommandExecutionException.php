@@ -20,8 +20,6 @@ namespace CliTools\Exception;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use Symfony\Component\Console\Output\OutputInterface;
-
 class CommandExecutionException extends \RuntimeException {
 
     /**

@@ -22,10 +22,8 @@ namespace CliTools\Console\Command\TYPO3;
 
 use CliTools\Utility\CommandExecutionUtility;
 use CliTools\Utility\Typo3Utility;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ClearCacheCommand extends \CliTools\Console\Command\AbstractCommand {
