@@ -85,7 +85,7 @@ class Typo3Utility {
                 $userPath = $input->getArgument($inputArgName);
             }
         }
-    var_dump($userPath);
+
         if (empty($userPath)) {
             // No user path specified, only use base path
             $ret = $basePath;
