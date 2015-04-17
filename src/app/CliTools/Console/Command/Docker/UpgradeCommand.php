@@ -1,6 +1,6 @@
 <?php
 
-namespace CliTools\Console\Command\System;
+namespace CliTools\Console\Command\Docker;
 
 /*
  * CliTools Command
@@ -27,16 +27,15 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class RebootCommand extends \CliTools\Console\Command\AbstractCommand {
+class UpgradeCommand extends AbstractCommand {
 
     /**
      * Configure command
      */
     protected function configure() {
         $this
-            ->setName('system:reboot')
-            ->setAliases( array('reboot') )
-            ->setDescription('Reboot system');
+            ->setName('docker:upgrade')
+            ->setDescription('Upgrade docker version');
     }
 
     /**
@@ -48,7 +47,8 @@ class RebootCommand extends \CliTools\Console\Command\AbstractCommand {
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
-        CommandExecutionUtility::execInteractive('reboot');
+        CommandExecutionUtility::execInteractive('wget -N https://get.docker.com/ | sh');
+        return 0;
     }
 
 }
