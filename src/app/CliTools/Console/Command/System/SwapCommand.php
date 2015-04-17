@@ -89,7 +89,7 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
         uasort(
             $procList,
             function ($a, $b) {
-                return $a['swap'] < $b['swap'];
+                return $a['swap'] > $b['swap'];
             }
         );
 
