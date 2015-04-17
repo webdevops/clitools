@@ -120,18 +120,6 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
         }
 
         // ##################
-        // npm update
-        // ##################
-        //try {
-        //	$this->outputBlock($output, 'Running npm update');
-        //	CommandExecutionUtility::execInteractive('npm', 'update -g');
-        //} catch (\RuntimeException $e) {
-        //	$msg = 'Running npm update... FAILED';
-        //	$output->writeln('<error>' . $msg . '</error>');
-        //	$errorMsgList[] = $msg;
-        //}
-
-        // ##################
         // clitools update
         // ##################
         try {
