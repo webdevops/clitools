@@ -31,7 +31,8 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
      * Configure command
      */
     protected function configure() {
-        $this->setName('system:banner')->setDescription('Banner generator for /etc/issue');
+        $this->setName('system:banner')
+            ->setDescription('Banner generator for /etc/issue');
     }
 
     /**

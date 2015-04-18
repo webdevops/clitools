@@ -33,7 +33,8 @@ class OpenFilesCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('system:openfiles')->setDescription('List swap usage');
+        $this->setName('system:openfiles')
+            ->setDescription('List swap usage');
     }
 
     /**

@@ -30,7 +30,9 @@ class SelfUpdateCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('self-update')->setAliases(array('selfupdate'))->setDescription('Self update of CliTools Command');
+        $this->setName('self-update')
+            ->setAliases(array('selfupdate'))
+            ->setDescription('Self update of CliTools Command');
     }
 
     /**

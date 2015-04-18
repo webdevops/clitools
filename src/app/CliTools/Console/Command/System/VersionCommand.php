@@ -32,7 +32,8 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('system:version')->setDescription('List common version');
+        $this->setName('system:version')
+            ->setDescription('List common version');
     }
 
     /**

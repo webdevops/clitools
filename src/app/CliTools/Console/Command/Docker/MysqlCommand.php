@@ -29,7 +29,8 @@ class MysqlCommand extends AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:mysql')->setDescription('Enter mysql in docker container');
+        $this->setName('docker:mysql')
+            ->setDescription('Enter mysql in docker container');
     }
 
     /**

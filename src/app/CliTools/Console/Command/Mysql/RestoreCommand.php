@@ -32,8 +32,18 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:restore')->setDescription('Restore database')->addArgument('db', InputArgument::REQUIRED,
-                'Database name')->addArgument('file', InputArgument::REQUIRED, 'File (mysql dump)');
+        $this->setName('mysql:restore')
+            ->setDescription('Restore database')
+            ->addArgument(
+                'db',
+                InputArgument::REQUIRED,
+                'Database name'
+            )
+            ->addArgument(
+                'file',
+                InputArgument::REQUIRED,
+                'File (mysql dump)'
+            );
     }
 
     /**

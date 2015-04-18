@@ -34,9 +34,25 @@ class TraceCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('php:trace')->setDescription('Debug PHP process with strace')->addArgument('grep',
-                InputArgument::OPTIONAL, 'Grep')->addOption('c', null, InputOption::VALUE_NONE,
-                'SysCall statistics')->addOption('r', null, InputOption::VALUE_NONE, 'Relative time');
+        $this->setName('php:trace')
+            ->setDescription('Debug PHP process with strace')
+            ->addArgument(
+                'grep',
+                InputArgument::OPTIONAL,
+                'Grep'
+            )
+            ->addOption(
+                'c',
+                null,
+                InputOption::VALUE_NONE,
+                'SysCall statistics'
+            )
+            ->addOption(
+                'r',
+                null,
+                InputOption::VALUE_NONE,
+                'Relative time'
+            );
     }
 
     /**

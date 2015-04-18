@@ -38,7 +38,8 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
      * Configure command
      */
     protected function configure() {
-        $this->setName('system:crontask')->setDescription('System cron task');
+        $this->setName('system:crontask')
+            ->setDescription('System cron task');
     }
 
     /**

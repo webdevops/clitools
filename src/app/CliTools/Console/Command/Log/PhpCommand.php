@@ -30,8 +30,14 @@ class PhpCommand extends \CliTools\Console\Command\Log\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('log:php')->setAliases(array('php:log'))->setDescription('Show up php log')->addArgument('grep',
-                InputArgument::OPTIONAL, 'Grep');
+        $this->setName('log:php')
+            ->setAliases(array('php:log'))
+            ->setDescription('Show up php log')
+            ->addArgument(
+                'grep',
+                InputArgument::OPTIONAL,
+                'Grep'
+            );
     }
 
     /**

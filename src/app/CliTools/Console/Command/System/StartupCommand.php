@@ -31,7 +31,8 @@ class StartupCommand extends \CliTools\Console\Command\AbstractCommand implement
      * Configure command
      */
     protected function configure() {
-        $this->setName('system:startup')->setDescription('System startup task');
+        $this->setName('system:startup')
+            ->setDescription('System startup task');
     }
 
     /**

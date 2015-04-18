@@ -30,8 +30,13 @@ class ShellCommand extends AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:shell')->setDescription('Enter shell in docker container')->addArgument('container',
-                InputArgument::OPTIONAL, 'Container');
+        $this->setName('docker:shell')
+            ->setDescription('Enter shell in docker container')
+            ->addArgument(
+                'container',
+                InputArgument::OPTIONAL,
+                'Container'
+            );
     }
 
     /**

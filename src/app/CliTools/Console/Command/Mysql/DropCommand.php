@@ -31,8 +31,13 @@ class DropCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:drop')->setDescription('Drop database')->addArgument('db', InputArgument::REQUIRED,
-                'Database name');
+        $this->setName('mysql:drop')
+            ->setDescription('Drop database')
+            ->addArgument(
+                'db',
+                InputArgument::REQUIRED,
+                'Database name'
+            );
     }
 
     /**

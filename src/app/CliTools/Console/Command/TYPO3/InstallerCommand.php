@@ -32,9 +32,18 @@ class InstallerCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('typo3:installer')->setDescription('Enable installer on all (or one specific) TYPO3 instances')->addArgument('path',
-                InputArgument::OPTIONAL, 'Path to TYPO3 instance')->addOption('remove', 'r', InputOption::VALUE_NONE,
-                'Remove installer file');
+        $this->setName('typo3:installer')
+            ->setDescription('Enable installer on all (or one specific) TYPO3 instances')
+            ->addArgument(
+                'path',
+                InputArgument::OPTIONAL,
+                'Path to TYPO3 instance'
+            )->addOption(
+                'remove',
+                'r',
+                InputOption::VALUE_NONE,
+                'Remove installer file'
+            );
     }
 
     /**

@@ -34,11 +34,28 @@ class ListCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:list')->setDescription('List all databases')->addOption('sort-name', null,
-                InputOption::VALUE_NONE, 'Sort output by table count')->addOption('sort-data', null,
-                InputOption::VALUE_NONE, 'Sort output by data size')->addOption('sort-index', null,
-                InputOption::VALUE_NONE, 'Sort output by index size')->addOption('sort-total', null,
-                InputOption::VALUE_NONE, 'Sort output by total size');
+        $this->setName('mysql:list')
+            ->setDescription('List all databases')
+            ->addOption(
+                'sort-name', null,
+                InputOption::VALUE_NONE,
+                'Sort output by table count'
+            )
+            ->addOption('sort-data',
+                null,
+                InputOption::VALUE_NONE,
+                'Sort output by data size'
+            )
+            ->addOption('sort-index',
+                null,
+                InputOption::VALUE_NONE,
+                'Sort output by index size'
+            )
+            ->addOption('sort-total',
+                null,
+                InputOption::VALUE_NONE,
+                'Sort output by total size'
+            );
     }
 
     /**

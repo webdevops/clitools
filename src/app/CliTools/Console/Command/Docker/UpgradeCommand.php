@@ -30,7 +30,8 @@ class UpgradeCommand extends AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:upgrade')->setDescription('Upgrade docker version');
+        $this->setName('docker:upgrade')
+            ->setDescription('Upgrade docker version');
     }
 
     /**

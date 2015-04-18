@@ -31,8 +31,13 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('typo3:domain')->setDescription('Add common development domains to database')->addArgument('db',
-                InputArgument::OPTIONAL, 'Database name');
+        $this->setName('typo3:domain')
+            ->setDescription('Add common development domains to database')
+            ->addArgument(
+                'db',
+                InputArgument::OPTIONAL,
+                'Database name'
+            );
     }
 
     /**

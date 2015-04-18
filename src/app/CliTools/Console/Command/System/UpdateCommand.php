@@ -31,7 +31,9 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('system:update')->setAliases(array('update'))->setDescription('Update system');
+        $this->setName('system:update')
+            ->setAliases(array('update'))
+            ->setDescription('Update system');
     }
 
     /**

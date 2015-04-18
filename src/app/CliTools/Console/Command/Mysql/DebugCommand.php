@@ -31,8 +31,13 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:debug')->setDescription('Debug mysql connections')->addArgument('grep',
-                InputArgument::OPTIONAL, 'Grep');
+        $this->setName('mysql:debug')
+            ->setDescription('Debug mysql connections')
+            ->addArgument(
+                'grep',
+                InputArgument::OPTIONAL,
+                'Grep'
+            );
     }
 
     /**

@@ -30,7 +30,8 @@ class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('php:restart')->setDescription('Restart PHP FPM');
+        $this->setName('php:restart')
+            ->setDescription('Restart PHP FPM');
     }
 
     /**

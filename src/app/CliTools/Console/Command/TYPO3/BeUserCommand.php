@@ -33,10 +33,29 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('typo3:beuser')->setDescription('Add backend admin user to database')->addArgument('db',
-                InputArgument::OPTIONAL, 'Database name')->addArgument('user', InputArgument::OPTIONAL,
-                'Username')->addArgument('password', InputArgument::OPTIONAL, 'Password')->addOption('plain', null,
-                InputOption::VALUE_NONE, 'Do not crypt password (non salted password)');
+        $this->setName('typo3:beuser')
+            ->setDescription('Add backend admin user to database')
+            ->addArgument(
+                'db',
+                InputArgument::OPTIONAL,
+                'Database name'
+            )
+            ->addArgument(
+                'user',
+                InputArgument::OPTIONAL,
+                'Username'
+            )
+            ->addArgument(
+                'password',
+                InputArgument::OPTIONAL,
+                'Password'
+            )
+            ->addOption(
+                'plain',
+                null,
+                InputOption::VALUE_NONE,
+                'Do not crypt password (non salted password)'
+            );
     }
 
     /**
