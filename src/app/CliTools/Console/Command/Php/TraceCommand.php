@@ -42,6 +42,12 @@ class TraceCommand extends \CliTools\Console\Command\AbstractCommand {
                 'Grep'
             )
             ->addOption(
+                'all',
+                null,
+                InputOption::VALUE_NONE,
+                'Trace all PHP processes'
+            )
+            ->addOption(
                 'c',
                 null,
                 InputOption::VALUE_NONE,
@@ -64,44 +70,23 @@ class TraceCommand extends \CliTools\Console\Command\AbstractCommand {
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
+        $this->elevateProcess($input, $output);
+
         $pid        = null;
         $grep       = $input->getArgument('grep');
-        $currentPid = posix_getpid();
+
 
         if (empty($pid)) {
-            $phpProcessList = array(
-                'all PHP processes' => 'all',
-            );
+            list($pidList, $phpProcessList) = $this->buildPhpProcessList();
 
-            $cmdOutput = '';
-            CommandExecutionUtility::execRaw('ps h -o pid,comm,args -C php5-fpm,php-fpm,php5,php', $cmdOutput);
+            if ($input->getOption('all')) {
+                $pid = 'all';
+            } else {
+                $question = new ChoiceQuestion('Please choose PHP process for tracing', $phpProcessList);
 
-            $pidList = array();
-            foreach ($cmdOutput as $outputLine) {
-                $outputLine      = trim($outputLine);
-                $outputLineParts = preg_split('/[\s]+/', $outputLine);
-                list($pid, $cmd) = $outputLineParts;
-
-                $pid = (int)$pid;
-
-                unset($outputLineParts[0], $outputLineParts[1]);
-                $args = implode(' ', $outputLineParts);
-
-                $cmd = $pid . ' [' . $cmd . '] ' . $args;
-
-                // don't show current pid
-                if ($pid === $currentPid) {
-                    continue;
-                }
-
-                $pidList[]            = (int)$pid;
-                $phpProcessList[$cmd] = (int)$pid;
+                $questionDialog = new QuestionHelper();
+                $pid            = $questionDialog->ask($input, $output, $question);
             }
-
-            $question = new ChoiceQuestion('Please choose PHP process for tracing', $phpProcessList);
-
-            $questionDialog = new QuestionHelper();
-            $pid            = $questionDialog->ask($input, $output, $question);
         }
 
 
@@ -136,13 +121,47 @@ class TraceCommand extends \CliTools\Console\Command\AbstractCommand {
 
             if (!empty($grep)) {
                 $cmdArgs[] = $grep;
-                CommandExecutionUtility::execInteractive('sudo',
-                    'strace ' . $straceOpts . ' -p %s 2>&1  | grep --color=auto %s', $cmdArgs);
+                CommandExecutionUtility::execInteractive('strace', $straceOpts . ' -p %s 2>&1  | grep --color=auto %s', $cmdArgs);
             } else {
-                CommandExecutionUtility::execInteractive('sudo', 'strace ' . $straceOpts . ' -p %s', $cmdArgs);
+                CommandExecutionUtility::execInteractive('strace ', $straceOpts . ' -p %s 2>&1', $cmdArgs);
             }
         }
 
         return 0;
+    }
+
+    protected function buildPhpProcessList() {
+        $currentPid = posix_getpid();
+
+        $phpProcessList = array(
+            'all PHP processes' => 'all',
+        );
+
+        $cmdOutput = '';
+        CommandExecutionUtility::execRaw('ps h -o pid,comm,args -C php5-fpm,php-fpm,php5,php', $cmdOutput);
+
+        $pidList = array();
+        foreach ($cmdOutput as $outputLine) {
+            $outputLine      = trim($outputLine);
+            $outputLineParts = preg_split('/[\s]+/', $outputLine);
+            list($pid, $cmd) = $outputLineParts;
+
+            $pid = (int)$pid;
+
+            unset($outputLineParts[0], $outputLineParts[1]);
+            $args = implode(' ', $outputLineParts);
+
+            $cmd = $pid . ' [' . $cmd . '] ' . $args;
+
+            // don't show current pid
+            if ($pid === $currentPid) {
+                continue;
+            }
+
+            $pidList[]            = (int)$pid;
+            $phpProcessList[$cmd] = (int)$pid;
+        }
+
+        return array($pidList, $phpProcessList);
     }
 }
