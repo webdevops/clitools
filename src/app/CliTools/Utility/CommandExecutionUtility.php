@@ -125,9 +125,9 @@ class CommandExecutionUtility {
         ConsoleUtility::verboseWriteln('EXEC::PASSTHRU', $execCommand);
 
         $descriptorSpec = array(
-            0 => array('file', 'php://stdin', 'r'),  // stdin is a file that the child will read from
+            0 => array('file', 'php://stdin',  'r'),  // stdin is a file that the child will read from
             1 => array('file', 'php://stdout', 'w'),  // stdout is a file that the child will write to
-            2 => array('file', '/dev/null', 'w')   // stderr is a file that the child will write to
+            2 => array('file', 'php://stderr', 'w')   // stderr is a file that the child will write to
         );
 
         $process = proc_open($execCommand, $descriptorSpec, $pipes);
