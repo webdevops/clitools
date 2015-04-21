@@ -63,6 +63,13 @@ class TsharkCommand extends AbstractCommand {
         $fullOutput = $input->getOption('full');
 
         switch ($protocol) {
+            // ##############
+            // HTTP
+            // ##############
+            case 'con':
+            case 'tcp':
+                $args = '-R "tcp.flags.syn==1 && tcp.flags.ack==0"';
+                break;
 
             // ##############
             // HTTP
@@ -88,6 +95,13 @@ class TsharkCommand extends AbstractCommand {
             // ##############
             case 'mysql':
                 $args = 'tcp -d tcp.port==3306,mysql -T fields -e mysql.query "port 3306"';
+                break;
+
+            // ##############
+            // DNS
+            // ##############
+            case 'dns':
+                $args = '-nn -e ip.src -e dns.qry.name -E separator=" " -T fields port 53';
                 break;
 
             // ##############
