@@ -81,6 +81,7 @@ class Application extends \Symfony\Component\Console\Application {
      * Initialize
      */
     public function initialize() {
+        $this->initializeChecks();
         $this->initializeConfiguration();
         $this->initializePosixTrap();
 
@@ -146,6 +147,16 @@ class Application extends \Symfony\Component\Console\Application {
 
         pcntl_signal(SIGTERM, $signalHandler);
         pcntl_signal(SIGINT, $signalHandler);
+    }
+
+    /**
+     * PHP Checks
+     */
+    protected function initializeChecks() {
+        if (!function_exists('pcntl_signal')) {
+            echo ' [ERROR] PHP-Module pcnt not loaded';
+            exit(1);
+        }
     }
 
     /**
