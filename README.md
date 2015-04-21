@@ -26,6 +26,16 @@ All log commands are using a grep-filter (specified as optional argument)
 |----------------------------|---------------------------------------------------------------------------|
 | ct log:mail                | Shows mail logs                                                           |
 
+## Docker commands
+
+| Command                    | Description                                                               |
+|----------------------------|---------------------------------------------------------------------------|
+| ct docker:shell            | Jump into a shell inside a docker container                               |
+|                            | __ct docker:shell __ -> enter main container                              |
+|                            | __ct docker:shell mysql __ -> enter mysql container                       |
+| ct docker:mysql            | Jump into a mysql client inside a docker container                        |
+|                            | __ct docker:mysql __ -> execute mysql client inside main container        |
+
 ## MySQL commands
 
 | Command                    | Description                                                               |
