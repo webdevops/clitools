@@ -134,11 +134,16 @@ class CommandExecutionUtility {
 
         if (is_resource($process)) {
             $execStatus = proc_close($process);
-        }
+            $execStatus = pcntl_wexitstatus($execStatus);
 
-        if ($execStatus !== 0) {
-            $e = new CommandExecutionException('Process ' . $execCommand . ' did not finished successfully');
-            $e->setReturnCode($execStatus);
+            if ($execStatus !== 0) {
+                $e = new CommandExecutionException('Process ' . $execCommand . ' did not finished successfully [return code: ' . $execStatus . ']');
+                $e->setReturnCode($execStatus);
+                throw $e;
+            }
+        } else {
+            $e = new CommandExecutionException('Process ' . $execCommand . ' could not be started');
+            $e->setReturnCode(-1);
             throw $e;
         }
     }

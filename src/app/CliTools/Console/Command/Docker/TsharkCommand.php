@@ -22,6 +22,7 @@ namespace CliTools\Console\Command\Docker;
 
 use CliTools\Utility\CommandExecutionUtility;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -37,6 +38,11 @@ class TsharkCommand extends AbstractCommand {
                 'protocol',
                 InputArgument::REQUIRED,
                 'Protocol'
+            )
+            ->addOption('full',
+                null,
+                InputOption::VALUE_NONE,
+                'Show full output (if supported by protocol)'
             );
     }
 
@@ -53,11 +59,16 @@ class TsharkCommand extends AbstractCommand {
 
         $container = 'main';
 
-        $protocol = $input->getArgument('protocol');
+        $protocol   = $input->getArgument('protocol');
+        $fullOutput = $input->getOption('full');
 
         switch ($protocol) {
             case 'http':
-                $args = 'tcp -i docker0 port 80 or tcp port 443 -V -R "http.request || http.response"';
+                if ($fullOutput) {
+                    $args = 'tcp port 80 or tcp port 443 -V -R "http.request || http.response"';
+                } else {
+                    $args = '-z proto,colinfo,http.request.uri,http.request.uri -R http.request.uri';
+                }
                 break;
 
             case 'smtp':
@@ -72,8 +83,6 @@ class TsharkCommand extends AbstractCommand {
         }
 
         CommandExecutionUtility::execInteractive('tshark', '-i docker0 ' . $args);
-
-        $this->executeDockerExec($container, 'bash');
 
         return 0;
     }
