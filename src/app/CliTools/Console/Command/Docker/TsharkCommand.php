@@ -63,21 +63,38 @@ class TsharkCommand extends AbstractCommand {
         $fullOutput = $input->getOption('full');
 
         switch ($protocol) {
+
+            // ##############
+            // HTTP
+            // ##############
             case 'http':
                 if ($fullOutput) {
                     $args = 'tcp port 80 or tcp port 443 -V -R "http.request || http.response"';
                 } else {
-                    $args = '-z proto,colinfo,http.request.uri,http.request.uri -R http.request.uri';
+                    $args = 'tcp port 80 or tcp port 443 -V -R "http.request" -Tfields -e ip.dst -e http.request.method -e http.request.full_uri';
                 }
                 break;
 
+            // ##############
+            // SMTP
+            // ##############
             case 'smtp':
             case 'mail':
-                $args = ' -f "port 25" -R "smtp"';
+                $args = 'tcp -f "port 25" -R "smtp"';
                 break;
 
+            // ##############
+            // MYSQL
+            // ##############
+            case 'mysql':
+                $args = 'tcp -d tcp.port==3306,mysql -T fields -e mysql.query "port 3306"';
+                break;
+
+            // ##############
+            // HELP
+            // ##############
             default:
-                $output->writeln('<error>Protocol not supported (supported: http, smtp)</error>');
+                $output->writeln('<error>Protocol not supported (supported: http, smtp, mysql)</error>');
                 return 1;
                 break;
         }
