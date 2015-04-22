@@ -23,6 +23,8 @@ namespace CliTools\Console;
 use CliTools\Database\DatabaseConnection;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\ArgvInput;
 
 class Application extends \Symfony\Component\Console\Application {
 
@@ -120,7 +122,23 @@ class Application extends \Symfony\Component\Console\Application {
         $ret = 0;
 
         try {
-            $ret = parent::doRun($input, $output);
+            $name = $this->getCommandName($input);
+
+            /** @var \CliTools\Console\Command\AbstractCommand $command */
+            $command = $this->find($name);
+
+            if ($command instanceof \CliTools\Console\Filter\AnyParameterFilterInterface) {
+                $argCount = $command->getDefinition()->getArgumentRequiredCount();
+
+                $argvFiltered = array_splice($_SERVER['argv'], 0, 2 + $argCount);
+
+                $input = new ArgvInput($argvFiltered);
+                $this->configureIO($input, $output);
+
+                $ret = parent::doRun($input, $output);
+            } else {
+                $ret = parent::doRun($input, $output);
+            }
         } catch (\Exception $e) {
             $this->callTearDown();
             throw $e;
