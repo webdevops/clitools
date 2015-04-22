@@ -41,17 +41,20 @@ class ListCommand extends \CliTools\Console\Command\AbstractCommand {
                 InputOption::VALUE_NONE,
                 'Sort output by table count'
             )
-            ->addOption('sort-data',
+            ->addOption(
+                'sort-data',
                 null,
                 InputOption::VALUE_NONE,
                 'Sort output by data size'
             )
-            ->addOption('sort-index',
+            ->addOption(
+                'sort-index',
                 null,
                 InputOption::VALUE_NONE,
                 'Sort output by index size'
             )
-            ->addOption('sort-total',
+            ->addOption(
+                'sort-total',
                 null,
                 InputOption::VALUE_NONE,
                 'Sort output by total size'
