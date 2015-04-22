@@ -124,10 +124,12 @@ class Application extends \Symfony\Component\Console\Application {
         try {
             $name = $this->getCommandName($input);
 
-            /** @var \CliTools\Console\Command\AbstractCommand $command */
-            $command = $this->find($name);
+            if (!empty($name)) {
+                /** @var \CliTools\Console\Command\AbstractCommand $command */
+                $command = $this->find($name);
+            }
 
-            if ($command instanceof \CliTools\Console\Filter\AnyParameterFilterInterface) {
+            if (!empty($command) && $command instanceof \CliTools\Console\Filter\AnyParameterFilterInterface) {
                 $argCount = $command->getDefinition()->getArgumentRequiredCount();
 
                 $argvFiltered = array_splice($_SERVER['argv'], 0, 2 + $argCount);
