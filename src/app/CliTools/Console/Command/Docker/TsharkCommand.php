@@ -39,7 +39,8 @@ class TsharkCommand extends AbstractCommand {
                 InputArgument::REQUIRED,
                 'Protocol'
             )
-            ->addOption('full',
+            ->addOption(
+                'full',
                 null,
                 InputOption::VALUE_NONE,
                 'Show full output (if supported by protocol)'
@@ -64,7 +65,7 @@ class TsharkCommand extends AbstractCommand {
 
         switch ($protocol) {
             // ##############
-            // HTTP
+            // TCP connections
             // ##############
             case 'con':
             case 'tcp':
@@ -72,14 +73,28 @@ class TsharkCommand extends AbstractCommand {
                 break;
 
             // ##############
+            // ICMP
+            // ##############
+            case 'icmp':
+                $args = 'icmp';
+                break;
+
+            // ##############
             // HTTP
             // ##############
             case 'http':
                 if ($fullOutput) {
-                    $args = 'tcp port 80 or tcp port 443 -V -R "http.request || http.response"';
+                    $args = 'tcp port 80 or tcp port 443 -2 -V -R "http.request || http.response"';
                 } else {
-                    $args = 'tcp port 80 or tcp port 443 -V -R "http.request" -Tfields -e ip.dst -e http.request.method -e http.request.full_uri';
+                    $args = 'tcp port 80 or tcp port 443 -2 -V -R "http.request" -Tfields -e ip.dst -e http.request.method -e http.request.full_uri';
                 }
+                break;
+
+            // ##############
+            // SOLR
+            // ##############
+            case 'solr':
+                $args = 'tcp port 8983 -2 -V -R "http.request || http.response"';
                 break;
 
             // ##############
@@ -108,7 +123,7 @@ class TsharkCommand extends AbstractCommand {
             // HELP
             // ##############
             default:
-                $output->writeln('<error>Protocol not supported (supported: http, smtp, mysql)</error>');
+                $output->writeln('<error>Protocol not supported (supported: tcp, icmp, http, solr, smtp, mysql, dns)</error>');
                 return 1;
                 break;
         }
