@@ -20,17 +20,18 @@ namespace CliTools\Console\Command\Docker;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class MysqlCommand extends AbstractCommand {
+class ExecCommand extends AbstractCommand implements \CliTools\Console\Filter\AnyParameterFilterInterface {
 
     /**
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:mysql')
-            ->setDescription('Enter mysql in docker container');
+        $this->setName('docker:exec')
+            ->setDescription('Run defined command in docker container');
     }
 
     /**
@@ -42,8 +43,20 @@ class MysqlCommand extends AbstractCommand {
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
+        $paramList = $this->getFullParameterList();
         $container = $this->getApplication()->getConfigValue('docker', 'container');
-        $this->executeDockerExec($container, 'mysql');
+
+        if (!empty($paramList)) {
+            $comamnd = array_splice($paramList, 0, 1);
+            $comamnd = reset($comamnd);
+
+            $execCommand = \CliTools\Utility\CommandExecutionUtility::buildCommand($comamnd, null, $paramList);
+
+            $this->executeDockerExec($container, $execCommand);
+        } else {
+            $output->writeln('<error>No command/parameter specified</error>');
+            return 1;
+        }
 
         return 0;
     }

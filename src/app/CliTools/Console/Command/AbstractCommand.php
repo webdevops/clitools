@@ -70,9 +70,6 @@ abstract class AbstractCommand extends Command {
     protected function getFullParameterList($offset = null) {
         $ret = $_SERVER['argv'];
 
-        // remove self and command
-        $ret = array_splice($ret, 2);
-
         // remove requested offset
         if ($offset !== null) {
             $ret = array_splice($ret, $offset);
