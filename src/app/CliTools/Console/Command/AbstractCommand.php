@@ -23,6 +23,8 @@ namespace CliTools\Console\Command;
 use CliTools\Utility\CommandExecutionUtility;
 use CliTools\Utility\ConsoleUtility;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -56,6 +58,99 @@ abstract class AbstractCommand extends Command {
         $this->output = $output;
 
         ConsoleUtility::initialize($input, $output);
+    }
+
+    /**
+     * Allow all arguments and options
+     *
+     * @return AbstractCommand
+     */
+    protected function addAllArgumentsAndOptions() {
+        $shortcutBlacklist = array();
+        $optionBlacklist   = array();
+        $argumentCount = $this->getDefinition()->getArgumentCount();
+
+        foreach ($this->getFullParameterList() as $argNum => $arg) {
+
+            if (strpos($arg, '--') === 0) {
+                // ####################
+                // Option
+                // ####################
+                $optName = substr($arg, 2);
+                if (!$this->getDefinition()->hasOption($optName) && !in_array($optName, $optionBlacklist)) {
+                    $this->addOption(
+                        substr($arg, 2),
+                        null,
+                        InputOption::VALUE_NONE,
+                        'raw-argument' . $argNum
+                    );
+                }
+            } elseif (strpos($arg, '-') === 0) {
+                // ####################
+                // Option (shortcut)
+                // ####################
+                foreach (str_split(substr($arg, 1)) as $optNum => $optName) {
+                    if (!$this->getDefinition()->hasShortcut($optName) && !in_array($optName, $shortcutBlacklist)) {
+                        $this->addOption(
+                            'raw-argument' . $argNum . '-' . $optNum,
+                            $optName,
+                            InputOption::VALUE_NONE,
+                            'raw-argument' . $argNum . '-' . $optNum
+                        );
+                    }
+                }
+
+            } else {
+                // ####################
+                // Argument
+                // ####################
+                if ($argumentCount <= 0 && !$this->getDefinition()->hasArgument('argument' . $argNum)) {
+                    $this->addArgument(
+                        'raw-argument' . $argNum,
+                        InputArgument::OPTIONAL,
+                        'raw-argument' . $argNum
+                    );
+                }
+                $argumentCount--;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param bool $mergeArgs
+     */
+    public function mergeApplicationDefinition($mergeArgs = true) {
+        try {
+            parent::mergeApplicationDefinition($mergeArgs);
+
+            if ($this instanceof \CliTools\Console\Filter\AnyParameterFilterInterface) {
+                $this->addAllArgumentsAndOptions();
+            }
+        } catch (\Exception $e) {
+        }
+    }
+
+    /**
+     * Get full parameter list
+     *
+     * @param integer   $offset Parameter offset
+     *
+     * @return mixed
+     */
+    protected function getFullParameterList($offset = null) {
+        $ret = $_SERVER['argv'];
+
+        // remove self and command
+        $ret = array_splice($ret, 2);
+
+        // remove requested offset
+        if ($offset !== null) {
+            $ret = array_splice($ret, $offset);
+        }
+
+        return $ret;
     }
 
     /**
