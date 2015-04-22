@@ -26,14 +26,14 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class TsharkCommand extends AbstractCommand {
+class SniffCommand extends AbstractCommand {
 
     /**
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:tshark')
-            ->setDescription('Start tshark with docker')
+        $this->setName('docker:sniff')
+            ->setDescription('Start network sniffing with docker')
             ->addArgument(
                 'protocol',
                 InputArgument::REQUIRED,
@@ -69,13 +69,23 @@ class TsharkCommand extends AbstractCommand {
             // ##############
             case 'con':
             case 'tcp':
+                $sniffer = 'tshark';
                 $args = '-R "tcp.flags.syn==1 && tcp.flags.ack==0"';
+                break;
+
+            // ##############
+            // ARP
+            // ##############
+            case 'arp':
+                $sniffer = 'tshark';
+                $args = 'arp';
                 break;
 
             // ##############
             // ICMP
             // ##############
             case 'icmp':
+                $sniffer = 'tshark';
                 $args = 'icmp';
                 break;
 
@@ -84,8 +94,10 @@ class TsharkCommand extends AbstractCommand {
             // ##############
             case 'http':
                 if ($fullOutput) {
+                    $sniffer = 'tshark';
                     $args = 'tcp port 80 or tcp port 443 -2 -V -R "http.request || http.response"';
                 } else {
+                    $sniffer = 'tshark';
                     $args = 'tcp port 80 or tcp port 443 -2 -V -R "http.request" -Tfields -e ip.dst -e http.request.method -e http.request.full_uri';
                 }
                 break;
@@ -94,7 +106,33 @@ class TsharkCommand extends AbstractCommand {
             // SOLR
             // ##############
             case 'solr':
-                $args = 'tcp port 8983 -2 -V -R "http.request || http.response"';
+                $sniffer = 'tcpdump';
+                $args = '-nl -s0 -w- port 8983 | strings -n8';
+                break;
+
+            // ##############
+            // ELASTICSEARCH
+            // ##############
+            case 'elasticsearch':
+                $sniffer = 'tcpdump';
+                $args = '-A -nn -s 0 \'tcp dst port 9200 and (((ip[2:2] - ((ip[0]&0xf)<<2)) - ((tcp[12]&0xf0)>>2)) != 0)\'';
+                break;
+
+            // ##############
+            // MEMCACHE
+            // ##############
+            case 'memcache':
+            case 'memcached':
+                $sniffer = 'tcpdump';
+                $args = '-s 65535 -A -ttt port 11211| cut -c 9- | grep -i \'^get\|set\'';
+                break;
+
+            // ##############
+            // REDIS
+            // ##############
+            case 'redis':
+                $sniffer = 'tcpdump';
+                $args = '-s 65535 tcp port 6379';
                 break;
 
             // ##############
@@ -102,6 +140,7 @@ class TsharkCommand extends AbstractCommand {
             // ##############
             case 'smtp':
             case 'mail':
+                $sniffer = 'tshark';
                 $args = 'tcp -f "port 25" -R "smtp"';
                 break;
 
@@ -109,6 +148,7 @@ class TsharkCommand extends AbstractCommand {
             // MYSQL
             // ##############
             case 'mysql':
+                $sniffer = 'tshark';
                 $args = 'tcp -d tcp.port==3306,mysql -T fields -e mysql.query "port 3306"';
                 break;
 
@@ -116,6 +156,7 @@ class TsharkCommand extends AbstractCommand {
             // DNS
             // ##############
             case 'dns':
+                $sniffer = 'tshark';
                 $args = '-nn -e ip.src -e dns.qry.name -E separator=" " -T fields port 53';
                 break;
 
@@ -123,12 +164,26 @@ class TsharkCommand extends AbstractCommand {
             // HELP
             // ##############
             default:
-                $output->writeln('<error>Protocol not supported (supported: tcp, icmp, http, solr, smtp, mysql, dns)</error>');
+                $output->writeln('<error>Protocol not supported (supported: tcp, icmp, http, solr, elasticsearch, memcache, redis, smtp, mysql, dns)</error>');
                 return 1;
                 break;
         }
 
-        CommandExecutionUtility::execInteractive('tshark', '-i docker0 ' . $args);
+        switch ($sniffer) {
+            case 'tshark':
+                CommandExecutionUtility::execInteractive('tshark', '-i docker0 ' . $args);
+                break;
+
+            case 'tcpdump':
+                CommandExecutionUtility::execInteractive('tcpdump', '-i docker0 ' . $args);
+                break;
+
+            case 'ngrep':
+                CommandExecutionUtility::execInteractive('tcpdump', '-d docker0 ' . $args);
+                break;
+        }
+
+
 
         return 0;
     }
