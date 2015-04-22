@@ -48,14 +48,20 @@ class TraceCommand extends \CliTools\Console\Command\AbstractCommand {
                 'Trace all PHP processes'
             )
             ->addOption(
+                'e',
+                'e',
+                InputOption::VALUE_REQUIRED,
+                'System call filter'
+            )
+            ->addOption(
                 'c',
-                null,
+                'c',
                 InputOption::VALUE_NONE,
                 'SysCall statistics'
             )
             ->addOption(
                 'r',
-                null,
+                'r',
                 InputOption::VALUE_NONE,
                 'Relative time'
             );
@@ -115,6 +121,11 @@ class TraceCommand extends \CliTools\Console\Command\AbstractCommand {
             if ($input->getOption('r')) {
                 unset($straceOpts['t']);
                 $straceOpts['r'] = '-r';
+            }
+
+            // System trace filter
+            if ($input->getOption('e')) {
+                $straceOpts['e'] = '-e ' . escapeshellarg($input->getOption('e'));
             }
 
             $straceOpts = implode(' ', $straceOpts);
