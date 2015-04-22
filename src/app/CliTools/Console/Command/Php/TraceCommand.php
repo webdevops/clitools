@@ -130,6 +130,11 @@ class TraceCommand extends \CliTools\Console\Command\AbstractCommand {
         return 0;
     }
 
+    /**
+     * Build list of running php processes
+     *
+     * @return array
+     */
     protected function buildPhpProcessList() {
         $currentPid = posix_getpid();
 
