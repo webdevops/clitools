@@ -58,20 +58,15 @@ class SniffCommand extends AbstractCommand {
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
 
-        $container = 'main';
+        $dockerInterface = $this->getApplication()->getConfigValue('docker', 'interface');
 
         $protocol   = $input->getArgument('protocol');
         $fullOutput = $input->getOption('full');
 
         switch ($protocol) {
-            // ##############
-            // TCP connections
-            // ##############
-            case 'con':
-            case 'tcp':
-                $sniffer = 'tshark';
-                $args = '-R "tcp.flags.syn==1 && tcp.flags.ack==0"';
-                break;
+            // ############################################
+            // OSI LEVEL 2
+            // ############################################
 
             // ##############
             // ARP
@@ -81,6 +76,10 @@ class SniffCommand extends AbstractCommand {
                 $args = 'arp';
                 break;
 
+            // ############################################
+            // OSI LEVEL 3
+            // ############################################
+
             // ##############
             // ICMP
             // ##############
@@ -88,6 +87,23 @@ class SniffCommand extends AbstractCommand {
                 $sniffer = 'tshark';
                 $args = 'icmp';
                 break;
+
+            // ############################################
+            // OSI LEVEL 4
+            // ############################################
+
+            // ##############
+            // TCP connections
+            // ##############
+            case 'con':
+            case 'tcp':
+                $sniffer = 'tshark';
+                $args = '-R "tcp.flags.syn==1 && tcp.flags.ack==0"';
+                break;
+
+            // ############################################
+            // OSI LEVEL 5-7
+            // ############################################
 
             // ##############
             // HTTP
@@ -164,27 +180,29 @@ class SniffCommand extends AbstractCommand {
             // HELP
             // ##############
             default:
-                $output->writeln('<error>Protocol not supported (supported: tcp, icmp, http, solr, elasticsearch, memcache, redis, smtp, mysql, dns)</error>');
+                $output->writeln('<error>Protocol not supported:</error>');
+                $output->writeln('<comment>  OSI layer 7: http, solr, elasticsearch, memcache, redis, smtp, mysql, dns</comment>');
+                $output->writeln('<comment>  OSI layer 4: tcp</comment>');
+                $output->writeln('<comment>  OSI layer 3: icmp</comment>');
+                $output->writeln('<comment>  OSI layer 2: arp</comment>');
                 return 1;
                 break;
         }
 
         switch ($sniffer) {
             case 'tshark':
-                CommandExecutionUtility::execInteractive('tshark', '-i docker0 ' . $args);
+                $ret = CommandExecutionUtility::execInteractive('tshark', '-i ' . escapeshellarg($dockerInterface) . ' ' . $args);
                 break;
 
             case 'tcpdump':
-                CommandExecutionUtility::execInteractive('tcpdump', '-i docker0 ' . $args);
+                $ret = CommandExecutionUtility::execInteractive('tcpdump', '-i ' . escapeshellarg($dockerInterface) . ' '  . $args);
                 break;
 
             case 'ngrep':
-                CommandExecutionUtility::execInteractive('tcpdump', '-d docker0 ' . $args);
+                $ret = CommandExecutionUtility::execInteractive('tcpdump', '-d ' . escapeshellarg($dockerInterface) . ' '  . $args);
                 break;
         }
 
-
-
-        return 0;
+        return $ret;
     }
 }
