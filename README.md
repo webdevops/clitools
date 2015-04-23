@@ -1,5 +1,7 @@
 # CliTools for Vagrant VM
 
+![License GPL3](https://img.shields.io/badge/license-GPL3-blue.svg?style=flat)
+
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416/big.png)](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416)
 
 
