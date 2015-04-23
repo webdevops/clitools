@@ -40,11 +40,7 @@ class CommandExecutionUtility {
         // Escape args
         if ($parameter !== null && is_array($parameter) && count($parameter) >= 1) {
             // dynamic paramter
-            unset($param);
-            foreach ($parameter as &$param) {
-                $param = escapeshellarg($param);
-            }
-            unset($param);
+            $parameter = array_map('escapeshellarg', $parameter);
 
             // Just add parameter if template is empty
             if ($parameterTemplate === null) {
@@ -58,6 +54,20 @@ class CommandExecutionUtility {
         }
 
         return $execCommand;
+    }
+
+
+    /**
+     * Build argument list as string
+     *
+     * @param  array  $parameter         Parameter List
+     *
+     * @return string
+     */
+    public static function buildArgumentString(array $parameter) {
+        $parameter = array_map('escapeshellarg', $parameter);
+        $ret = implode(' ', $parameter);
+        return $ret;
     }
 
     /**
