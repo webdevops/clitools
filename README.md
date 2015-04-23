@@ -34,16 +34,16 @@ All log commands are using a grep-filter (specified as optional argument)
 | Command                    | Description                                                               |
 |----------------------------|---------------------------------------------------------------------------|
 | ct docker:shell            | Jump into a shell inside a docker container                               |
-|                            | __ct docker:shell __ -> enter main container                              |
-|                            | __ct docker:shell mysql __ -> enter mysql container                       |
+|                            | __ct docker:shell__ -> enter main container                               |
+|                            | __ct docker:shell mysql__ -> enter mysql container                        |
 | ct docker:mysql            | Jump into a mysql client inside a docker container                        |
-|                            | __ct docker:mysql __ -> execute mysql client inside main container        |
+|                            | __ct docker:mysql__ -> execute mysql client inside main container         |
 | ct docker:sniff            | Start network sniffer for various protocols                               |
-|                            | __ct docker:sniff http __ -> start HTTP sniffing                          |
+|                            | __ct docker:sniff http__ -> start HTTP sniffing                           |
 | ct docker:exec             | Execute command in docker container                                       |
-|                            | __ct docker:exec ps __ -> run 'ps' inside main container                  |
+|                            | __ct docker:exec ps__ -> run 'ps' inside main container                   |
 | ct docker:cli              | Execute special cli command in docker container                           |
-|                            | __ct docker:cli scheduler __ -> run 'scheduler' in TYPO3 CMS              |
+|                            | __ct docker:cli scheduler__ -> run 'scheduler' in TYPO3 CMS               |
 
 ## MySQL commands
 
