@@ -44,6 +44,8 @@ class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
-        CommandExecutionUtility::execInteractive('service', '%s %s', array('apache2', 'restart'));
+        $ret = CommandExecutionUtility::execInteractive('service', '%s %s', array('apache2', 'restart'));
+
+        return $ret;
     }
 }

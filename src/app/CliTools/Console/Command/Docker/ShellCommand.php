@@ -54,8 +54,8 @@ class ShellCommand extends AbstractCommand {
             $container = $input->getArgument('container');
         }
 
-        $this->executeDockerExec($container, 'bash');
+        $ret = $this->executeDockerExec($container, 'bash');
 
-        return 0;
+        return $ret;
     }
 }

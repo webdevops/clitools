@@ -20,7 +20,6 @@ namespace CliTools\Console\Command\Docker;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -52,12 +51,12 @@ class ExecCommand extends AbstractCommand implements \CliTools\Console\Filter\An
 
             $execCommand = \CliTools\Utility\CommandExecutionUtility::buildCommand($comamnd, null, $paramList);
 
-            $this->executeDockerExec($container, $execCommand);
+            $ret = $this->executeDockerExec($container, $execCommand);
         } else {
             $output->writeln('<error>No command/parameter specified</error>');
-            return 1;
+            $ret = 1;
         }
 
-        return 0;
+        return $ret;
     }
 }

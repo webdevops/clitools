@@ -44,8 +44,8 @@ class UpgradeCommand extends AbstractCommand {
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
-        CommandExecutionUtility::execInteractive('wget -N https://get.docker.com/ | sh');
+        $ret = CommandExecutionUtility::execInteractive('wget -N https://get.docker.com/ | sh');
 
-        return 0;
+        return $ret;
     }
 }
