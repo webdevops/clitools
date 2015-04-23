@@ -32,10 +32,10 @@ class DockerUtility {
     public static function searchDockerDirectoryRecursive($path = null) {
         $ret = false;
 
+        // Set path to current path (if not specified)
         if ($path === null) {
             $path = getcwd();
         }
-
 
         if (!empty($path) && $path !== '/') {
             // Check if current path is docker directory
