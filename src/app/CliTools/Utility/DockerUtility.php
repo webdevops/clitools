@@ -23,6 +23,40 @@ namespace CliTools\Utility;
 class DockerUtility {
 
     /**
+     * Parse docker configuration (from docker inspect)
+     *
+     * @param string $container Name of docker container
+     *
+     * @return stdClass|null
+     */
+    public static function getDockerConfiguration($container) {
+        CommandExecutionUtility::exec('docker', $output, 'inspect %s', array($container));
+
+        $output = implode("\n", $output);
+
+        $conf = json_decode($output);
+
+        if (!empty($conf)) {
+            $conf = reset($conf);
+
+            // Parse env
+            if (!empty($conf->Config->Env)) {
+                $envList = array();
+                foreach ($conf->Config->Env as $value) {
+                    list($envName, $envValue) = explode('=', $value, 2);
+                    $envList[$envName] = $envValue;
+                }
+
+                $conf->Config->Env = $envList;
+            }
+
+            return $conf;
+        }
+
+        return null;
+    }
+
+    /**
      * Search docker-compose.yml recursive
      *
      * @param  NULL|string $path Docker path

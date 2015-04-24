@@ -44,13 +44,49 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
     public function execute(InputInterface $input, OutputInterface $output) {
         $paramList = $this->getFullParameterList();
         $container = $this->getApplication()->getConfigValue('docker', 'container');
+        $cliMethod = $this->getApplication()->getConfigValue('docker', 'climethod');
 
-        if (!empty($paramList)) {
-            $ret = $this->executeDockerComposeRun($container, 'cli', $paramList);
-        } else {
-            $output->writeln('<error>No command/parameter specified</error>');
-            $ret = 1;
+        switch ($cliMethod) {
+            ###########################
+            # with Docker exec (faster, complex)
+            ###########################
+            case 'docker-exec':
+                $cliScript = $this->getDockerEnv($container, 'CLI_SCRIPT');
+
+                list($cliCommand, $cliParams) = explode(' ', $cliScript, 2);
+                $cliCommand = trim($cliCommand);
+                $cliParams  = trim($cliParams);
+
+                $cliParamList = array();
+
+                if (!empty($cliParams)) {
+                    $cliParamList[] = $cliParams;
+                }
+
+                $cliParamList = array_merge($cliParamList, $paramList);
+
+                $ret = $this->executeDockerExec($container, $cliCommand, $cliParamList);
+                break;
+
+            ###########################
+            # with docker-compose run (simple, slower)
+            ###########################
+            case 'dockercompose-run':
+               if (!empty($paramList)) {
+                    $ret = $this->executeDockerComposeRun($container, 'cli', $paramList);
+                } else {
+                    $output->writeln('<error>No command/parameter specified</error>');
+                    $ret = 1;
+                }
+                break;
+
+            default:
+                $output->writeln('<error>CliMethod "' . $cliMethod .'" not defined</error>');
+                return 1;
+                break;
         }
+
+
 
         return $ret;
     }

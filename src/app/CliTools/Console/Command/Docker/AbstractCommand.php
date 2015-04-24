@@ -25,30 +25,105 @@ use CliTools\Utility\CommandExecutionUtility;
 abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand {
 
     /**
+     * Docker path
+     *
+     * @var null|string
+     */
+    protected $dockerPath;
+
+    /**
+     * Search and return for updir docker path
+     *
+     * @return bool|null|string
+     */
+    protected function getDockerPath() {
+        if ($this->dockerPath === null) {
+            $this->dockerPath = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
+            $this->output->writeln('<comment>Found docker directory: ' . $this->dockerPath . '</comment>');
+        }
+
+        return $this->dockerPath;
+    }
+
+    /**
      * Execute docker command
      *
      * @param  string $containerName Container name
-     * @param  string $cmd           Command
+     * @param  string $envName       Environment variable
      *
-     * @return int|null|void
+     * @return string|bool
      */
-    protected function executeDockerExec($containerName, $cmd) {
-        if (empty($cmd)) {
-            $this->output->writeln('<error>No command specified</error>');
-            return 1;
+    protected function getDockerEnv($containerName, $envName) {
+        if (empty($containerName)) {
+            $this->output->writeln('<error>No container specified</error>');
+            return false;
         }
 
-        $path = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
+        if (empty($envName)) {
+            $this->output->writeln('<error>No environment name specified</error>');
+            return false;
+        }
+
+        $path = $this->getDockerPath();
 
         if (!empty($path)) {
             $dockerContainerName = \CliTools\Utility\DockerUtility::getDockerInstanceName($containerName, 1, $path);
 
-            $this->output->writeln('<comment>Found docker directory: ' . $path . '</comment>');
             chdir($path);
 
-            $this->output->writeln('<info>Executing "' . $cmd . '" in docker container "' . $dockerContainerName . '" ...</info>');
+            $conf = \CliTools\Utility\DockerUtility::getDockerConfiguration($dockerContainerName);
 
-            CommandExecutionUtility::execInteractive('docker', 'exec -ti %s %s', array($dockerContainerName, $cmd));
+            if (empty($conf)) {
+                throw new \RuntimeException('Could not read docker configuration');
+            }
+
+            if (!empty($conf->Config->Env[$envName])) {
+                return $conf->Config->Env[$envName];
+            } else {
+                throw new \RuntimeException('Docker don\'t have environment variable "' . $envName . '"');
+            }
+        }
+    }
+
+    /**
+     * Execute docker command
+     *
+     * @param  string      $containerName Container name
+     * @param  string      $comamnd       Command
+     * @param  array|null  $parameter     Parameters
+     *
+     * @return int|null|void
+     */
+    protected function executeDockerExec($containerName, $comamnd, $parameter = null) {
+        if (empty($containerName)) {
+            $this->output->writeln('<error>No container specified</error>');
+            return 1;
+        }
+
+        if (empty($comamnd)) {
+            $this->output->writeln('<error>No command specified</error>');
+            return 1;
+        }
+
+        $path = $this->getDockerPath();
+
+        if (!empty($path)) {
+            $dockerContainerName = \CliTools\Utility\DockerUtility::getDockerInstanceName($containerName, 1, $path);
+
+            chdir($path);
+
+            $this->output->writeln('<info>Executing "' . $comamnd . '" in docker container "' . $dockerContainerName . '" ...</info>');
+
+            // Build command parameter and template
+            $dockerExecParam = array(
+                $dockerContainerName,
+                $comamnd
+            );
+            $dockerExecParam = array_merge($dockerExecParam, $parameter);
+
+            $paramTemplate = 'exec -ti ' . str_repeat('%s ', count($dockerExecParam));
+
+            CommandExecutionUtility::execInteractive('docker', $paramTemplate, $dockerExecParam);
         } else {
             $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
 
@@ -97,10 +172,9 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             return 1;
         }
 
-        $path = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
+        $path = $this->getDockerPath();
 
         if (!empty($path)) {
-            $this->output->writeln('<comment>Found docker directory: ' . $path . '</comment>');
             chdir($path);
 
             $this->output->writeln('<info>Executing "' . $cmd . '" in docker container "' . $containerName . '" ...</info>');
