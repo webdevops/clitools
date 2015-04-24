@@ -127,12 +127,13 @@ class CommandExecutionUtility {
      * @param string|null $parameterTemplate Parameter Template
      * @param array|null  $parameter         Parameter List
      *
+     * @return integer
      * @throws CommandExecutionException
      */
     public static function execInteractive($command, $parameterTemplate = null, $parameter = null) {
         $execCommand = self::buildCommand($command, $parameterTemplate, $parameter);
 
-        ConsoleUtility::verboseWriteln('EXEC::PASSTHRU', $execCommand);
+        ConsoleUtility::verboseWriteln('EXEC::INTERACTIVE', $execCommand);
 
         $descriptorSpec = array(
             0 => array('file', 'php://stdin',  'r'),  // stdin is a file that the child will read from
@@ -156,5 +157,7 @@ class CommandExecutionUtility {
             $e->setReturnCode(-1);
             throw $e;
         }
+
+        return $execStatus;
     }
 }
