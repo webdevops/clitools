@@ -32,6 +32,7 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
      */
     protected function configure() {
         $this->setName('mysql:debug')
+            ->setAliases(array('mysql:querylog'))
             ->setDescription('Debug mysql connections')
             ->addArgument(
                 'grep',
@@ -52,6 +53,16 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
         $this->elevateProcess($input, $output);
 
         $debugLogLocation = $this->getApplication()->getConfigValue('db', 'debug_log_dir');
+        $debugLogDir      = dirname($debugLogLocation);
+
+        // Create directory if not exists
+        if (!is_dir($debugLogDir)) {
+            if(!mkdir($debugLogDir, 0777, true)) {
+                $output->writeln('<error>Could not create "' . $debugLogDir . '" directory</error>');
+                exit(1);
+            }
+        }
+
         if (!empty($debugLogLocation)) {
             $debugLogLocation .= 'mysql_' . getmypid() . '.log';
 
@@ -66,14 +77,14 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
         if (!empty($logFileRow['Value'])) {
 
             // Enable general log
-            $output->write('<comment>Enabling general log</comment>');
+            $output->writeln('<comment>Enabling general log</comment>');
             $query = 'SET GLOBAL general_log = \'ON\'';
             DatabaseConnection::exec($query);
 
             // Setup teardown cleanup
             $tearDownFunc = function () use ($output) {
                 // Disable general log
-                $output->write('<comment>Disabling general log</comment>');
+                $output->writeln('<comment>Disabling general log</comment>');
                 $query = 'SET GLOBAL general_log = \'OFF\'';
                 DatabaseConnection::exec($query);
             };
