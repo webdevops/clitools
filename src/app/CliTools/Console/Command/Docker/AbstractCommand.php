@@ -46,9 +46,33 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $this->output->writeln('<comment>Found docker directory: ' . $path . '</comment>');
             chdir($path);
 
-            $this->output->writeln('<info>Execeuting "' . $cmd . '" in docker container "' . $dockerContainerName . '" ...</info>');
+            $this->output->writeln('<info>Executing "' . $cmd . '" in docker container "' . $dockerContainerName . '" ...</info>');
 
             CommandExecutionUtility::execInteractive('docker', 'exec -ti %s %s', array($dockerContainerName, $cmd));
+        } else {
+            $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
+
+            return 1;
+        }
+
+        return 0;
+    }
+
+    /**
+     * Execute docker compose run
+     *
+     * @param  null|array $args          Command arguments
+     *
+     * @return int|null|void
+     */
+    protected function executeDockerCompose($args = null) {
+        $path = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
+
+        if (!empty($path)) {
+            $this->output->writeln('<comment>Found docker directory: ' . $path . '</comment>');
+            chdir($path);
+
+            CommandExecutionUtility::execInteractive('docker-compose', null, $args);
         } else {
             $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
 
@@ -79,7 +103,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $this->output->writeln('<comment>Found docker directory: ' . $path . '</comment>');
             chdir($path);
 
-            $this->output->writeln('<info>Execeuting "' . $cmd . '" in docker container "' . $containerName . '" ...</info>');
+            $this->output->writeln('<info>Executing "' . $cmd . '" in docker container "' . $containerName . '" ...</info>');
 
             if (!empty($args) && is_array($args)) {
                 $args = CommandExecutionUtility::buildArgumentString($args);
