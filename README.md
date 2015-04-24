@@ -70,7 +70,7 @@ All log commands are using a grep-filter (specified as optional argument)
 | Command                    | Description                                                               |
 |----------------------------|---------------------------------------------------------------------------|
 | ct php:trace               | Trace syscalls from one or all PHP processes (strace)                     |
-
+|                            | __ct php:trace --all__ -> Trace all php processes immediately             |
 
 ## Samba commands
 
