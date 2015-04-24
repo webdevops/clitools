@@ -8,20 +8,62 @@
 
 Documentation is still WIP :)
 
-## Special commands
+## Configuration
+
+CliTools will read /etc/clitools.ini for system wide configuration.
+
+Defaults available in [config.ini](https://github.com/mblaschke/vagrant-clitools/blob/master/src/config.ini)
+
+### Docker specific configuration
+```ini
+[config]
+; ssh_conf_path   = "/vagrant/provision/sshconfig/"
+
+[db]
+dsn = "mysql:host=127.0.0.1;port=13306"
+username = "root"
+password = "dev"
+debug_log_dir = "/tmp/debug/"
+
+[syscheck]
+enabled = 1
+wall = 1
+growl = 1
+diskusage = 85
+
+[growl]
+server = 192.168.56.1
+password =
+
+[commands]
+; not used commands here
+ignore[] = "CliTools\Console\Command\Log\ApacheCommand"
+ignore[] = "CliTools\Console\Command\Log\PhpCommand"
+ignore[] = "CliTools\Console\Command\Log\DebugCommand"
+ignore[] = "CliTools\Console\Command\Apache\RestartCommand"
+ignore[] = "CliTools\Console\Command\Mysql\RestartCommand"
+ignore[] = "CliTools\Console\Command\Php\RestartCommand"
+ignore[] = "CliTools\Console\Command\Samba\RestartCommand"
+ignore[] = "CliTools\Console\Command\System\UpdateCommand"
+ignore[] = "CliTools\Console\Command\System\RebootCommand"
+```
+
+## Commands
+
+### Special commands
 
 | Command                    | Description                                                               |
 |----------------------------|---------------------------------------------------------------------------|
 | ct self-update             | Update ct command (download new version)                                  |
 | ct update                  | Updates all system components, ssh configuration, ct command update etc.  |
 
-## System commands
+### System commands
 
 | Command                    | Description                                                               |
 |----------------------------|---------------------------------------------------------------------------|
 | ct shutdown (alias)        | Shutdown system                                                           |
 
-## Log commands
+### Log commands
 
 All log commands are using a grep-filter (specified as optional argument)
 
@@ -29,7 +71,7 @@ All log commands are using a grep-filter (specified as optional argument)
 |----------------------------|---------------------------------------------------------------------------|
 | ct log:mail                | Shows mail logs                                                           |
 
-## Docker commands
+### Docker commands
 
 | Command                    | Description                                                               |
 |----------------------------|---------------------------------------------------------------------------|
@@ -44,8 +86,10 @@ All log commands are using a grep-filter (specified as optional argument)
 |                            | __ct docker:exec ps__ -> run 'ps' inside main container                   |
 | ct docker:cli              | Execute special cli command in docker container                           |
 |                            | __ct docker:cli scheduler__ -> run 'scheduler' in TYPO3 CMS               |
+| ct docker:compose          | Execute docker-compose (recursive up-searching for docker-compose.yml)    |
+|                            | __ct docker:compose ps__ -> list all running docker-compose containers    |
 
-## MySQL commands
+### MySQL commands
 
 | Command                    | Description                                                               |
 |----------------------------|---------------------------------------------------------------------------|
@@ -57,6 +101,10 @@ All log commands are using a grep-filter (specified as optional argument)
 | ct mysql:debug             | Shows mysql debug log (lists all queries) with basic filter support       |
 |                            | __ct mysql:debug__  (full log)                                            |
 |                            | __ct mysql:debug tt_content__  (full log)                                 |
+| ct mysql:slowlog           | Shows mysql slow log                                                      |
+|                            | __ct mysql:slowlog__  (show slow queries with 1 sec and more)             |
+|                            | __ct mysql:slowlog --time=10__  (show slow queries with 10 sec and more)  |
+|                            | __ct mysql:slowlog --no-index__ (show not using index and slow (1sec) queries) |
 | ct mysql:drop              | Drops a database                                                          |
 |                            | __ct mysql:drop typo3__                                                   |
 | ct mysql:list              | Lists all databases with some statitics                                   |
@@ -65,21 +113,21 @@ All log commands are using a grep-filter (specified as optional argument)
 |                            | Dump file can be plaintext, gziped or bzip2 compressed                    |
 |                            | __ct mysql:restore typo3 dump.sql.bz2__                                   |
 
-## PHP commands
+### PHP commands
 
 | Command                    | Description                                                               |
 |----------------------------|---------------------------------------------------------------------------|
 | ct php:trace               | Trace syscalls from one or all PHP processes (strace)                     |
 |                            | __ct php:trace --all__ -> Trace all php processes immediately             |
 
-## Samba commands
+### Samba commands
 
 | Command                    | Description                                                               |
 |----------------------------|---------------------------------------------------------------------------|
 | ct samba:restart           | Restart Samba server                                                      |
 
 
-## System commands
+### System commands
 
 | Command                    | Description                                                               |
 |----------------------------|---------------------------------------------------------------------------|
@@ -90,7 +138,7 @@ All log commands are using a grep-filter (specified as optional argument)
 | ct system:update           | Updates all system components, ssh configuration, ct command update etc.  |
 | ct system:version          | Shows version for common packages                                         |
 
-## TYPO3 commands
+### TYPO3 commands
 
 | Command                    | Description                                                               |
 |----------------------------|---------------------------------------------------------------------------|
@@ -101,7 +149,7 @@ All log commands are using a grep-filter (specified as optional argument)
 |                            | __ct typo3:cleanup__                                                      |
 |                            | __ct typo3:cleanup typo3__                                                |
 
-## User commands
+### User commands
 
 | Command                    | Description                                                               |
 |----------------------------|---------------------------------------------------------------------------|
