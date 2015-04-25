@@ -129,7 +129,8 @@ All log commands are using a grep-filter (specified as optional argument)
 | ct mysql:list              | Lists all databases with some statitics                                   |
 | ct mysql:restart           | Restart MySQL server                                                      |
 | ct mysql:restore           | Create (and drops if already exists) a database and restore from a dump   |
-|                            | Dump file can be plaintext, gziped or bzip2 compressed                    |
+|                            | Dump file can be plaintext, gziped, bzip2 or lzma compressed              |
+|                            | and will automatically detected                                           |
 |                            | __ct mysql:restore typo3 dump.sql.bz2__                                   |
 
 ### PHP commands

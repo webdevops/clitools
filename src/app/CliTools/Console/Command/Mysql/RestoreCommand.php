@@ -69,6 +69,16 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
         $dumpFileType = finfo_file($finfo, $dumpFile);
         finfo_close($finfo);
 
+        if ($dumpFileType === 'application/octet-stream') {
+            $finfo        = finfo_open();
+            $dumpFileInfo = finfo_file($finfo, $dumpFile);
+            finfo_close($finfo);
+
+            if (strpos($dumpFileInfo, 'LZMA compressed data') !== false) {
+                $dumpFileType = 'application/x-lzma';
+            }
+        }
+
         // Dropping
         $output->writeln('<comment>Dropping Database "' . $database . '"...</comment>');
         $query = 'DROP DATABASE IF EXISTS ' . DatabaseConnection::sanitizeSqlDatabase($database);
@@ -98,6 +108,10 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
 
             case 'application/gzip':
                 $commandFile->setCommand('gzcat');
+                break;
+
+            case 'application/x-lzma':
+                $commandFile->setCommand('lzcat');
                 break;
 
             default:
