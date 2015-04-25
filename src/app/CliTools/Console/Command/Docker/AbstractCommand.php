@@ -159,11 +159,6 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @return int|null|void
      */
     protected function executeDockerComposeRun($containerName, CommandBuilder $command) {
-        if (empty($cmd)) {
-            $this->output->writeln('<error>No command specified</error>');
-            return 1;
-        }
-
         $path = $this->getDockerPath();
 
         if (!empty($path)) {

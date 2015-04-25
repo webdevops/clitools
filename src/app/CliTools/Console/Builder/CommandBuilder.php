@@ -65,7 +65,9 @@ class CommandBuilder {
     protected $pipeList = array();
 
     /**
-     * @var
+     * Executor
+     *
+     * @var null|Executor
      */
     protected $executor;
 
@@ -294,6 +296,7 @@ class CommandBuilder {
      * @return $this
      */
     public function append(CommandBuilder $command, $inline = true) {
+
         // Check if sub command is executeable
         if (!$command->isExecuteable()) {
             throw new \RuntimeException('Sub command "' . $command->getCommand() . '" is not executable or available');
@@ -317,17 +320,17 @@ class CommandBuilder {
      * @return bool
      */
     public function isExecuteable() {
-        $ret = false;
-
-        if (!empty($this->command)) {
-            $ret = true;
-        }
-
-        if (!\CliTools\Utility\UnixUtility::checkExecutable($this->command)) {
+        // Command must be set
+        if (empty($this->command)) {
             return false;
         }
 
-        return $ret;
+        // Only check command paths for local commands
+        if (!($this instanceof RemoteCommandBuilder) && !\CliTools\Utility\UnixUtility::checkExecutable($this->command)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
