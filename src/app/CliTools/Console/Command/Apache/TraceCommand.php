@@ -1,6 +1,6 @@
 <?php
 
-namespace CliTools\Console\Command\Php;
+namespace CliTools\Console\Command\Apache;
 
 /*
  * CliTools Command
