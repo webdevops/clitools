@@ -80,7 +80,7 @@ class ClearCacheCommand extends \CliTools\Console\Command\AbstractCommand {
             $output->writeln('<info>Running clearcache command on ' . $dirPath . '</info>');
             try {
 
-                $command = new CommandBuilder('cmd');
+                $command = new CommandBuilder('php');
                 $command->setArgumentList($params)
                     ->executeInteractive();
             } catch (\Exception $e) {
