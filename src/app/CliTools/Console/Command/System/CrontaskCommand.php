@@ -87,7 +87,7 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
             $this->sendGrowlMessage('CliTools :: System Check Warnings', $message);
 
             // Local wall message
-            $msgPrefix = ' [WARNING] ';
+            $msgPrefix = ' - ';
             $message   = ' -- CliTools :: System Check Warnings --' . "\n\n";
             $message .= $msgPrefix . implode("\n" . $msgPrefix, $this->sysCheckMessageList);
             $message .= "\n\n" . '(This warning can be disabled in /etc/clitools.ini)';
@@ -130,8 +130,13 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
             foreach ($mountInfoList as $mount => $stats) {
                 $usageInt = $stats['usageInt'];
 
+                $statsLine = array(
+                    $usageInt . '% used',
+                    \CliTools\Utility\FormatUtility::bytes($stats['free']) . ' free',
+                );
+
                 if ($usageInt >= $diskUsageLimit) {
-                    $this->sysCheckMessageList[] = 'Usage of "' . $mount . '" exceeds limit of ' . $diskUsageLimit . '% (current usage: ' . $usageInt . '%)';
+                    $this->sysCheckMessageList[] = 'Mount "' . $mount . '" exceeds limit of ' . $diskUsageLimit . '% (' . implode(', ', $statsLine) . ')';
                 }
             }
         }

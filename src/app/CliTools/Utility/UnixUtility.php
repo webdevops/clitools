@@ -119,13 +119,14 @@ abstract class UnixUtility {
     public static function mountInfoList() {
         $command = new CommandBuilder('df', '-a --type=ext3 --type=ext4 --type vmhgfs --type vboxsf --portability');
         $command->addPipeCommand( new CommandBuilder('tail', '--lines=+2') )
-                ->addPipeCommand( new CommandBuilder('awk', '\'{ print $6 " " $4 " " $5 }\'') );
+                ->addPipeCommand( new CommandBuilder('awk', '\'{ print $6 " " $3 " " $4 " " $5 }\'') );
         $execOutput = $command->execute()->getOutput();
 
         $ret = array();
         foreach ($execOutput as $line) {
-            list($disc, $capacity, $usage) = explode(' ', $line);
+            list($disc, $capacity, $free, $usage) = explode(' ', $line);
             $ret[$disc]['capacity'] = $capacity * 1024;
+            $ret[$disc]['free']     = $free * 1024;
             $ret[$disc]['usage']    = $usage;
             $ret[$disc]['usageInt'] = (int)$usage;
         }
