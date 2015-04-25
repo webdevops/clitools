@@ -45,7 +45,7 @@ abstract class UnixUtility {
      * @return string
      */
     public static function cpuCount() {
-        $command = new CommandBuilder('nproc', '-d');
+        $command = new CommandBuilder('nproc');
         $ret = $command->execute()->getOutputString();
 
         $ret = trim($ret);
