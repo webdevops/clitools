@@ -20,7 +20,6 @@ namespace CliTools\Console\Command\System;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\CommandExecutionUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use CliTools\Console\Builder\CommandBuilder;

@@ -21,7 +21,6 @@ namespace CliTools\Console\Command\Mysql;
  */
 
 use CliTools\Database\DatabaseConnection;
-use CliTools\Utility\CommandExecutionUtility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
