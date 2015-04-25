@@ -8,6 +8,25 @@
 
 Documentation is still WIP :)
 
+## Requirements
+
+- PHP 5.5
+- Tools
+  - git
+  - wget
+  - multitail
+  - tshark
+  - tcpdump
+  - ngrep
+  - strace
+  - lsof
+  - sudo
+  - moreutils (ifdata)
+  - coreutils (grep, sort, uniq, awk, cat, df, ip, cut, lsb_release, wall)
+  - docker and docker-compose (if you want to use docker)
+  - mysql (if you want to use mysql)
+
+
 ## Configuration
 
 CliTools will read /etc/clitools.ini for system wide configuration.
