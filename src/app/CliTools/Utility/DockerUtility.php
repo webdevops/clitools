@@ -20,6 +20,9 @@ namespace CliTools\Utility;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Shell\ExecutorShell;
+
 class DockerUtility {
 
     /**
@@ -30,10 +33,16 @@ class DockerUtility {
      * @return stdClass|null
      */
     public static function getDockerConfiguration($container) {
-        CommandExecutionUtility::exec('docker', $output, 'inspect %s', array($container));
 
-        $output = implode("\n", $output);
+        // Build command
+        $command = new CommandBuilder('docker', 'inspect %s', array($container));
 
+        // execute
+        $executor = new ExecutorShell($command);
+        $executor->execute();
+        $output = $executor->getOutputString();
+
+        // Parse
         $conf = json_decode($output);
 
         if (!empty($conf)) {

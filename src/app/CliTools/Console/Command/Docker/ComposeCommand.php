@@ -22,6 +22,7 @@ namespace CliTools\Console\Command\Docker;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use CliTools\Console\Builder\CommandBuilder;
 
 class ComposeCommand extends AbstractCommand implements \CliTools\Console\Filter\AnyParameterFilterInterface {
 
@@ -44,12 +45,13 @@ class ComposeCommand extends AbstractCommand implements \CliTools\Console\Filter
     public function execute(InputInterface $input, OutputInterface $output) {
         $paramList = $this->getFullParameterList();
 
+        $command = new CommandBuilder();
+
         if (!empty($paramList)) {
-            $ret = $this->executeDockerCompose($paramList);
-        } else {
-            $output->writeln('<error>No command/parameter specified</error>');
-            $ret = 1;
+            $command->setArgumentList($paramList);
         }
+
+        $ret = $this->executeDockerCompose($command);
 
         return $ret;
     }

@@ -25,6 +25,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Shell\ExecutorShell;
 
 class SniffCommand extends AbstractCommand {
 
@@ -63,6 +65,8 @@ class SniffCommand extends AbstractCommand {
         $protocol   = $input->getArgument('protocol');
         $fullOutput = $input->getOption('full');
 
+        $command = new CommandBuilder();
+
         switch ($protocol) {
             // ############################################
             // OSI LEVEL 2
@@ -72,8 +76,8 @@ class SniffCommand extends AbstractCommand {
             // ARP
             // ##############
             case 'arp':
-                $sniffer = 'tshark';
-                $args = 'arp';
+                $command->setCommand('tshark');
+                $command->addArgument('arp');
                 break;
 
             // ############################################
@@ -84,8 +88,8 @@ class SniffCommand extends AbstractCommand {
             // ICMP
             // ##############
             case 'icmp':
-                $sniffer = 'tshark';
-                $args = 'icmp';
+                $command->setCommand('tshark');
+                $command->addArgument('icmp');
                 break;
 
             // ############################################
@@ -97,8 +101,8 @@ class SniffCommand extends AbstractCommand {
             // ##############
             case 'con':
             case 'tcp':
-                $sniffer = 'tshark';
-                $args = '-R "tcp.flags.syn==1 && tcp.flags.ack==0"';
+                $command->setCommand('tshark');
+                $command->addArgumentRaw('-R "tcp.flags.syn==1 && tcp.flags.ack==0"');
                 break;
 
             // ############################################
@@ -109,12 +113,12 @@ class SniffCommand extends AbstractCommand {
             // HTTP
             // ##############
             case 'http':
+                $command->setCommand('tshark');
+
                 if ($fullOutput) {
-                    $sniffer = 'tshark';
-                    $args = 'tcp port 80 or tcp port 443 -2 -V -R "http.request || http.response"';
+                    $command->addArgumentRaw('tcp port 80 or tcp port 443 -2 -V -R "http.request || http.response"');
                 } else {
-                    $sniffer = 'tshark';
-                    $args = 'tcp port 80 or tcp port 443 -2 -V -R "http.request" -Tfields -e ip.dst -e http.request.method -e http.request.full_uri';
+                    $command->addArgumentRaw('tcp port 80 or tcp port 443 -2 -V -R "http.request" -Tfields -e ip.dst -e http.request.method -e http.request.full_uri');
                 }
                 break;
 
@@ -122,16 +126,20 @@ class SniffCommand extends AbstractCommand {
             // SOLR
             // ##############
             case 'solr':
-                $sniffer = 'tcpdump';
-                $args = '-nl -s0 -w- port 8983 | strings -n8';
+                $command->setCommand('tcpdump');
+                $command->addArgumentRaw('-nl -s0 -w- port 8983');
+
+                $pipeCommand = new CommandBuilder('strings', '-n -8');
+
+                $command->addPipeCommand($pipeCommand);
                 break;
 
             // ##############
             // ELASTICSEARCH
             // ##############
             case 'elasticsearch':
-                $sniffer = 'tcpdump';
-                $args = '-A -nn -s 0 \'tcp dst port 9200 and (((ip[2:2] - ((ip[0]&0xf)<<2)) - ((tcp[12]&0xf0)>>2)) != 0)\'';
+                $command->setCommand('tcpdump');
+                $command->addArgumentRaw('-A -nn -s 0 \'tcp dst port 9200 and (((ip[2:2] - ((ip[0]&0xf)<<2)) - ((tcp[12]&0xf0)>>2)) != 0)\'');
                 break;
 
             // ##############
@@ -139,16 +147,16 @@ class SniffCommand extends AbstractCommand {
             // ##############
             case 'memcache':
             case 'memcached':
-                $sniffer = 'tcpdump';
-                $args = '-s 65535 -A -ttt port 11211| cut -c 9- | grep -i \'^get\|set\'';
+                $command->setCommand('tcpdump');
+                $command->addArgumentRaw('-s 65535 -A -ttt port 11211| cut -c 9- | grep -i \'^get\|set\'');
                 break;
 
             // ##############
             // REDIS
             // ##############
             case 'redis':
-                $sniffer = 'tcpdump';
-                $args = '-s 65535 tcp port 6379';
+                $command->setCommand('tcpdump');
+                $command->addArgumentRaw('-s 65535 tcp port 6379');
                 break;
 
             // ##############
@@ -156,24 +164,24 @@ class SniffCommand extends AbstractCommand {
             // ##############
             case 'smtp':
             case 'mail':
-                $sniffer = 'tshark';
-                $args = 'tcp -f "port 25" -R "smtp"';
+                $command->setCommand('tshark');
+                $command->addArgumentRaw('tcp -f "port 25" -R "smtp"');
                 break;
 
             // ##############
             // MYSQL
             // ##############
             case 'mysql':
-                $sniffer = 'tshark';
-                $args = 'tcp -d tcp.port==3306,mysql -T fields -e mysql.query "port 3306"';
+                $command->setCommand('tshark');
+                $command->addArgumentRaw('tcp -d tcp.port==3306,mysql -T fields -e mysql.query "port 3306"');
                 break;
 
             // ##############
             // DNS
             // ##############
             case 'dns':
-                $sniffer = 'tshark';
-                $args = '-nn -e ip.src -e dns.qry.name -E separator=" " -T fields port 53';
+                $command->setCommand('tshark');
+                $command->addArgumentRaw('-nn -e ip.src -e dns.qry.name -E separator=" " -T fields port 53');
                 break;
 
             // ##############
@@ -189,20 +197,23 @@ class SniffCommand extends AbstractCommand {
                 break;
         }
 
-        switch ($sniffer) {
+        switch ($command->getCommand()) {
             case 'tshark':
-                $ret = CommandExecutionUtility::execInteractive('tshark', '-i ' . escapeshellarg($dockerInterface) . ' ' . $args);
+                $command->addArgumentTemplate('-i %s', $dockerInterface);
                 break;
 
             case 'tcpdump':
-                $ret = CommandExecutionUtility::execInteractive('tcpdump', '-i ' . escapeshellarg($dockerInterface) . ' '  . $args);
+                $command->addArgumentTemplate('-i %s', $dockerInterface);
                 break;
 
             case 'ngrep':
-                $ret = CommandExecutionUtility::execInteractive('tcpdump', '-d ' . escapeshellarg($dockerInterface) . ' '  . $args);
+                $command->addArgumentTemplate('-d %s', $dockerInterface);
                 break;
         }
 
-        return $ret;
+        $executor = new ExecutorShell($command);
+        $executor->execInteractive();
+
+        return 0;
     }
 }

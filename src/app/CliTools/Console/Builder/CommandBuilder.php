@@ -174,13 +174,13 @@ class CommandBuilder {
      * Set argument with template
      *
      * @param string $arg     Argument sprintf
-     * @param array  $params  Argument parameters
+     * @param string $params  Argument parameters
      *
      * @return $this
      */
     public function addArgumentTemplate($arg, $params) {
         $funcArgs = func_get_args();
-        $funcArgs = array_shift($funcArgs);
+        array_shift($funcArgs);
 
         return $this->addArgumentTemplateList($arg, $funcArgs);
     }
@@ -213,6 +213,16 @@ class CommandBuilder {
 
         $this->argumentList = array_merge($this->argumentList, $arg);
         return $this;
+    }
+
+
+    /**
+     * Get arguments list
+     *
+     * @return array
+     */
+    public function getArgumentList() {
+        return $this->argumentList;
     }
 
     /**
@@ -287,6 +297,35 @@ class CommandBuilder {
         }
 
         return $ret;
+    }
+
+    /**
+     *
+     * Get pipe list
+     *
+     * @return array
+     */
+    public function getPipeList() {
+        return $this->pipeList;
+    }
+
+    /**
+     * Set pipe list
+     *
+     * @param array $pipeList
+     */
+    public function setPipeList(array $pipeList) {
+        $this->pipeList = $pipeList;
+    }
+
+
+    /**
+     * Add pipe command
+     *
+     * @param CommandBuilder $command
+     */
+    public function addPipeCommand(CommandBuilder $command) {
+        $this->pipeList[] = $command;
     }
 
     /**

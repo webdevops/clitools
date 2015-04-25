@@ -23,6 +23,8 @@ namespace CliTools\Console\Command\Docker;
 use CliTools\Utility\CommandExecutionUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Shell\ExecutorShell;
 
 class UpgradeCommand extends AbstractCommand {
 
@@ -44,8 +46,13 @@ class UpgradeCommand extends AbstractCommand {
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
-        $ret = CommandExecutionUtility::execInteractive('wget -N https://get.docker.com/ | sh');
 
-        return $ret;
+        $command = new CommandBuilder('wget', '-N %s', array('https://get.docker.com/'));
+        $command->addPipeCommand(new CommandBuilder('sh'));
+
+        $executor = new ExecutorShell($command);
+        $executor->execInteractive();
+
+        return 0;
     }
 }

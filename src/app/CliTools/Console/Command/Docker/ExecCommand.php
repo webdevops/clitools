@@ -22,6 +22,7 @@ namespace CliTools\Console\Command\Docker;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use CliTools\Console\Builder\CommandBuilder;
 
 class ExecCommand extends AbstractCommand implements \CliTools\Console\Filter\AnyParameterFilterInterface {
 
@@ -46,10 +47,11 @@ class ExecCommand extends AbstractCommand implements \CliTools\Console\Filter\An
         $container = $this->getApplication()->getConfigValue('docker', 'container');
 
         if (!empty($paramList)) {
-            $comamnd = array_splice($paramList, 0, 1);
-            $comamnd = reset($comamnd);
+            $firstParam = array_shift($paramList);
 
-            $ret = $this->executeDockerExec($container, $comamnd, $paramList);
+            $command = new CommandBuilder($firstParam, $paramList);
+
+            $ret = $this->executeDockerExec($container, $command);
         } else {
             $output->writeln('<error>No command/parameter specified</error>');
             $ret = 1;

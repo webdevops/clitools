@@ -21,6 +21,8 @@ namespace CliTools\Console\Command\Docker;
  */
 
 use CliTools\Utility\CommandExecutionUtility;
+use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Shell\ExecutorShell;
 
 abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand {
 
@@ -88,20 +90,19 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Execute docker command
      *
-     * @param  string      $containerName Container name
-     * @param  string      $comamnd       Command
-     * @param  array|null  $parameter     Parameters
+     * @param  string         $containerName Container name
+     * @param  CommandBuilder $comamnd       Command
      *
      * @return int|null|void
      */
-    protected function executeDockerExec($containerName, $comamnd, $parameter = null) {
+    protected function executeDockerExec($containerName, CommandBuilder $command) {
         if (empty($containerName)) {
             $this->output->writeln('<error>No container specified</error>');
             return 1;
         }
 
-        if (empty($comamnd)) {
-            $this->output->writeln('<error>No command specified</error>');
+        if (!$command->isExecuteable()) {
+            $this->output->writeln('<error>No command specified or not executeable</error>');
             return 1;
         }
 
@@ -112,18 +113,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
             chdir($path);
 
-            $this->output->writeln('<info>Executing "' . $comamnd . '" in docker container "' . $dockerContainerName . '" ...</info>');
+            $this->output->writeln('<info>Executing "' . $command->getCommand() . '" in docker container "' . $dockerContainerName . '" ...</info>');
 
-            // Build command parameter and template
-            $dockerExecParam = array(
-                $dockerContainerName,
-                $comamnd
-            );
-            $dockerExecParam = array_merge($dockerExecParam, $parameter);
+            $dockerCommand = new CommandBuilder('docker', 'exec -ti %s', array($dockerContainerName));
+            $dockerCommand->append($command, false);
 
-            $paramTemplate = 'exec -ti ' . str_repeat('%s ', count($dockerExecParam));
-
-            CommandExecutionUtility::execInteractive('docker', $paramTemplate, $dockerExecParam);
+            $exec = new ExecutorShell($dockerCommand);
+            $exec->execInteractive();
         } else {
             $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
 
@@ -136,18 +132,21 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Execute docker compose run
      *
-     * @param  null|array $args          Command arguments
+     * @param  null|CommandBuilder $command   Command
      *
      * @return int|null|void
      */
-    protected function executeDockerCompose($args = null) {
+    protected function executeDockerCompose(CommandBuilder $command = null) {
         $path = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
 
         if (!empty($path)) {
             $this->output->writeln('<comment>Found docker directory: ' . $path . '</comment>');
             chdir($path);
 
-            CommandExecutionUtility::execInteractive('docker-compose', null, $args);
+            $command->setCommand('docker-compose');
+
+            $exec = new ExecutorShell($command);
+            $exec->execInteractive();
         } else {
             $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
 
@@ -160,13 +159,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Execute docker compose run
      *
-     * @param  string     $containerName Container name
-     * @param  string     $cmd           Command
-     * @param  null|array $args          Command arguments
+     * @param  string          $containerName Container name
+     * @param  CommandBuilder  $command       Command
      *
      * @return int|null|void
      */
-    protected function executeDockerComposeRun($containerName, $cmd, $args = null) {
+    protected function executeDockerComposeRun($containerName, CommandBuilder $command) {
         if (empty($cmd)) {
             $this->output->writeln('<error>No command specified</error>');
             return 1;
@@ -177,13 +175,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         if (!empty($path)) {
             chdir($path);
 
-            $this->output->writeln('<info>Executing "' . $cmd . '" in docker container "' . $containerName . '" ...</info>');
+            $this->output->writeln('<info>Executing "' . $command->getCommand() . '" in docker container "' . $containerName . '" ...</info>');
 
-            if (!empty($args) && is_array($args)) {
-                $args = CommandExecutionUtility::buildArgumentString($args);
-            }
+            $dockerCommand = new CommandBuilder('docker-compose', 'run --rm %s', array($containerName));
+            $dockerCommand->append($command, false);
 
-            CommandExecutionUtility::execInteractive('docker-compose', 'run --rm %s %s ' . $args, array($containerName, $cmd));
+            $exec = new ExecutorShell($dockerCommand);
+            $exec->execInteractive();
         } else {
             $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
 

@@ -22,6 +22,7 @@ namespace CliTools\Console\Command\Docker;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use CliTools\Console\Builder\CommandBuilder;
 
 class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\AnyParameterFilterInterface {
 
@@ -53,19 +54,11 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
             case 'docker-exec':
                 $cliScript = $this->getDockerEnv($container, 'CLI_SCRIPT');
 
-                list($cliCommand, $cliParams) = explode(' ', $cliScript, 2);
-                $cliCommand = trim($cliCommand);
-                $cliParams  = trim($cliParams);
+                $command = new CommandBuilder();
+                $command->parse($cliScript);
+                $command->addArgumentList($paramList);
 
-                $cliParamList = array();
-
-                if (!empty($cliParams)) {
-                    $cliParamList[] = $cliParams;
-                }
-
-                $cliParamList = array_merge($cliParamList, $paramList);
-
-                $ret = $this->executeDockerExec($container, $cliCommand, $cliParamList);
+                $this->executeDockerExec($container, $command);
                 break;
 
             ###########################
