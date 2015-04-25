@@ -85,8 +85,6 @@ class Application extends \Symfony\Component\Console\Application {
         $this->initializeChecks();
         $this->initializeConfiguration();
         $this->initializePosixTrap();
-
-        define('CLITOOLS_COMMAND_CLI', $_SERVER['argv'][0]);
     }
 
     /**
