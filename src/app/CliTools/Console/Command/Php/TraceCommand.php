@@ -20,13 +20,13 @@ namespace CliTools\Console\Command\Php;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\CommandExecutionUtility;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
+use CliTools\Console\Builder\CommandBuilder;
 
 class TraceCommand extends \CliTools\Console\Command\AbstractCommand {
 
@@ -81,6 +81,9 @@ class TraceCommand extends \CliTools\Console\Command\AbstractCommand {
         $pid        = null;
         $grep       = $input->getArgument('grep');
 
+        $command = new CommandBuilder('strace');
+        $command->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_ALL_STDOUT);
+
 
         if (empty($pid)) {
             list($pidList, $phpProcessList) = $this->buildPhpProcessList();
@@ -91,51 +94,50 @@ class TraceCommand extends \CliTools\Console\Command\AbstractCommand {
                 $question = new ChoiceQuestion('Please choose PHP process for tracing', $phpProcessList);
 
                 $questionDialog = new QuestionHelper();
-                $pid            = $questionDialog->ask($input, $output, $question);
+
+                $pid = $questionDialog->ask($input, $output, $question);
             }
         }
 
 
         if (!empty($pid)) {
-            $cmdArgs = array();
             switch ($pid) {
                 case 'all':
-                    $cmdArgs[] = implode(',', $pidList);
+                    $command->addArgumentTemplate('-p %s', implode(',', $pidList));
                     break;
 
                 default:
-                    $cmdArgs[] = $pid;
+                    $command->addArgumentTemplate('-p %s', $pid);
                     break;
             }
 
-            $straceOpts = array(
-                't' => '-tt',
-            );
-
             // Stats
             if ($input->getOption('c')) {
-                $straceOpts['c'] = '-c';
+                $command->addArgument('-c');
             }
 
             // Relative time
             if ($input->getOption('r')) {
-                unset($straceOpts['t']);
-                $straceOpts['r'] = '-r';
+                $command->addArgument('-r');
+            } else {
+                $command->addArgument('-tt');
             }
 
             // System trace filter
             if ($input->getOption('e')) {
-                $straceOpts['e'] = '-e ' . escapeshellarg($input->getOption('e'));
+                $command->addArgumentTemplate('-e %s', $input->getOption('e'));
             }
 
-            $straceOpts = implode(' ', $straceOpts);
-
+            // Add grep
             if (!empty($grep)) {
-                $cmdArgs[] = $grep;
-                CommandExecutionUtility::execInteractive('strace', $straceOpts . ' -p %s 2>&1  | grep --color=auto %s', $cmdArgs);
-            } else {
-                CommandExecutionUtility::execInteractive('strace ', $straceOpts . ' -p %s 2>&1', $cmdArgs);
+                $grepCommand = new CommandBuilder('grep');
+                $grepCommand->addArgument('--color=auto')
+                    ->addArgument($grep);
+
+                $command->addPipeCommand($grepCommand);
             }
+
+            $command->executeInteractive();
         }
 
         return 0;
@@ -153,8 +155,10 @@ class TraceCommand extends \CliTools\Console\Command\AbstractCommand {
             'all PHP processes' => 'all',
         );
 
-        $cmdOutput = '';
-        CommandExecutionUtility::execRaw('ps h -o pid,comm,args -C php5-fpm,php-fpm,php5,php', $cmdOutput);
+
+        $command = new CommandBuilder('ps');
+        $command->addArgumentRaw('h -o pid,comm,args -C php5-fpm,php-fpm,php5,php');
+        $cmdOutput = $command->execute()->getOutput();
 
         $pidList = array();
         foreach ($cmdOutput as $outputLine) {
