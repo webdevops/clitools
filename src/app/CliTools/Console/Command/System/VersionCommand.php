@@ -21,7 +21,7 @@ namespace CliTools\Console\Command\System;
  */
 
 use CliTools\Database\DatabaseConnection;
-use CliTools\Utility\CommandExecutionUtility;
+use CliTools\Console\Builder\CommandBuilder;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -56,9 +56,10 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
             'version' => 'Unknown',
         );
 
+        $command = new CommandBuilder('lsb_release', '-a');
+        $command->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_NO_STDERR);
+        $execOutput = $command->execute()->getOutput();
 
-        $execOutput = '';
-        CommandExecutionUtility::execRaw('lsb_release -a 2> /dev/null', $execOutput);
         foreach ($execOutput as $execOutputLine) {
             if (strpos($execOutputLine, ':') !== false) {
                 list($tmpKey, $tmpVersion) = explode(':', trim($execOutputLine), 2);
@@ -100,7 +101,10 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
             'version' => 'Unknown',
         );
 
-        CommandExecutionUtility::execRaw('apache2ctl -v', $execOutput);
+        $command = new CommandBuilder('apache2ctl', '-v');
+        $command->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_NO_STDERR);
+        $execOutput = $command->execute()->getOutput();
+
         foreach ($execOutput as $execOutputLine) {
             if (strpos($execOutputLine, ':') !== false) {
                 list($tmpKey, $tmpVersion) = explode(':', trim($execOutputLine), 2);
@@ -125,10 +129,11 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
 
 
         try {
-            $execOutput = '';
-            CommandExecutionUtility::execRaw('docker --version', $execOutput);
+            $command = new CommandBuilder('docker', '--version');
+            $command->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_NO_STDERR);
+            $execOutput = $command->execute()->getOutputString();
 
-            $versionRow['version'] = trim(implode('', $execOutput));
+            $versionRow['version'] = $execOutput;
         } catch (\Exception $e) {
             // no docker installed?!
         }

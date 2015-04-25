@@ -20,8 +20,8 @@ namespace CliTools\Console\Command\TYPO3;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\CommandExecutionUtility;
 use CliTools\Utility\Typo3Utility;
+use CliTools\Console\Builder\CommandBuilder;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -79,7 +79,10 @@ class ClearCacheCommand extends \CliTools\Console\Command\AbstractCommand {
 
             $output->writeln('<info>Running clearcache command on ' . $dirPath . '</info>');
             try {
-                CommandExecutionUtility::execInteractive('php', null, $params);
+
+                $command = new CommandBuilder('cmd');
+                $command->setArgumentList($params)
+                    ->executeInteractive();
             } catch (\Exception $e) {
                 $output->writeln('<error> Failed with exception: ' . $e->getMessage() . '</error>');
             }

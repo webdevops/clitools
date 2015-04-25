@@ -30,6 +30,7 @@ class CommandBuilder {
 
     const OUTPUT_REDIRECT_NULL       = ' &> /dev/null';
     const OUTPUT_REDIRECT_ALL_STDOUT = ' 2>&1';
+    const OUTPUT_REDIRECT_NO_STDERR = ' 2> /dev/null';
 
     // ##########################################
     // Attributs
@@ -252,9 +253,11 @@ class CommandBuilder {
 
     /**
      * @param null|string $outputRedirect
+     * @return $this
      */
     public function setOutputRedirect($outputRedirect = null) {
         $this->outputRedirect = $outputRedirect;
+        return $this;
     }
 
     /**
