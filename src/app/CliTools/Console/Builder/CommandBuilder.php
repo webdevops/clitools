@@ -140,6 +140,16 @@ class CommandBuilder {
     }
 
     /**
+     * Add argument separator
+     *
+     * @return $this
+     */
+    public function addArgumentSeparator() {
+        $this->argumentList[] = '--';
+        return $this;
+    }
+
+    /**
      * Set argument from list
      *
      * @param  array $args Arguments

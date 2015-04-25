@@ -44,7 +44,16 @@ class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
-        CommandExecutionUtility::execInteractive('service', '%s %s', array('smbd', 'restart'));
-        CommandExecutionUtility::execInteractive('service', '%s %s', array('nmbd', 'restart'));
+
+        $commandSmbd = new CommandBuilder('service', 'smbd restart');
+        $commandNmbd = new CommandBuilder('service', 'nmbd restart');
+
+        $executor = new ExecutorShell($commandSmbd);
+        $executor->execInteractive();
+
+        $executor = new ExecutorShell($commandNmbd);
+        $executor->execInteractive();
+
+        return 0;
     }
 }

@@ -23,6 +23,8 @@ namespace CliTools\Console\Command\Apache;
 use CliTools\Utility\CommandExecutionUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Shell\ExecutorShell;
 
 class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
 
@@ -44,8 +46,12 @@ class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
-        $ret = CommandExecutionUtility::execInteractive('service', '%s %s', array('apache2', 'restart'));
 
-        return $ret;
+        $command = new CommandBuilder('service', 'apache2 restart');
+
+        $executor = new ExecutorShell($command);
+        $executor->execInteractive();
+
+        return 0;
     }
 }

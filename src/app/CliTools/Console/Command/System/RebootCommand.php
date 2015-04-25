@@ -23,6 +23,8 @@ namespace CliTools\Console\Command\System;
 use CliTools\Utility\CommandExecutionUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Shell\ExecutorShell;
 
 class RebootCommand extends \CliTools\Console\Command\AbstractCommand {
 
@@ -45,6 +47,12 @@ class RebootCommand extends \CliTools\Console\Command\AbstractCommand {
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
-        CommandExecutionUtility::execInteractive('reboot');
+
+        $command = new CommandBuilder('reboot');
+
+        $executor = new ExecutorShell($command);
+        $executor->execInteractive();
+
+        return 0;
     }
 }

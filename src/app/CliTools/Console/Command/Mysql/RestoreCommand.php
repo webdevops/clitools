@@ -25,6 +25,8 @@ use CliTools\Utility\CommandExecutionUtility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Shell\ExecutorShell;
 
 class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
 
@@ -84,22 +86,29 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
         putenv('USER=' . DatabaseConnection::getDbUsername());
         putenv('MYSQL_PWD=' . DatabaseConnection::getDbPassword());
 
+
+        $commandMysql = new CommandBuilder('mysql','--user=%s %s', array(DatabaseConnection::getDbUsername(), $database));
+
+        $commandFile = new CommandBuilder();
+        $commandFile->addArgument($dumpFile);
+        $commandFile->addPipeCommand($commandMysql);
+
         switch ($dumpFileType) {
             case 'application/x-bzip2':
-                CommandExecutionUtility::execInteractive('bzcat', '%s | mysql --user=%s %s',
-                    array($dumpFile, DatabaseConnection::getDbUsername(), $database));
+                $commandFile->setCommand('bzcat');
                 break;
 
             case 'application/gzip':
-                CommandExecutionUtility::execInteractive('gzcat', '%s | mysql --user=%s %s',
-                    array($dumpFile, DatabaseConnection::getDbUsername(), $database));
+                $commandFile->setCommand('gzcat');
                 break;
 
             default:
-                CommandExecutionUtility::execInteractive('cat', '%s | mysql --user=%s %s',
-                    array($dumpFile, DatabaseConnection::getDbUsername(), $database));
+                $commandFile->setCommand('cat');
                 break;
         }
+
+        $executor = new ExecutorShell($commandFile);
+        $executor->execInteractive();
 
         $output->writeln('<info>Database "' . $database . '" restored</info>');
 

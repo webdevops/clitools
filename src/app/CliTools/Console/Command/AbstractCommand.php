@@ -25,6 +25,8 @@ use CliTools\Utility\ConsoleUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Shell\ExecutorShell;
 
 abstract class AbstractCommand extends Command {
 
@@ -126,40 +128,18 @@ abstract class AbstractCommand extends Command {
             }
         }
 
-        // Default params
-        $paramList     = array();
-        $paramTemplate = array('--follow-all');
+        $command = new CommandBuilder('multitail', '--follow-all');
 
         // Add grep
         if ($grep !== null) {
-            $paramTemplate[] = '-E %s';
-            $paramList[]     = $grep;
-        }
-
-        // Add additional option list
-        if ($optionList !== null) {
-            $paramTemplate = array_merge($paramTemplate, $optionList);
+            $command->addArgumentTemplate('-E %s', $grep);
         }
 
         // Add log
-        $paramList       = array_merge($paramList, $logList);
-        $paramTemplate[] = str_repeat('%s ', count($logList));
+        $command->addArgumentList($logList);
 
-        $startTime = time();
-
-        try {
-            // Execute command
-            $paramTemplate = implode(' ', $paramTemplate);
-            CommandExecutionUtility::execInteractive('multitail', $paramTemplate, $paramList);
-        } catch (\Exception $e) {
-            $elapsedTime = time() - $startTime;
-
-            if ($elapsedTime <= 1) {
-                // less than 1 seconds, must be an error
-                // if the cmd runs longer the user must be pressed CTRL+C
-                throw $e;
-            }
-        }
+        $executor = new ExecutorShell($command);
+        $executor->execInteractive();
 
         return 0;
     }

@@ -23,6 +23,8 @@ namespace CliTools\Console\Command\Mysql;
 use CliTools\Utility\CommandExecutionUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Shell\ExecutorShell;
 
 class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
 
@@ -44,6 +46,12 @@ class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
      */
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
-        CommandExecutionUtility::execInteractive('service', '%s %s', array('mysql', 'restart'));
+
+        $command = new CommandBuilder('service', 'mysql restart');
+
+        $executor = new ExecutorShell($command);
+        $executor->execInteractive();
+
+        return 0;
     }
 }

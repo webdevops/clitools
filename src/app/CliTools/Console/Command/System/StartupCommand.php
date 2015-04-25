@@ -24,6 +24,8 @@ use CliTools\Database\DatabaseConnection;
 use CliTools\Utility\CommandExecutionUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Shell\ExecutorShell;
 
 class StartupCommand extends \CliTools\Console\Command\AbstractCommand implements \CliTools\Console\Filter\OnlyRootFilterInterface {
 
@@ -86,9 +88,14 @@ class StartupCommand extends \CliTools\Console\Command\AbstractCommand implement
             $logFileRow = DatabaseConnection::getRow($query);
 
             if (!empty($logFileRow['Value'])) {
-                // Remove logfile
-                $output = '';
-                CommandExecutionUtility::exec('rm', $output, '-f %s', array($logFileRow['Value']));
+
+                $command = new CommandBuilder('rm');
+                $command->addArgument('-f')
+                    ->addArgumentSeparator()
+                    ->addArgument($logFileRow['Value']);
+
+                $executor = new ExecutorShell($command);
+                $executor->execInteractive();
             }
         } catch (\Exception $e) {
             // do nothing if no mysql is running
