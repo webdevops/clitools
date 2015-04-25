@@ -25,6 +25,13 @@ use CliTools\Console\Builder\CommandBuilder;
 abstract class UnixUtility {
 
     /**
+     * Path list
+     *
+     * @var array
+     */
+    protected static $pathList = null;
+
+    /**
      * Get LSB System Description
      *
      * @return string
@@ -206,5 +213,48 @@ abstract class UnixUtility {
         $command->addArgument($message)
                 ->addPipeCommand($commandWall);
         $command->execute();
+    }
+
+    /**
+     * Get list of PATH entries
+     *
+     * @return array
+     */
+    public static function pathList() {
+
+        if (self::$pathList === null) {
+            $pathList = explode(':', getenv('PATH'));
+            self::$pathList = array_map('trim', $pathList);
+        }
+
+        return self::$pathList;
+    }
+
+    /**
+     * Check if command is exetuable
+     *
+     * @param string $command Command
+     *
+     * @return bool
+     */
+    public static function checkExecutable($command) {
+
+        if(strpos($command,'/') !== false) {
+            // command with path
+            if (file_exists($command) && is_executable($command)) {
+                return true;
+            }
+        } else {
+            // command without path
+            foreach (self::pathList() as $path) {
+                $commandPath = $path . '/' . $command;
+
+                if (file_exists($commandPath) && is_executable($commandPath)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

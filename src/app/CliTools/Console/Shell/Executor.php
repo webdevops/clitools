@@ -217,7 +217,7 @@ class Executor {
         }
 
         if (!$this->command->isExecuteable()) {
-            throw $this->generateException('Commmand is not executable');
+            throw $this->generateException('Commmand "' . $this->command->getCommand() . '" is not executable or available');
         }
 
         return $this;

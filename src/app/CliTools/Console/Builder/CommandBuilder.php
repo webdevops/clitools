@@ -296,7 +296,7 @@ class CommandBuilder {
     public function append(CommandBuilder $command, $inline = true) {
         // Check if sub command is executeable
         if (!$command->isExecuteable()) {
-            throw new \RuntimeException('Subcommand is not executable');
+            throw new \RuntimeException('Sub command "' . $command->getCommand() . '" is not executable or available');
         }
 
         if ($inline) {
@@ -321,6 +321,10 @@ class CommandBuilder {
 
         if (!empty($this->command)) {
             $ret = true;
+        }
+
+        if (!\CliTools\Utility\UnixUtility::checkExecutable($this->command)) {
+            return false;
         }
 
         return $ret;
@@ -370,6 +374,10 @@ class CommandBuilder {
 
         if ($this->command === null) {
             throw new \Exception('Command can\'t be empty');
+        }
+
+        if (!$this->isExecuteable()) {
+
         }
 
         // Add command
@@ -443,7 +451,5 @@ class CommandBuilder {
     public function executeInteractive() {
         return $this->getExecutor()->execInteractive();
     }
-
-
 
 }
