@@ -125,7 +125,7 @@ class Executor {
         $ret = null;
 
         if ($this->output !== null) {
-            $ret = trim(implode("\n", $this->output));
+            $ret = implode("\n", $this->output);
         }
 
         return $ret;

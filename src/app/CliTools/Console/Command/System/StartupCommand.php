@@ -21,10 +21,10 @@ namespace CliTools\Console\Command\System;
  */
 
 use CliTools\Database\DatabaseConnection;
-use CliTools\Utility\CommandExecutionUtility;
+use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Builder\SelfCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\CommandBuilder;
 
 class StartupCommand extends \CliTools\Console\Command\AbstractCommand implements \CliTools\Console\Filter\OnlyRootFilterInterface {
 
@@ -55,10 +55,9 @@ class StartupCommand extends \CliTools\Console\Command\AbstractCommand implement
      * Setup banner
      */
     protected function setupBanner() {
-        $output = '';
-        CommandExecutionUtility::exec(CLITOOLS_COMMAND_CLI, $output, 'system:banner');
-
-        $output = implode("\n", $output);
+        $command = new SelfCommandBuilder();
+        $command->addArgument('system:banner');
+        $output = $command->execute()->getOutputString();
 
         // escape special chars for /etc/issue
         $outputIssue = addcslashes($output, '\\');
@@ -87,7 +86,6 @@ class StartupCommand extends \CliTools\Console\Command\AbstractCommand implement
             $logFileRow = DatabaseConnection::getRow($query);
 
             if (!empty($logFileRow['Value'])) {
-
                 $command = new CommandBuilder('rm');
                 $command->addArgument('-f')
                     ->addArgumentSeparator()

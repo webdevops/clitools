@@ -81,6 +81,8 @@ class CommandBuilder {
      * @param null|array         $argParams Argument params (sprintf)
      */
     public function __construct($command = null, $args = null, $argParams = null) {
+        $this->initialize();
+
         if ($command !== null) {
             $this->setCommand($command);
         }
@@ -103,6 +105,13 @@ class CommandBuilder {
                 }
             }
         }
+    }
+
+    /**
+     * Initalized command
+     */
+    protected function initialize() {
+
     }
 
     /**
@@ -232,7 +241,6 @@ class CommandBuilder {
         return $this;
     }
 
-
     /**
      * Get arguments list
      *
@@ -332,9 +340,11 @@ class CommandBuilder {
      * Set pipe list
      *
      * @param array $pipeList
+     * @return $this
      */
     public function setPipeList(array $pipeList) {
         $this->pipeList = $pipeList;
+        return $this;
     }
 
 
@@ -342,9 +352,11 @@ class CommandBuilder {
      * Add pipe command
      *
      * @param CommandBuilder $command
+     * @return $this
      */
     public function addPipeCommand(CommandBuilder $command) {
         $this->pipeList[] = $command;
+        return $this;
     }
 
     /**

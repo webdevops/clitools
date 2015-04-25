@@ -20,8 +20,8 @@ namespace CliTools\Console\Command\System;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\CommandExecutionUtility;
 use CliTools\Utility\UnixUtility;
+use CliTools\Console\Builder\SelfCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -64,10 +64,9 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
      * Setup banner
      */
     protected function setupBanner() {
-        $output = '';
-        CommandExecutionUtility::exec(CLITOOLS_COMMAND_CLI, $output, 'system:banner');
-
-        $output = implode("\n", $output);
+        $command = new SelfCommandBuilder();
+        $command->addArgument('system:banner');
+        $output = $command->execute()->getOutputString();
 
         // escape special chars for /etc/issue
         $outputIssue = addcslashes($output, '\\');
