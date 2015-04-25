@@ -50,7 +50,7 @@ abstract class AbstractTraceCommand extends AbstractCommand {
                  'all',
                  null,
                  InputOption::VALUE_NONE,
-                 'Trace all PHP processes'
+                 'Trace all processes'
              )
              ->addOption(
                  'e',
@@ -149,7 +149,7 @@ abstract class AbstractTraceCommand extends AbstractCommand {
     }
 
     /**
-     * Build list of running php processes
+     * Build list of running processes
      *
      * @return array
      */
