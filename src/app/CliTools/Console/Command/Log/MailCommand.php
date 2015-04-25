@@ -24,7 +24,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class MailCommand extends \CliTools\Console\Command\Log\AbstractCommand {
+class MailCommand extends \CliTools\Console\Command\AbstractCommand {
 
     /**
      * Configure command
