@@ -20,6 +20,8 @@ namespace CliTools\Exception;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Console\Builder\CommandBuilder;
+
 class CommandExecutionException extends \RuntimeException {
 
     /**
@@ -27,7 +29,14 @@ class CommandExecutionException extends \RuntimeException {
      *
      * @var null|integer
      */
-    protected $returnCode = null;
+    protected $returnCode;
+
+    /**
+     * Return code from cli command
+     *
+     * @var null|CommandBuilder
+     */
+    protected $command;
 
     /**
      * Get return code from cli command
@@ -46,4 +55,24 @@ class CommandExecutionException extends \RuntimeException {
     public function setReturnCode($returnCode) {
         $this->returnCode = $returnCode;
     }
+
+    /**
+     * Get command
+     *
+     * @return CommandBuilder|null
+     */
+    public function getCommand() {
+        return $this->command;
+    }
+
+    /**
+     * Set command
+     *
+     * @param CommandBuilder $command
+     */
+    public function setCommand(CommandBuilder $command) {
+        $this->command = $command;
+    }
+
+
 }
