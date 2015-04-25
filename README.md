@@ -40,7 +40,7 @@ chmod 777 /usr/local/bin/ct
 wget -O/etc/clitools.ini https://raw.githubusercontent.com/mblaschke/vagrant-development/develop/provision/ansible/roles/clitools/files/clitools.ini
 ```
 
-Now you can use following aliases:
+Now you can use following aliases (some aliases requires clitools 1.8.0!):
 
 ```bash
 # Shortcut for docker-compose (autosearch docker-compose.yml in up-path)
