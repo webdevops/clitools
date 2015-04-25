@@ -25,7 +25,6 @@ use CliTools\Utility\CommandExecutionUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Shell\ExecutorShell;
 
 class StartupCommand extends \CliTools\Console\Command\AbstractCommand implements \CliTools\Console\Filter\OnlyRootFilterInterface {
 
@@ -92,10 +91,8 @@ class StartupCommand extends \CliTools\Console\Command\AbstractCommand implement
                 $command = new CommandBuilder('rm');
                 $command->addArgument('-f')
                     ->addArgumentSeparator()
-                    ->addArgument($logFileRow['Value']);
-
-                $executor = new ExecutorShell($command);
-                $executor->execInteractive();
+                    ->addArgument($logFileRow['Value'])
+                    ->executeInteractive();
             }
         } catch (\Exception $e) {
             // do nothing if no mysql is running

@@ -21,7 +21,7 @@ namespace CliTools\Utility;
  */
 
 use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Shell\ExecutorShell;
+use CliTools\Console\Shell\Executor;
 
 class DockerUtility {
 
@@ -38,7 +38,7 @@ class DockerUtility {
         $command = new CommandBuilder('docker', 'inspect %s', array($container));
 
         // execute
-        $executor = new ExecutorShell($command);
+        $executor = new Executor($command);
         $executor->execute();
         $output = $executor->getOutputString();
 

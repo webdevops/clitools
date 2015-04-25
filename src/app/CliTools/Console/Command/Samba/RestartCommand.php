@@ -23,6 +23,7 @@ namespace CliTools\Console\Command\Samba;
 use CliTools\Utility\CommandExecutionUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use CliTools\Console\Builder\CommandBuilder;
 
 class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
 
@@ -46,13 +47,10 @@ class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
         $this->elevateProcess($input, $output);
 
         $commandSmbd = new CommandBuilder('service', 'smbd restart');
+        $commandSmbd->executeInteractive();
+
         $commandNmbd = new CommandBuilder('service', 'nmbd restart');
-
-        $executor = new ExecutorShell($commandSmbd);
-        $executor->execInteractive();
-
-        $executor = new ExecutorShell($commandNmbd);
-        $executor->execInteractive();
+        $commandNmbd->executeInteractive();
 
         return 0;
     }

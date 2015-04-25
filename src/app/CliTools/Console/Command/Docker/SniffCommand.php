@@ -26,7 +26,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Shell\ExecutorShell;
 
 class SniffCommand extends AbstractCommand {
 
@@ -211,8 +210,7 @@ class SniffCommand extends AbstractCommand {
                 break;
         }
 
-        $executor = new ExecutorShell($command);
-        $executor->execInteractive();
+        $command->executeInteractive();
 
         return 0;
     }

@@ -26,7 +26,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Shell\ExecutorShell;
 
 class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
 
@@ -107,8 +106,7 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
                 break;
         }
 
-        $executor = new ExecutorShell($commandFile);
-        $executor->execInteractive();
+        $commandFile->executeInteractive();
 
         $output->writeln('<info>Database "' . $database . '" restored</info>');
 

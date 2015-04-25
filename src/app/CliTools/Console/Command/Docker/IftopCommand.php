@@ -24,7 +24,6 @@ use CliTools\Utility\CommandExecutionUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Shell\ExecutorShell;
 
 class IftopCommand extends \CliTools\Console\Command\AbstractCommand {
 
@@ -50,9 +49,7 @@ class IftopCommand extends \CliTools\Console\Command\AbstractCommand {
         $dockerInterface = $this->getApplication()->getConfigValue('docker', 'interface');
 
         $command = new CommandBuilder('iftop', '-i %s', array($dockerInterface));
-
-        $executor = new ExecutorShell($command);
-        $executor->execInteractive();
+        $command->executeInteractive();
 
         return 0;
     }

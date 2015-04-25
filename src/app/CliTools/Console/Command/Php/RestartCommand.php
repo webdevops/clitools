@@ -24,7 +24,6 @@ use CliTools\Utility\CommandExecutionUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Shell\ExecutorShell;
 
 class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
 
@@ -48,9 +47,7 @@ class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
         $this->elevateProcess($input, $output);
 
         $command = new CommandBuilder('service', 'php5-fpm restart');
-
-        $executor = new ExecutorShell($command);
-        $executor->execInteractive();
+        $command->executeInteractive();
 
         return 0;
     }

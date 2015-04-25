@@ -21,7 +21,6 @@ namespace CliTools\Console\Command\Docker;
  */
 
 use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Shell\ExecutorShell;
 
 abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand {
 
@@ -116,9 +115,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
             $dockerCommand = new CommandBuilder('docker', 'exec -ti %s', array($dockerContainerName));
             $dockerCommand->append($command, false);
-
-            $exec = new ExecutorShell($dockerCommand);
-            $exec->execInteractive();
+            $dockerCommand->executeInteractive();
         } else {
             $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
 
@@ -143,9 +140,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             chdir($path);
 
             $command->setCommand('docker-compose');
-
-            $exec = new ExecutorShell($command);
-            $exec->execInteractive();
+            $command->executeInteractive();
         } else {
             $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
 
@@ -178,9 +173,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
             $dockerCommand = new CommandBuilder('docker-compose', 'run --rm %s', array($containerName));
             $dockerCommand->append($command, false);
-
-            $exec = new ExecutorShell($dockerCommand);
-            $exec->execInteractive();
+            $dockerCommand->executeInteractive();
         } else {
             $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
 

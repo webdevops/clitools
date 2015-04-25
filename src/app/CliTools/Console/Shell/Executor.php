@@ -24,7 +24,7 @@ use CliTools\Exception\CommandExecutionException;
 use CliTools\Console\Builder\CommandBuilder;
 use CliTools\Utility\ConsoleUtility;
 
-class ExecutorShell {
+class Executor {
 
     // ##########################################
     // Constants
@@ -91,9 +91,11 @@ class ExecutorShell {
      * Set command
      *
      * @param CommandBuilder $command
+     * @return $this
      */
     public function setCommand($command) {
         $this->command = $command;
+        return $this;
     }
 
     /**
@@ -141,16 +143,19 @@ class ExecutorShell {
     /**
      * Set strict mode
      *
+     * @return $this
      * @param boolean $strictMode
      */
     public function setStrictMode($strictMode) {
         $this->strictMode = (bool)$strictMode;
+        return $this;
     }
 
 
     /**
      * Execute command
      *
+     * @return $this
      * @throws \Exception
      */
     public function execute() {
@@ -163,12 +168,14 @@ class ExecutorShell {
         if ($this->strictMode && $this->returnCode !== 0) {
             throw $this->generateException('Process ' . $this->command->getCommand() . ' did not finished successfully');
         }
+
+        return $this;
     }
 
     /**
      * Execute interactive
      *
-     * @return int
+     * @return $this
      * @throws \Exception
      */
     public function execInteractive() {
@@ -195,11 +202,14 @@ class ExecutorShell {
             throw $this->generateException('Process ' . $this->command->getCommand() . ' could not be started');
         }
 
-        return $execStatus;
+        return $this;
     }
 
     /**
      * Check command
+     *
+     * @return $this
+     * @throws CommandExecutionException
      */
     protected function checkCommand() {
         if ($this->command === null) {
@@ -209,6 +219,8 @@ class ExecutorShell {
         if (!$this->command->isExecuteable()) {
             throw $this->generateException('Commmand is not executable');
         }
+
+        return $this;
     }
 
     /**

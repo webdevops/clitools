@@ -20,13 +20,11 @@ namespace CliTools\Console\Command;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\CommandExecutionUtility;
 use CliTools\Utility\ConsoleUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Shell\ExecutorShell;
 
 abstract class AbstractCommand extends Command {
 
@@ -93,8 +91,23 @@ abstract class AbstractCommand extends Command {
 
             try {
                 $parameterList = $_SERVER['argv'];
-                $paramArgList  = str_repeat('%s ', count($parameterList));
-                CommandExecutionUtility::execInteractive('sudo', $paramArgList . ' --ansi', $parameterList);
+
+                // find command
+                if ($_SERVER['argv'][0] == $_SERVER['_']) {
+                    // self execution (eg. clitools.phar)
+                    array_shift($parameterList);
+                    $paramCommand = $_SERVER['_'];
+                } else {
+                    // execution by command (eg. php command.php)
+                    $paramCommand = $_SERVER['_'];
+                }
+
+                $commandMyself = new CommandBuilder($paramCommand);
+                $commandMyself->addArgumentList($parameterList);
+
+                $commandSudo = new CommandBuilder('sudo');
+                $commandSudo->append($commandMyself, false);
+                $commandSudo->executeInteractive();
             } catch (\Exception $e) {
                 // do not display exception here because it's a child process
             }
@@ -137,9 +150,7 @@ abstract class AbstractCommand extends Command {
 
         // Add log
         $command->addArgumentList($logList);
-
-        $executor = new ExecutorShell($command);
-        $executor->execInteractive();
+        $command->executeInteractive();
 
         return 0;
     }

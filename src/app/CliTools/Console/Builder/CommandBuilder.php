@@ -20,12 +20,13 @@ namespace CliTools\Console\Builder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Console\Shell\Executor;
+
 class CommandBuilder {
 
     // ##########################################
     // Constants
     // ##########################################
-
 
     const OUTPUT_REDIRECT_NULL       = ' &> /dev/null';
     const OUTPUT_REDIRECT_ALL_STDOUT = ' 2>&1';
@@ -61,6 +62,11 @@ class CommandBuilder {
      * @var array
      */
     protected $pipeList = array();
+
+    /**
+     * @var
+     */
+    protected $executor;
 
     // ##########################################
     // Methods
@@ -382,5 +388,47 @@ class CommandBuilder {
     public function __toString() {
         return $this->build();
     }
+
+    /**
+     * Get executor
+     *
+     * @return Executor
+     */
+    public function getExecutor() {
+        if ($this->executor === null) {
+            $this->executor = new Executor($this);
+        }
+
+        return $this->executor;
+    }
+
+    /**
+     * Set executor
+     *
+     * @param Executor $executor
+     */
+    public function setExecutor(Executor $executor) {
+        $this->executor = $executor;
+    }
+
+    /**
+     * Execute command
+     *
+     * @return Executor
+     */
+    public function execute() {
+        return $this->getExecutor()->execute();
+    }
+
+    /**
+     * Execute command
+     *
+     * @return Executor
+     */
+    public function executeInteractive() {
+        return $this->getExecutor()->execInteractive();
+    }
+
+
 
 }

@@ -24,7 +24,6 @@ use CliTools\Utility\CommandExecutionUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Shell\ExecutorShell;
 
 class ShutdownCommand extends \CliTools\Console\Command\AbstractCommand {
 
@@ -50,9 +49,7 @@ class ShutdownCommand extends \CliTools\Console\Command\AbstractCommand {
         CommandExecutionUtility::execInteractive('shutdown', '%s %s', array('-h', 'now'));
 
         $command = new CommandBuilder('shutdown', '-h now');
-
-        $executor = new ExecutorShell($command);
-        $executor->execInteractive();
+        $command->executeInteractive();
 
         return 0;
     }
