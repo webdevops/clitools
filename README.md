@@ -26,6 +26,37 @@ Documentation is still WIP :)
   - docker and docker-compose (if you want to use docker)
   - mysql (if you want to use mysql)
 
+## Installation
+
+
+```bash
+# Download latest tools
+wget -O/usr/local/bin/ct https://www.achenar.net/clicommand/clitools.phar
+
+# Set executable bit
+chmod 777 /usr/local/bin/ct
+
+# Download example config
+wget -O/etc/clitools.ini https://raw.githubusercontent.com/mblaschke/vagrant-development/develop/provision/ansible/roles/clitools/files/clitools.ini
+```
+
+Now you can use following aliases:
+
+```bash
+# Shortcut for docker-compose (autosearch docker-compose.yml in up-path)
+alias dcc='ct docker:compose'
+
+# Enter main docker container
+alias dcshell='ct docker:shell'
+alias dcsh='ct docker:shell'
+
+# Execute predefined cli in docker container
+alias dcli='ct docker:cli'
+
+# Execute mysql client in docker container
+alias dcsql='ct docker:mysql'
+alias dcmysql='ct docker:mysql'
+```
 
 ## Configuration
 
