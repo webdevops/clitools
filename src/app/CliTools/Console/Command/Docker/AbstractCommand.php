@@ -20,7 +20,6 @@ namespace CliTools\Console\Command\Docker;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\CommandExecutionUtility;
 use CliTools\Console\Builder\CommandBuilder;
 use CliTools\Console\Shell\ExecutorShell;
 
