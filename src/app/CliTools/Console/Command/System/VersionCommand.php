@@ -117,7 +117,7 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
         // ############################
 
         $versionList[] = array(
-            'CliTools command',
+            'CliTools',
             CLITOOLS_COMMAND_VERSION
         );
 
