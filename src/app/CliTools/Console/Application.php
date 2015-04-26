@@ -85,8 +85,6 @@ class Application extends \Symfony\Component\Console\Application {
         $this->initializeChecks();
         $this->initializeConfiguration();
         $this->initializePosixTrap();
-
-        define('CLITOOLS_COMMAND_CLI', $_SERVER['argv'][0]);
     }
 
     /**
@@ -212,15 +210,9 @@ class Application extends \Symfony\Component\Console\Application {
         //#########################
         if (!empty($this->config['commands']['class'])) {
             // Load list
+
             foreach ($this->config['commands']['class'] as $class) {
-
-                // check ignore
-                if (in_array($class, $this->config['commands']['ignore'])) {
-                    continue;
-                }
-
-                if (class_exists($class)) {
-
+                if ($this->checkCommandClass($class)) {
                     // check OnlyRoot filter
                     if (!$isRunningAsRoot && is_subclass_of($class, '\CliTools\Console\Filter\OnlyRootFilterInterface')
                     ) {
@@ -232,6 +224,40 @@ class Application extends \Symfony\Component\Console\Application {
                 }
             }
         }
+    }
+
+    /**
+     * Check command class
+     *
+     * @param $class
+     *
+     * @return bool
+     */
+    protected function checkCommandClass($class) {
+        // Ignores
+        foreach ($this->config['commands']['ignore'] as $ignore) {
+
+            // Check if there is any wildcard and generate regexp for it
+            if (strpos($ignore, '*') !== false) {
+                $regExp = '/' . preg_quote($ignore, '/') . '/i';
+                $regExp = str_replace('\\*', '.*', $regExp);
+
+                if (preg_match($regExp, $class)) {
+                    return false;
+                }
+
+            } elseif( $class === $ignore) {
+                // direct ignore
+                return false;
+            }
+        }
+
+        if(!class_exists($class)) {
+            return false;
+        }
+
+
+        return true;
     }
 
     /**

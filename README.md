@@ -1,12 +1,62 @@
-# CliTools for Vagrant VM
+# CliTools for Vagrant VM, Debian and Ubuntu
 
-![latest v1.7.4](https://img.shields.io/badge/latest-v1.7.4-green.svg?style=flat)
+![latest v1.8.0](https://img.shields.io/badge/latest-v1.8.0-green.svg?style=flat)
 ![License GPL3](https://img.shields.io/badge/license-GPL3-blue.svg?style=flat)
 
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416/big.png)](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416)
 
 
 Documentation is still WIP :)
+
+## Requirements
+
+- PHP 5.5
+- Tools
+  - git
+  - wget
+  - multitail
+  - tshark
+  - tcpdump
+  - ngrep
+  - strace
+  - lsof
+  - sudo
+  - moreutils (ifdata)
+  - coreutils (grep, sort, uniq, awk, cat, df, ip, cut, lsb_release, wall)
+  - docker and docker-compose (if you want to use docker)
+  - mysql (if you want to use mysql)
+
+## Installation
+
+
+```bash
+# Download latest tools
+wget -O/usr/local/bin/ct https://www.achenar.net/clicommand/clitools.phar
+
+# Set executable bit
+chmod 777 /usr/local/bin/ct
+
+# Download example config
+wget -O/etc/clitools.ini https://raw.githubusercontent.com/mblaschke/vagrant-development/develop/provision/ansible/roles/clitools/files/clitools.ini
+```
+
+Now you can use following aliases (some aliases requires clitools 1.8.0!):
+
+```bash
+# Shortcut for docker-compose (autosearch docker-compose.yml in up-dir, you don't have to be in directory with docker-compose.yml)
+alias dcc='ct docker:compose'
+
+# Enter main docker container
+alias dcshell='ct docker:shell'
+alias dcsh='ct docker:shell'
+
+# Execute predefined cli in docker container
+alias dcli='ct docker:cli'
+
+# Execute mysql client in docker container
+alias dcsql='ct docker:mysql'
+alias dcmysql='ct docker:mysql'
+```
 
 ## Configuration
 
@@ -43,7 +93,6 @@ ignore[] = "CliTools\Console\Command\Log\DebugCommand"
 ignore[] = "CliTools\Console\Command\Apache\RestartCommand"
 ignore[] = "CliTools\Console\Command\Mysql\RestartCommand"
 ignore[] = "CliTools\Console\Command\Php\RestartCommand"
-ignore[] = "CliTools\Console\Command\Samba\RestartCommand"
 ignore[] = "CliTools\Console\Command\System\UpdateCommand"
 ignore[] = "CliTools\Console\Command\System\RebootCommand"
 ```
@@ -110,7 +159,8 @@ All log commands are using a grep-filter (specified as optional argument)
 | ct mysql:list              | Lists all databases with some statitics                                   |
 | ct mysql:restart           | Restart MySQL server                                                      |
 | ct mysql:restore           | Create (and drops if already exists) a database and restore from a dump   |
-|                            | Dump file can be plaintext, gziped or bzip2 compressed                    |
+|                            | Dump file can be plaintext, gziped, bzip2 or lzma compressed              |
+|                            | and will automatically detected                                           |
 |                            | __ct mysql:restore typo3 dump.sql.bz2__                                   |
 
 ### PHP commands

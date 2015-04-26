@@ -22,6 +22,12 @@ namespace CliTools\Utility;
 
 use CliTools\Exception\CommandExecutionException;
 
+/**
+ * Class CommandExecutionUtility
+ *
+ * @package CliTools\Utility
+ * @deprecated
+ */
 class CommandExecutionUtility {
 
     /**

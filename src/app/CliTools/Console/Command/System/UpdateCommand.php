@@ -21,7 +21,8 @@ namespace CliTools\Console\Command\System;
  */
 
 use CliTools\Service\SelfUpdateService;
-use CliTools\Utility\CommandExecutionUtility;
+use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Builder\SelfCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -81,10 +82,13 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
             try {
                 // Update git repository
                 $this->outputBlock($output, 'Running git update of ' . $reposDirectory);
-                CommandExecutionUtility::execInteractive('git', 'pull');
 
-                // Rebuild ssh config
-                CommandExecutionUtility::execInteractive(CLITOOLS_COMMAND_CLI, 'user:rebuildsshconfig');
+                $command = new CommandBuilder('git', 'pull');
+                $command->executeInteractive();
+
+                $command = new \CliTools\Console\Builder\SelfCommandBuilder();
+                $command->addArgument('user:rebuildsshconfig');
+                $command->executeInteractive();
             } catch (\RuntimeException $e) {
                 $msg = 'Running git update of ' . $reposDirectory . '... FAILED';
                 $output->writeln('<error>' . $msg . '</error>');
@@ -110,11 +114,18 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
         // ##################
         try {
             $this->outputBlock($output, 'Running system package update');
-            CommandExecutionUtility::execInteractive('apt-get', '%s --quiet', array('clean'));
-            CommandExecutionUtility::execInteractive('apt-get', '%s --quiet', array('update'));
-            CommandExecutionUtility::execInteractive('apt-get', '%s --fix-broken --assume-yes --quiet',
-                array('dist-upgrade'));
-            CommandExecutionUtility::execInteractive('apt-get', '%s --quiet', array('autoclean'));
+
+            $command = new CommandBuilder('apt-get', 'clean --quiet');
+            $command->executeInteractive();
+
+            $command = new CommandBuilder('apt-get', 'update --quiet');
+            $command->executeInteractive();
+
+            $command = new CommandBuilder('apt-get', 'dist-upgrade --fix-broken --assume-yes --quiet');
+            $command->executeInteractive();
+
+            $command = new CommandBuilder('apt-get', 'autoclean --quiet');
+            $command->executeInteractive();
         } catch (\RuntimeException $e) {
             $msg = 'Running system package update... FAILED';
             $output->writeln('<error>' . $msg . '</error>');
@@ -139,7 +150,9 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
         // ##################
         try {
             $this->outputBlock($output, 'Running composer update');
-            CommandExecutionUtility::execInteractive('composer', '%s', array('self-update'));
+
+            $command = new CommandBuilder('composer', 'self-update');
+            $command->executeInteractive();
         } catch (\RuntimeException $e) {
             $msg = 'Running composer update... FAILED';
             $output->writeln('<error>' . $msg . '</error>');
@@ -151,7 +164,9 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
         // ##################
         try {
             $this->outputBlock($output, 'Running box.phar update');
-            CommandExecutionUtility::execInteractive('box.phar', '%s', array('update'));
+
+            $command = new CommandBuilder('box.phar', 'update');
+            $command->executeInteractive();
         } catch (\RuntimeException $e) {
             $msg = 'Running box.phar update... FAILED';
             $output->writeln('<error>' . $msg . '</error>');

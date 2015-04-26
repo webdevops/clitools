@@ -1,6 +1,6 @@
 <?php
 
-namespace CliTools\Console\Command\Php;
+namespace CliTools\Console\Command\Apache;
 
 /*
  * CliTools Command
@@ -27,14 +27,14 @@ class TraceCommand extends \CliTools\Console\Command\AbstractTraceCommand {
      *
      * @var array
      */
-    protected $traceProcessNameList = array('php5-fpm', 'php-fpm', 'php5', 'php');
+    protected $traceProcessNameList = array('apache', 'apache2', 'httpd');
 
     /**
      * Configure command
      */
     protected function configure() {
-        $this->setName('php:trace')
-            ->setDescription('Debug PHP processes with strace');
+        $this->setName('apache:trace')
+            ->setDescription('Debug Apache processes with strace');
         parent::configure();
     }
 

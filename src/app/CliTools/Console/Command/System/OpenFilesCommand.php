@@ -20,8 +20,8 @@ namespace CliTools\Console\Command\System;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\CommandExecutionUtility;
 use CliTools\Utility\FormatUtility;
+use CliTools\Console\Builder\CommandBuilder;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputInterface;
@@ -51,8 +51,14 @@ class OpenFilesCommand extends \CliTools\Console\Command\AbstractCommand {
         $procList       = array();
         $openFilesTotal = 0;
 
-        $execOutput = '';
-        CommandExecutionUtility::execRaw('lsof -n|grep -oE \'^[a-z]+\'|sort|uniq -c|sort -n', $execOutput);
+        $command = new CommandBuilder('lsof', '-n');
+        $command->addPipeCommand( new CommandBuilder('grep', '-oE \'^[a-z]+\'') )
+            ->addPipeCommand( new CommandBuilder('sort') )
+            ->addPipeCommand( new CommandBuilder('uniq', '-c') )
+            ->addPipeCommand( new CommandBuilder('sort', '-n'))
+            ->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_NO_STDERR);
+        $execOutput = $command->execute()->getOutput();
+
         foreach ($execOutput as $execOutputLine) {
             // get open files and proc name from output
             list($procOpenFiles, $procName) = explode(' ', trim($execOutputLine), 2);

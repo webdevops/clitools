@@ -22,7 +22,7 @@ namespace CliTools\Console\Command\Docker;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Builder\RemoteCommandBuilder;
 
 class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\AnyParameterFilterInterface {
 
@@ -54,9 +54,9 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
             case 'docker-exec':
                 $cliScript = $this->getDockerEnv($container, 'CLI_SCRIPT');
 
-                $command = new CommandBuilder();
-                $command->parse($cliScript);
-                $command->addArgumentList($paramList);
+                $command = new RemoteCommandBuilder();
+                $command->parse($cliScript)
+                    ->addArgumentList($paramList);
 
                 $this->executeDockerExec($container, $command);
                 break;
@@ -65,12 +65,10 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
             # with docker-compose run (simple, slower)
             ###########################
             case 'dockercompose-run':
-               if (!empty($paramList)) {
-                    $ret = $this->executeDockerComposeRun($container, 'cli', $paramList);
-                } else {
-                    $output->writeln('<error>No command/parameter specified</error>');
-                    $ret = 1;
-                }
+                $command = new RemoteCommandBuilder('cli');
+                $command->addArgumentList($paramList);
+
+               $ret = $this->executeDockerComposeRun($container, $command);
                 break;
 
             default:

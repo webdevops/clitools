@@ -1,6 +1,6 @@
 <?php
 
-namespace CliTools\Console\Command\Log;
+namespace CliTools\Console\Builder;
 
 /*
  * CliTools Command
@@ -20,6 +20,6 @@ namespace CliTools\Console\Command\Log;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand {
+class RemoteCommandBuilder extends CommandBuilder {
 
 }

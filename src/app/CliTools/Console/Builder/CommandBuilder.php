@@ -65,7 +65,9 @@ class CommandBuilder {
     protected $pipeList = array();
 
     /**
-     * @var
+     * Executor
+     *
+     * @var null|Executor
      */
     protected $executor;
 
@@ -81,6 +83,8 @@ class CommandBuilder {
      * @param null|array         $argParams Argument params (sprintf)
      */
     public function __construct($command = null, $args = null, $argParams = null) {
+        $this->initialize();
+
         if ($command !== null) {
             $this->setCommand($command);
         }
@@ -103,6 +107,13 @@ class CommandBuilder {
                 }
             }
         }
+    }
+
+    /**
+     * Initalized command
+     */
+    protected function initialize() {
+
     }
 
     /**
@@ -232,7 +243,6 @@ class CommandBuilder {
         return $this;
     }
 
-
     /**
      * Get arguments list
      *
@@ -286,9 +296,10 @@ class CommandBuilder {
      * @return $this
      */
     public function append(CommandBuilder $command, $inline = true) {
+
         // Check if sub command is executeable
         if (!$command->isExecuteable()) {
-            throw new \RuntimeException('Subcommand is not executable');
+            throw new \RuntimeException('Sub command "' . $command->getCommand() . '" is not executable or available');
         }
 
         if ($inline) {
@@ -309,13 +320,17 @@ class CommandBuilder {
      * @return bool
      */
     public function isExecuteable() {
-        $ret = false;
-
-        if (!empty($this->command)) {
-            $ret = true;
+        // Command must be set
+        if (empty($this->command)) {
+            return false;
         }
 
-        return $ret;
+        // Only check command paths for local commands
+        if (!($this instanceof RemoteCommandBuilder) && !\CliTools\Utility\UnixUtility::checkExecutable($this->command)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -332,9 +347,11 @@ class CommandBuilder {
      * Set pipe list
      *
      * @param array $pipeList
+     * @return $this
      */
     public function setPipeList(array $pipeList) {
         $this->pipeList = $pipeList;
+        return $this;
     }
 
 
@@ -342,9 +359,11 @@ class CommandBuilder {
      * Add pipe command
      *
      * @param CommandBuilder $command
+     * @return $this
      */
     public function addPipeCommand(CommandBuilder $command) {
         $this->pipeList[] = $command;
+        return $this;
     }
 
     /**
@@ -358,6 +377,10 @@ class CommandBuilder {
 
         if ($this->command === null) {
             throw new \Exception('Command can\'t be empty');
+        }
+
+        if (!$this->isExecuteable()) {
+
         }
 
         // Add command
@@ -431,7 +454,5 @@ class CommandBuilder {
     public function executeInteractive() {
         return $this->getExecutor()->execInteractive();
     }
-
-
 
 }

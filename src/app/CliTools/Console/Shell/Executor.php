@@ -125,7 +125,7 @@ class Executor {
         $ret = null;
 
         if ($this->output !== null) {
-            $ret = trim(implode("\n", $this->output));
+            $ret = implode("\n", $this->output);
         }
 
         return $ret;
@@ -217,7 +217,7 @@ class Executor {
         }
 
         if (!$this->command->isExecuteable()) {
-            throw $this->generateException('Commmand is not executable');
+            throw $this->generateException('Commmand "' . $this->command->getCommand() . '" is not executable or available');
         }
 
         return $this;

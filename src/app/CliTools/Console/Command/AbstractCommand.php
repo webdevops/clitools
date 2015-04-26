@@ -24,6 +24,7 @@ use CliTools\Utility\ConsoleUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use CliTools\Console\Builder\FullSelfCommandBuilder;
 use CliTools\Console\Builder\CommandBuilder;
 
 abstract class AbstractCommand extends Command {
@@ -90,20 +91,7 @@ abstract class AbstractCommand extends Command {
             $output->writeln('<comment>Elevating process using sudo...</comment>');
 
             try {
-                $parameterList = $_SERVER['argv'];
-
-                // find command
-                if ($_SERVER['argv'][0] == $_SERVER['_']) {
-                    // self execution (eg. clitools.phar)
-                    array_shift($parameterList);
-                    $paramCommand = $_SERVER['_'];
-                } else {
-                    // execution by command (eg. php command.php)
-                    $paramCommand = $_SERVER['_'];
-                }
-
-                $commandMyself = new CommandBuilder($paramCommand);
-                $commandMyself->addArgumentList($parameterList);
+                $commandMyself = new FullSelfCommandBuilder();
 
                 $commandSudo = new CommandBuilder('sudo');
                 $commandSudo->append($commandMyself, false);

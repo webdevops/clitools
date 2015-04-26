@@ -1,6 +1,6 @@
 <?php
 
-namespace CliTools\Console\Command\Php;
+namespace CliTools\Console\Builder;
 
 /*
  * CliTools Command
@@ -20,22 +20,31 @@ namespace CliTools\Console\Command\Php;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TraceCommand extends \CliTools\Console\Command\AbstractTraceCommand {
+class SelfCommandBuilder extends CommandBuilder {
+
 
     /**
-     * Process names for strace'ing
-     *
-     * @var array
+     * Initalized command
      */
-    protected $traceProcessNameList = array('php5-fpm', 'php-fpm', 'php5', 'php');
+    protected function initialize() {
+        parent::initialize();
 
-    /**
-     * Configure command
-     */
-    protected function configure() {
-        $this->setName('php:trace')
-            ->setDescription('Debug PHP processes with strace');
-        parent::configure();
+        $arguments = $_SERVER['argv'];
+
+        if(\Phar::running()) {
+            // running as phar
+            $this->setCommand(array_shift($arguments));
+        } elseif(!empty($_SERVER['_'])) {
+            if ($_SERVER['argv'][0] !== $_SERVER['_']) {
+                $this->setCommand($_SERVER['_']);
+                $this->addArgument(reset($arguments));
+            }
+        }
+
+        // Fallback
+        if (!$this->getCommand()) {
+            $this->setCommand('php');
+            $this->addArgument($_SERVER['PHP_SELF']);
+        }
     }
-
 }

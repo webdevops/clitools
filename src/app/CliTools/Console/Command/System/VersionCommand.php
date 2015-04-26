@@ -22,6 +22,7 @@ namespace CliTools\Console\Command\System;
 
 use CliTools\Database\DatabaseConnection;
 use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Utility\UnixUtility;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -53,25 +54,8 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
         // ############################
         $versionRow = array(
             'system'  => 'System',
-            'version' => 'Unknown',
+            'version' => UnixUtility::lsbSystemDescription(),
         );
-
-        $command = new CommandBuilder('lsb_release', '-a');
-        $command->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_NO_STDERR);
-        $execOutput = $command->execute()->getOutput();
-
-        foreach ($execOutput as $execOutputLine) {
-            if (strpos($execOutputLine, ':') !== false) {
-                list($tmpKey, $tmpVersion) = explode(':', trim($execOutputLine), 2);
-
-                switch (strtolower($tmpKey)) {
-                    case 'description':
-                        $versionRow['version'] = trim($tmpVersion);
-                        break;
-                }
-            }
-        }
-
         $versionList[] = array_values($versionRow);
 
         // ############################
@@ -124,20 +108,8 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
         // ############################
         $versionRow = array(
             'system'  => 'Docker',
-            'version' => 'Unknown',
+            'version' => \CliTools\Utility\UnixUtility::dockerVersion(),
         );
-
-
-        try {
-            $command = new CommandBuilder('docker', '--version');
-            $command->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_NO_STDERR);
-            $execOutput = $command->execute()->getOutputString();
-
-            $versionRow['version'] = $execOutput;
-        } catch (\Exception $e) {
-            // no docker installed?!
-        }
-
         $versionList[] = array_values($versionRow);
 
         // ############################
@@ -145,7 +117,7 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
         // ############################
 
         $versionList[] = array(
-            'CliTools command',
+            'CliTools',
             CLITOOLS_COMMAND_VERSION
         );
 
@@ -159,7 +131,6 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
         foreach ($versionList as $versionRow) {
             $table->addRow(array_values($versionRow));
         }
-
 
         $table->render();
 

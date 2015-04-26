@@ -23,7 +23,7 @@ namespace CliTools\Console\Command\Docker;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Builder\RemoteCommandBuilder;
 
 class ShellCommand extends AbstractCommand {
 
@@ -55,7 +55,7 @@ class ShellCommand extends AbstractCommand {
             $container = $input->getArgument('container');
         }
 
-        $command = new CommandBuilder('bash');
+        $command = new RemoteCommandBuilder('bash');
         $ret = $this->executeDockerExec($container, $command);
 
         return $ret;

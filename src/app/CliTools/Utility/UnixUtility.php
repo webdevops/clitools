@@ -20,9 +20,16 @@ namespace CliTools\Utility;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\CommandExecutionUtility;
+use CliTools\Console\Builder\CommandBuilder;
 
 abstract class UnixUtility {
+
+    /**
+     * Path list
+     *
+     * @var array
+     */
+    protected static $pathList = null;
 
     /**
      * Get LSB System Description
@@ -30,11 +37,13 @@ abstract class UnixUtility {
      * @return string
      */
     public static function lsbSystemDescription() {
-        $lsbDesc = '';
-        CommandExecutionUtility::execRaw('lsb_release -d | cut -f 2 -d ":"', $lsbDesc);
-        $lsbDesc = trim(implode($lsbDesc));
+        $command = new CommandBuilder('lsb_release', '-d');
+        $command->addPipeCommand( new CommandBuilder('cut', '-f 2 -d ":"') );
+        $ret = $command->execute()->getOutputString();
 
-        return $lsbDesc;
+        $ret = trim($ret);
+
+        return $ret;
     }
 
     /**
@@ -43,11 +52,12 @@ abstract class UnixUtility {
      * @return string
      */
     public static function cpuCount() {
-        $cpuCount = '';
-        CommandExecutionUtility::execRaw('nproc', $cpuCount);
-        $cpuCount = trim(implode($cpuCount));
+        $command = new CommandBuilder('nproc');
+        $ret = $command->execute()->getOutputString();
 
-        return $cpuCount;
+        $ret = trim($ret);
+
+        return $ret;
     }
 
     /**
@@ -56,14 +66,14 @@ abstract class UnixUtility {
      * @return string
      */
     public static function memorySize() {
-        $memSize = '';
-        CommandExecutionUtility::execRaw('cat /proc/meminfo | awk \'match($1,"MemTotal") == 1 {print $2}\'', $memSize);
-        $memSize = (int)trim(implode($memSize));
+        $command = new CommandBuilder('cat', '/proc/meminfo');
+        $command->addPipeCommand( new CommandBuilder('awk', '\'match($1,"MemTotal") == 1 {print $2}\'') );
+        $ret = $command->execute()->getOutputString();
 
         // in bytes
-        $memSize *= 1024;
+        $ret = (int)trim($ret) * 1024;
 
-        return $memSize;
+        return $ret;
     }
 
     /**
@@ -72,9 +82,10 @@ abstract class UnixUtility {
      * @return string
      */
     public static function kernelVersion() {
-        $ret = '';
-        CommandExecutionUtility::execRaw('uname -r', $ret);
-        $ret = trim(implode($ret));
+        $command = new CommandBuilder('uname', '-r');
+        $ret = $command->execute()->getOutputString();
+
+        $ret = trim($ret);
 
         return $ret;
     }
@@ -87,8 +98,12 @@ abstract class UnixUtility {
     public static function dockerVersion() {
         $ret = '';
         try {
-            CommandExecutionUtility::execRaw('docker --version', $ret);
-            $ret = trim(implode($ret));
+            $command = new CommandBuilder('docker', '--version');
+            $ret = $command->execute()->getOutputString();
+
+            $ret = trim($ret);
+
+            return $ret;
         } catch (\Exception $e) {
             // no docker found?!
         }
@@ -102,14 +117,16 @@ abstract class UnixUtility {
      * @return string
      */
     public static function mountInfoList() {
-        $discList = '';
-        CommandExecutionUtility::execRaw('df -a --type=ext3 --type=ext4 --portability | tail --lines=+2 | awk \'{ print $6 " " $4 " " $5 }\'',
-            $discList);
+        $command = new CommandBuilder('df', '-a --type=ext3 --type=ext4 --type vmhgfs --type vboxsf --portability');
+        $command->addPipeCommand( new CommandBuilder('tail', '--lines=+2') )
+                ->addPipeCommand( new CommandBuilder('awk', '\'{ print $6 " " $3 " " $4 " " $5 }\'') );
+        $execOutput = $command->execute()->getOutput();
 
         $ret = array();
-        foreach ($discList as $line) {
-            list($disc, $capacity, $usage) = explode(' ', $line);
+        foreach ($execOutput as $line) {
+            list($disc, $capacity, $free, $usage) = explode(' ', $line);
             $ret[$disc]['capacity'] = $capacity * 1024;
+            $ret[$disc]['free']     = $free * 1024;
             $ret[$disc]['usage']    = $usage;
             $ret[$disc]['usageInt'] = (int)$usage;
         }
@@ -160,9 +177,8 @@ abstract class UnixUtility {
         unset($netInterfaceList['lo']);
 
         foreach ($netInterfaceList as $netName => &$netConf) {
-            $output = '';
-            CommandExecutionUtility::exec('ifdata', $output, ' -pa %s', array($netName));
-            $netConf['ipaddress'] = trim(implode('', $output));
+            $command = new CommandBuilder('ifdata', '-pa %s', array($netName));
+            $netConf['ipaddress'] = trim($command->execute()->getOutputString());
         }
         unset($netConf);
 
@@ -175,11 +191,14 @@ abstract class UnixUtility {
      * @return null
      */
     public static function defaultGateway() {
-        $output = null;
-        CommandExecutionUtility::execRaw('ip route show | grep \'default\' | awk \'{print $3}\'', $output);
-        $output = trim(implode('', $output));
+        $command = new CommandBuilder('ip', 'route show');
+        $command->addPipeCommand( new CommandBuilder('grep', '\'default\'') )
+            ->addPipeCommand( new CommandBuilder('awk', '\'{print $3}\'') );
+        $ret = $command->execute()->getOutputString();
 
-        return $output;
+        $ret = trim($ret);
+
+        return $ret;
     }
 
     /**
@@ -188,7 +207,55 @@ abstract class UnixUtility {
      * @param  string $message Message
      */
     public static function sendWallMessage($message) {
-        $output = '';
-        CommandExecutionUtility::exec('echo', $output, '%s | wall 2> /dev/null', array($message));
+        $commandWall = new CommandBuilder('wall');
+        $commandWall->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_NULL);
+
+        $command = new CommandBuilder('echo');
+        $command->addArgument($message)
+                ->addPipeCommand($commandWall);
+        $command->execute();
+    }
+
+    /**
+     * Get list of PATH entries
+     *
+     * @return array
+     */
+    public static function pathList() {
+
+        if (self::$pathList === null) {
+            $pathList = explode(':', getenv('PATH'));
+            self::$pathList = array_map('trim', $pathList);
+        }
+
+        return self::$pathList;
+    }
+
+    /**
+     * Check if command is exetuable
+     *
+     * @param string $command Command
+     *
+     * @return bool
+     */
+    public static function checkExecutable($command) {
+
+        if(strpos($command,'/') !== false) {
+            // command with path
+            if (file_exists($command) && is_executable($command)) {
+                return true;
+            }
+        } else {
+            // command without path
+            foreach (self::pathList() as $path) {
+                $commandPath = $path . '/' . $command;
+
+                if (file_exists($commandPath) && is_executable($commandPath)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
