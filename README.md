@@ -43,7 +43,7 @@ wget -O/etc/clitools.ini https://raw.githubusercontent.com/mblaschke/vagrant-dev
 Now you can use following aliases (some aliases requires clitools 1.8.0!):
 
 ```bash
-# Shortcut for docker-compose (autosearch docker-compose.yml in up-path)
+# Shortcut for docker-compose (autosearch docker-compose.yml in up-dir, you don't have to be in directory with docker-compose.yml)
 alias dcc='ct docker:compose'
 
 # Enter main docker container
