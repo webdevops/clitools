@@ -22,7 +22,7 @@ namespace CliTools\Console\Command\Docker;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Builder\RemoteCommandBuilder;
 
 class MysqlCommand extends AbstractCommand {
 
@@ -45,7 +45,7 @@ class MysqlCommand extends AbstractCommand {
     public function execute(InputInterface $input, OutputInterface $output) {
         $container = $this->getApplication()->getConfigValue('docker', 'container');
 
-        $command = new CommandBuilder('mysql');
+        $command = new RemoteCommandBuilder('mysql');
 
         $ret = $this->executeDockerExec($container, $command);
 
