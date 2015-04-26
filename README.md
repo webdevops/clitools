@@ -30,7 +30,7 @@ Documentation is still WIP :)
 
 
 ```bash
-# Download latest tools
+# Download latest tools (or in ~/bin if you have it in $PATH)
 wget -O/usr/local/bin/ct https://www.achenar.net/clicommand/clitools.phar
 
 # Set executable bit
