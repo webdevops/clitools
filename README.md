@@ -1,4 +1,4 @@
-# CliTools for Vagrant VM
+# CliTools for Vagrant VM, Debian and Ubuntu
 
 ![latest v1.7.4](https://img.shields.io/badge/latest-v1.7.4-green.svg?style=flat)
 ![License GPL3](https://img.shields.io/badge/license-GPL3-blue.svg?style=flat)
@@ -93,7 +93,6 @@ ignore[] = "CliTools\Console\Command\Log\DebugCommand"
 ignore[] = "CliTools\Console\Command\Apache\RestartCommand"
 ignore[] = "CliTools\Console\Command\Mysql\RestartCommand"
 ignore[] = "CliTools\Console\Command\Php\RestartCommand"
-ignore[] = "CliTools\Console\Command\Samba\RestartCommand"
 ignore[] = "CliTools\Console\Command\System\UpdateCommand"
 ignore[] = "CliTools\Console\Command\System\RebootCommand"
 ```
