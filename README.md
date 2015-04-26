@@ -1,10 +1,12 @@
-# CliTools for Vagrant VM, Debian and Ubuntu
+# CliTools for Vagrant VM, Debian and Ubuntu (and others)
 
 ![latest v1.8.0](https://img.shields.io/badge/latest-v1.8.0-green.svg?style=flat)
 ![License GPL3](https://img.shields.io/badge/license-GPL3-blue.svg?style=flat)
 
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416/big.png)](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416)
 
+
+CliTools is a terminal utility for some handy convierence tasks based on Symfony Components (Console).
 
 Documentation is still WIP :)
 
