@@ -37,7 +37,7 @@ wget -O/usr/local/bin/ct https://www.achenar.net/clicommand/clitools.phar
 chmod 777 /usr/local/bin/ct
 
 # Download example config
-wget -O/etc/clitools.ini https://raw.githubusercontent.com/mblaschke/vagrant-development/develop/provision/ansible/roles/clitools/files/clitools.ini
+wget -O"$HOME/.clitools.ini" https://raw.githubusercontent.com/mblaschke/vagrant-development/develop/provision/ansible/roles/clitools/files/clitools.ini
 ```
 
 Now you can use following aliases (some aliases requires clitools 1.8.0!):
