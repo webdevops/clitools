@@ -12,7 +12,7 @@ Documentation is still WIP :)
 
 ## Requirements
 
-- PHP 5.5
+- PHP 5.5 (CLI)
 - Tools
   - git
   - wget
@@ -62,9 +62,9 @@ alias dcmysql='ct docker:mysql'
 
 ## Configuration
 
-CliTools will read /etc/clitools.ini for system wide configuration.
+CliTools will read /etc/clitools.ini (system wide) and ~/.clitools.ini (personal) for configuration
 
-Defaults available in [config.ini](https://github.com/mblaschke/vagrant-clitools/blob/master/src/config.ini)
+The [default configuration](https://github.com/mblaschke/vagrant-clitools/blob/develop/src/config.ini) is inside the phar.
 
 ### Docker specific configuration
 ```ini
