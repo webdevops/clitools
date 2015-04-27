@@ -27,7 +27,7 @@ require __DIR__ . '/app/bootstrap.php';
 
 $app = new CliTools\Console\Application('CliTools :: Development Console Utility', CLITOOLS_COMMAND_VERSION);
 
-// App config
+// App config (from phar)
 $app->loadConfig(__DIR__ . '/config.ini');
 
 // Global config

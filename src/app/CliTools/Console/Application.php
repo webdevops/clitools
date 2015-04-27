@@ -173,7 +173,6 @@ class Application extends \Symfony\Component\Console\Application {
             echo "\n";
         };
 
-
         pcntl_signal(SIGTERM, $signalHandler);
         pcntl_signal(SIGINT, $signalHandler);
     }
@@ -258,13 +257,13 @@ class Application extends \Symfony\Component\Console\Application {
                     return false;
                 }
 
-            } elseif( $class === $ignore) {
+            } elseif ($class === $ignore) {
                 // direct ignore
                 return false;
             }
         }
 
-        if(!class_exists($class)) {
+        if (!class_exists($class)) {
             return false;
         }
 

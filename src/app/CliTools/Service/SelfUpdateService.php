@@ -24,15 +24,17 @@ class SelfUpdateService {
 
     /**
      * Update url
+     *
+     * @var null|string
      */
-    protected $updateUrl = 'https://www.achenar.net/clicommand/clitools.phar';
+    protected $updateUrl;
 
     /**
      * Path to current clitools command
      *
      * @var null|string
      */
-    protected $cliToolsCommandPath = null;
+    protected $cliToolsCommandPath;
 
     /**
      * Permissions
@@ -44,19 +46,19 @@ class SelfUpdateService {
     /**
      * Update path
      *
-     * @var null
+     * @var null|string
      */
-    protected $cliToolsUpdatePath = null;
+    protected $cliToolsUpdatePath;
 
     /**
      * @var null|\Symfony\Component\Console\Output\OutputInterface
      */
-    protected $output = null;
+    protected $output;
 
     /**
      * @var null|\CliTools\Console\Application
      */
-    protected $application = null;
+    protected $application;
 
     /**
      * Constructor

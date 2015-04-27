@@ -103,7 +103,7 @@ abstract class ConsoleUtility {
                 $line = implode("\n", $lineList);
             }
 
-            $line = '<info>[VERBOSE ' . $area . ']</info>' . "\n" . '<comment>' . $line . '</comment>' . "\n";
+            $line = sprintf("<info>[VERBOSE %s]</info>\n<comment>%s</comment>\n", $area, $line);
 
             self::$output->writeln($line);
         }

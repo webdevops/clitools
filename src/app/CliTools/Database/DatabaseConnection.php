@@ -29,28 +29,28 @@ class DatabaseConnection {
      *
      * @var null|string
      */
-    static protected $dbDsn = null;
+    static protected $dbDsn;
 
     /**
      * Database connection username
      *
      * @var null|string
      */
-    static protected $dbUsername = null;
+    static protected $dbUsername;
 
     /**
      * Database connection password
      *
      * @var null|string
      */
-    static protected $dbPassword = null;
+    static protected $dbPassword;
 
     /**
      * PDO connection
      *
      * @var null|\PDO
      */
-    static protected $connection = null;
+    static protected $connection;
 
     /**
      * Set dns

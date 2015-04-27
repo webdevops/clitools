@@ -31,10 +31,10 @@ class FullSelfCommandBuilder extends CommandBuilder {
 
         $arguments = $_SERVER['argv'];
 
-        if(\Phar::running()) {
+        if (\Phar::running()) {
             // running as phar
             $this->setCommand(array_shift($arguments));
-        } elseif(!empty($_SERVER['_'])) {
+        } elseif (!empty($_SERVER['_'])) {
             if ($_SERVER['argv'][0] !== $_SERVER['_']) {
                 $this->setCommand($_SERVER['_']);
                 $this->addArgument(array_shift($arguments));
