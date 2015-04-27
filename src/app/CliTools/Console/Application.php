@@ -37,8 +37,16 @@ class Application extends \Symfony\Component\Console\Application {
         'commands' => array(
             'class'  => array(),
             'ignore' => array(),
-        )
+        ),
+        '_files' => array(),
     );
+
+    /**
+     * Configuration files
+     *
+     * @var array
+     */
+    protected $configFiles = array();
 
     /**
      * Tear down funcs
@@ -56,6 +64,8 @@ class Application extends \Symfony\Component\Console\Application {
         if (is_readable($file)) {
             $parsedConfig = parse_ini_file($file, true);
             $this->config = array_replace_recursive($this->config, $parsedConfig);
+
+            $this->configFiles[] = $file;
         }
     }
 
@@ -127,6 +137,8 @@ class Application extends \Symfony\Component\Console\Application {
             }
 
             if (!empty($command) && $command instanceof \CliTools\Console\Filter\AnyParameterFilterInterface) {
+                // Remove all paramters and fake input without any paramters
+                // prevent eg. --help message
                 $argCount = $command->getDefinition()->getArgumentRequiredCount();
 
                 $argvFiltered = array_splice($_SERVER['argv'], 0, 2 + $argCount);

@@ -62,7 +62,7 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
                 break;
 
             ###########################
-            # with docker-compose run (simple, slower)
+            # with docker-compose run (simple, slower, requires entrypoint modification)
             ###########################
             case 'dockercompose-run':
                 $command = new RemoteCommandBuilder('cli');

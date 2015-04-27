@@ -74,13 +74,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $conf = \CliTools\Utility\DockerUtility::getDockerConfiguration($dockerContainerName);
 
             if (empty($conf)) {
-                throw new \RuntimeException('Could not read docker configuration');
+                throw new \RuntimeException('Could not read docker configuration from container  "' . $dockerContainerName . '"');
             }
 
             if (!empty($conf->Config->Env[$envName])) {
                 return $conf->Config->Env[$envName];
             } else {
-                throw new \RuntimeException('Docker don\'t have environment variable "' . $envName . '"');
+                throw new \RuntimeException('Docker container "' . $dockerContainerName . '" doesn\'t have environment variable "' . $envName . '"');
             }
         }
     }
