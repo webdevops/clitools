@@ -21,10 +21,12 @@ namespace CliTools\Console\Command\Mysql;
  */
 
 use CliTools\Database\DatabaseConnection;
+use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Builder\CommandBuilderInterface;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\CommandBuilder;
 
 class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
 
@@ -43,7 +45,12 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
                  'file',
                  InputArgument::REQUIRED,
                  'File (mysql dump)'
-             );
+             )->addOption(
+                'filter',
+                'f',
+                InputOption::VALUE_REQUIRED,
+                'Filter (eg. typo3)'
+            );
     }
 
     /**
@@ -57,6 +64,7 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
     public function execute(InputInterface $input, OutputInterface $output) {
         $database = $input->getArgument('db');
         $dumpFile = $input->getArgument('file');
+        $filter   = $input->getOption('filter');
 
         if (!DatabaseConnection::databaseExists($database)) {
             $output->writeln('<error>Database "' . $database . '" does not exists</error>');
@@ -96,6 +104,10 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
 
         $command = new CommandBuilder('mysqldump','--user=%s %s --single-transaction', array(DatabaseConnection::getDbUsername(), $database));
 
+        if (!empty($filter)) {
+            $command = $this->addFilterArguments($command, $database, $filter);
+        }
+
         if (!empty($commandCompressor)) {
             $command->addPipeCommand($commandCompressor);
             $commandCompressor->setOutputRedirectToFile($dumpFile);
@@ -107,5 +119,56 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
         $command->executeInteractive();
 
         $output->writeln('<info>Database "' . $database . '" stored to "' . $dumpFile . '"</info>');
+    }
+
+    /**
+     * Add filter to command
+     *
+     * @param CommandBuilderInterface $command  Command
+     * @param string                  $database Database
+     * @param string                  $filter   Filter name
+     *
+     * @return CommandBuilderInterface
+     */
+    protected function addFilterArguments(CommandBuilderInterface $commandDump, $database, $filter) {
+        $command = $commandDump;
+
+        // get filter
+        $filterList = $this->getApplication()->getConfigValue('mysql-backup-filter', $filter);
+
+        if (empty($filterList)) {
+            throw new \RuntimeException('MySQL dump filters "' . $filter . '" not available"');
+        }
+
+        // Get filtered tables
+        $tableList = DatabaseConnection::tableList($database);
+
+        $tableListFiltered = array();
+        foreach ($tableList as $table) {
+            foreach ($filterList as $filter) {
+                if (preg_match($filter, $table)) {
+                    continue 2;
+                }
+            }
+            $tableListFiltered[] = $table;
+        }
+
+        // Dump only structure
+        $commandStructure = clone $command;
+        $commandStructure->addArgument('--no-data');
+
+        // Dump only data (only filtered tables)
+        $commandData = clone $command;
+        $commandData
+            ->addArgument('--no-create-info')
+            ->addArgumentList($tableListFiltered);
+
+        // Combine both commands to one
+        $command = new \CliTools\Console\Builder\OutputCombineCommandBuilder();
+        $command
+            ->addCommandForCombinedOutput($commandStructure)
+            ->addCommandForCombinedOutput($commandData);
+
+        return $command;
     }
 }
