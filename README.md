@@ -2,6 +2,8 @@
 
 ![latest v1.8.0](https://img.shields.io/badge/latest-v1.8.0-green.svg?style=flat)
 ![License GPL3](https://img.shields.io/badge/license-GPL3-blue.svg?style=flat)
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/mblaschke/vagrant-clitools.svg)](http://isitmaintained.com/project/mblaschke/vagrant-clitools "Average time to resolve an issue")
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/mblaschke/vagrant-clitools.svg)](http://isitmaintained.com/project/mblaschke/vagrant-clitools "Percentage of issues still open")
 
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416/big.png)](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416)
 
@@ -126,6 +128,8 @@ All log commands are using a grep-filter (specified as optional argument)
 
 | Command                    | Description                                                               |
 |----------------------------|---------------------------------------------------------------------------|
+| ct docker:create           | Create new docker boilerplate in directory (first argument)               |
+|                            | __ct docker:create projectname__ ->                                       |
 | ct docker:shell            | Jump into a shell inside a docker container                               |
 |                            | __ct docker:shell__ -> enter main container                               |
 |                            | __ct docker:shell mysql__ -> enter mysql container                        |
@@ -160,6 +164,12 @@ All log commands are using a grep-filter (specified as optional argument)
 |                            | __ct mysql:drop typo3__                                                   |
 | ct mysql:list              | Lists all databases with some statitics                                   |
 | ct mysql:restart           | Restart MySQL server                                                      |
+| ct mysql:backup            | Backup a database to file                                                 |
+|                            | Compression type will be detected from file extension (default plain sql) |
+|                            | __ct mysql:restore typo3 dump.sql__ -> plain sql dump                     |
+|                            | __ct mysql:restore typo3 dump.sql.gz__ -> gzip'ed sql dump                |
+|                            | __ct mysql:restore typo3 dump.sql.bzip2__ -> bzip2'ed sql dump            |
+|                            | __ct mysql:restore typo3 dump.sql.xz__ -> xz'ed (lzma'ed) sql dump        |
 | ct mysql:restore           | Create (and drops if already exists) a database and restore from a dump   |
 |                            | Dump file can be plaintext, gziped, bzip2 or lzma compressed              |
 |                            | and will automatically detected                                           |
