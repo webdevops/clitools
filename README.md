@@ -170,6 +170,7 @@ All log commands are using a grep-filter (specified as optional argument)
 |                            | __ct mysql:restore typo3 dump.sql.gz__ -> gzip'ed sql dump                |
 |                            | __ct mysql:restore typo3 dump.sql.bzip2__ -> bzip2'ed sql dump            |
 |                            | __ct mysql:restore typo3 dump.sql.xz__ -> xz'ed (lzma'ed) sql dump        |
+|                            | __ct mysql:restore typo3 dump.sql --filter=typo3__ -> No TYPO3 cache tables in dump |
 | ct mysql:restore           | Create (and drops if already exists) a database and restore from a dump   |
 |                            | Dump file can be plaintext, gziped, bzip2 or lzma compressed              |
 |                            | and will automatically detected                                           |
