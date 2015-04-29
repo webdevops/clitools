@@ -245,19 +245,37 @@ class Application extends \Symfony\Component\Console\Application {
      * @return bool
      */
     protected function checkCommandClass($class) {
-        // Ignores
-        foreach ($this->config['commands']['ignore'] as $ignore) {
+        // Ignores (deprecated)
+        foreach ($this->config['commands']['ignore'] as $exclude) {
 
             // Check if there is any wildcard and generate regexp for it
-            if (strpos($ignore, '*') !== false) {
-                $regExp = '/' . preg_quote($ignore, '/') . '/i';
+            if (strpos($exclude, '*') !== false) {
+                $regExp = '/' . preg_quote($exclude, '/') . '/i';
                 $regExp = str_replace('\\*', '.*', $regExp);
 
                 if (preg_match($regExp, $class)) {
                     return false;
                 }
 
-            } elseif ($class === $ignore) {
+            } elseif ($class === $exclude) {
+                // direct ignore
+                return false;
+            }
+        }
+
+        // Excludes
+        foreach ($this->config['commands']['exclude'] as $exclude) {
+
+            // Check if there is any wildcard and generate regexp for it
+            if (strpos($exclude, '*') !== false) {
+                $regExp = '/' . preg_quote($exclude, '/') . '/i';
+                $regExp = str_replace('\\*', '.*', $regExp);
+
+                if (preg_match($regExp, $class)) {
+                    return false;
+                }
+
+            } elseif ($class === $exclude) {
                 // direct ignore
                 return false;
             }
