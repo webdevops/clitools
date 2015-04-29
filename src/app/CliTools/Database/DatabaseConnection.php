@@ -345,6 +345,20 @@ class DatabaseConnection {
     }
 
     /**
+     * Check fi database exists
+     *
+     * @param string $database Database name
+     * @return boolean
+     */
+    public static function databaseExists($database) {
+        $query = 'SELECT COUNT(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = %s';
+        $query = sprintf($query, self::quote($database));
+        $res = (int)self::getOne($query);
+
+        return ($res === 1 );
+    }
+
+    /**
      * Begin transaction
      */
     public static function beginTransaction() {
