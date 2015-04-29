@@ -79,10 +79,12 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
             }
         }
 
-        // Dropping
-        $output->writeln('<comment>Dropping Database "' . $database . '"...</comment>');
-        $query = 'DROP DATABASE IF EXISTS ' . DatabaseConnection::sanitizeSqlDatabase($database);
-        DatabaseConnection::exec($query);
+        if (DatabaseConnection::databaseExists($database)) {
+            // Dropping
+            $output->writeln('<comment>Dropping Database "' . $database . '"...</comment>');
+            $query = 'DROP DATABASE IF EXISTS ' . DatabaseConnection::sanitizeSqlDatabase($database);
+            DatabaseConnection::exec($query);
+        }
 
         // Creating
         $output->writeln('<comment>Creating Database "' . $database . '"...</comment>');
@@ -95,7 +97,7 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
         putenv('MYSQL_PWD=' . DatabaseConnection::getDbPassword());
 
 
-        $commandMysql = new CommandBuilder('mysql','--user=%s %s', array(DatabaseConnection::getDbUsername(), $database));
+        $commandMysql = new CommandBuilder('mysql','--user=%s %s --one-database', array(DatabaseConnection::getDbUsername(), $database));
 
         $commandFile = new CommandBuilder();
         $commandFile->addArgument($dumpFile);
@@ -111,7 +113,8 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
                 break;
 
             case 'application/x-lzma':
-                $commandFile->setCommand('lzcat');
+            case 'application/x-xz':
+                $commandFile->setCommand('xzcat');
                 break;
 
             default:
