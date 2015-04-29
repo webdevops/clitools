@@ -51,9 +51,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @param  string $containerName Container name
      * @param  string $envName       Environment variable
      *
-     * @return string|bool
+     * @return string|bool|null
      */
     protected function getDockerEnv($containerName, $envName) {
+        $ret = null;
+
         if (empty($containerName)) {
             $this->output->writeln('<error>No container specified</error>');
             return false;
@@ -78,11 +80,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             }
 
             if (!empty($conf->Config->Env[$envName])) {
-                return $conf->Config->Env[$envName];
-            } else {
-                throw new \RuntimeException('Docker container "' . $dockerContainerName . '" doesn\'t have environment variable "' . $envName . '"');
+                $ret = $conf->Config->Env[$envName];
             }
         }
+
+        return $ret;
     }
 
     /**

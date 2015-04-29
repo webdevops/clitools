@@ -31,7 +31,7 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
      */
     protected function configure() {
         $this->setName('docker:cli')
-             ->setDescription('Run cli command in docker container');
+             ->setDescription('Run cli command in docker container (defined by CLI_SCRIPT as docker env)');
     }
 
     /**
@@ -52,7 +52,13 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
             # with Docker exec (faster, complex)
             ###########################
             case 'docker-exec':
-                $cliScript = $this->getDockerEnv($container, 'CLI_SCRIPT');
+                $envName = 'CLI_SCRIPT';
+                $cliScript = $this->getDockerEnv($container, $envName);
+
+                if (empty($cliScript)) {
+                    $output->writeln('<error>Docker container "' . $container . '" doesn\'t have environment variable "' . $envName . '"</error>');
+                    return 1;
+                }
 
                 $command = new RemoteCommandBuilder();
                 $command->parse($cliScript)
