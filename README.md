@@ -129,7 +129,7 @@ All log commands are using a grep-filter (specified as optional argument)
 | Command                    | Description                                                               |
 |----------------------------|---------------------------------------------------------------------------|
 | ct docker:create           | Create new docker boilerplate in directory (first argument)               |
-|                            | __ct docker:create projectname__ ->                                       |
+|                            | __ct docker:create projectname__ -> Create new docker boilerplate instance in directory "projectname" |
 | ct docker:shell            | Jump into a shell inside a docker container                               |
 |                            | __ct docker:shell__ -> enter main container                               |
 |                            | __ct docker:shell mysql__ -> enter mysql container                        |
