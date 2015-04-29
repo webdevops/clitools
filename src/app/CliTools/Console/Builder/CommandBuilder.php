@@ -262,6 +262,8 @@ class CommandBuilder {
     }
 
     /**
+     * Set output (stdout and/or stderr) redirection
+     *
      * @param null|string $outputRedirect
      * @return $this
      */
@@ -270,10 +272,22 @@ class CommandBuilder {
         return $this;
     }
 
+
+    /**
+     * Redirect command stdout output to file
+     *
+     * @param string $filename Filename
+     * @return $this
+     */
+    public function setOutputRedirectToFile($filename) {
+        $this->outputRedirect = '> ' . escapeshellarg($filename);
+        return $this;
+    }
+
     /**
      * Parse command and attributs from exec line
      *
-     * Not safe!
+     * WARNING: Not safe!
      *
      * @param  string $str Command string
      * @return $this
