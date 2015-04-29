@@ -345,7 +345,7 @@ class DatabaseConnection {
     }
 
     /**
-     * Check fi database exists
+     * Check if database exists
      *
      * @param string $database Database name
      * @return boolean
@@ -353,9 +353,23 @@ class DatabaseConnection {
     public static function databaseExists($database) {
         $query = 'SELECT COUNT(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = %s';
         $query = sprintf($query, self::quote($database));
-        $res = (int)self::getOne($query);
+        $ret   = (int)self::getOne($query);
 
-        return ($res === 1 );
+        return ($ret === 1 );
+    }
+
+    /**
+     * Return list of tables of one database
+     *
+     * @param string $database Database name
+     * @return array
+     */
+    public static function tableList($database) {
+        $query = 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s';
+        $query = sprintf($query, self::quote($database));
+        $ret   = self::getCol($query);
+
+        return $ret;
     }
 
     /**

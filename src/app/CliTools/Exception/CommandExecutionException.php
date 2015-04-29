@@ -21,6 +21,7 @@ namespace CliTools\Exception;
  */
 
 use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Builder\CommandBuilderInterface;
 
 class CommandExecutionException extends \RuntimeException {
 
@@ -34,7 +35,7 @@ class CommandExecutionException extends \RuntimeException {
     /**
      * Return code from cli command
      *
-     * @var null|CommandBuilder
+     * @var null|CommandBuilderInterface
      */
     protected $command;
 
@@ -59,7 +60,7 @@ class CommandExecutionException extends \RuntimeException {
     /**
      * Get command
      *
-     * @return CommandBuilder|null
+     * @return CommandBuilderInterface|null
      */
     public function getCommand() {
         return $this->command;
@@ -68,9 +69,9 @@ class CommandExecutionException extends \RuntimeException {
     /**
      * Set command
      *
-     * @param CommandBuilder $command
+     * @param CommandBuilderInterface $command
      */
-    public function setCommand(CommandBuilder $command) {
+    public function setCommand(CommandBuilderInterface $command) {
         $this->command = $command;
     }
 

@@ -21,6 +21,7 @@ namespace CliTools\Console\Command\Docker;
  */
 
 use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Builder\CommandBuilderInterface;
 
 abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand {
 
@@ -90,12 +91,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Execute docker command
      *
-     * @param  string         $containerName Container name
-     * @param  CommandBuilder $comamnd       Command
+     * @param  string                  $containerName Container name
+     * @param  CommandBuilderInterface $comamnd       Command
      *
      * @return int|null|void
      */
-    protected function executeDockerExec($containerName, CommandBuilder $command) {
+    protected function executeDockerExec($containerName, CommandBuilderInterface $command) {
         if (empty($containerName)) {
             $this->output->writeln('<error>No container specified</error>');
             return 1;
@@ -130,11 +131,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Execute docker compose run
      *
-     * @param  null|CommandBuilder $command   Command
+     * @param  null|CommandBuilderInterface $command   Command
      *
      * @return int|null|void
      */
-    protected function executeDockerCompose(CommandBuilder $command = null) {
+    protected function executeDockerCompose(CommandBuilderInterface $command = null) {
         $path = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
 
         if (!empty($path)) {
@@ -156,11 +157,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * Execute docker compose run
      *
      * @param  string          $containerName Container name
-     * @param  CommandBuilder  $command       Command
+     * @param  CommandBuilderInterface  $command       Command
      *
      * @return int|null|void
      */
-    protected function executeDockerComposeRun($containerName, CommandBuilder $command) {
+    protected function executeDockerComposeRun($containerName, CommandBuilderInterface $command) {
         $path = $this->getDockerPath();
 
         if (!empty($path)) {
