@@ -45,7 +45,7 @@ class UpgradeCommand extends AbstractCommand {
     public function execute(InputInterface $input, OutputInterface $output) {
         $this->elevateProcess($input, $output);
 
-        $command = new CommandBuilder('wget', '-N %s', array('https://get.docker.com/'));
+        $command = new CommandBuilder('wget', '-qO- %s', array('https://get.docker.com/'));
         $command->addPipeCommand(new CommandBuilder('sh'));
         $command->executeInteractive();
 
