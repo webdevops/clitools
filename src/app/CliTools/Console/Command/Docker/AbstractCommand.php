@@ -72,7 +72,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         if (!empty($path)) {
             $dockerContainerName = \CliTools\Utility\DockerUtility::getDockerInstanceName($containerName, 1, $path);
 
-            chdir($path);
+            \CliTools\Utility\PhpUtility::chdir($path);
 
             $conf = \CliTools\Utility\DockerUtility::getDockerConfiguration($dockerContainerName);
 
@@ -112,7 +112,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         if (!empty($path)) {
             $dockerContainerName = \CliTools\Utility\DockerUtility::getDockerInstanceName($containerName, 1, $path);
 
-            chdir($path);
+            \CliTools\Utility\PhpUtility::chdir($path);
 
             $this->output->writeln('<info>Executing "' . $command->getCommand() . '" in docker container "' . $dockerContainerName . '" ...</info>');
 
@@ -140,7 +140,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         if (!empty($path)) {
             $this->output->writeln('<comment>Found docker directory: ' . $path . '</comment>');
-            chdir($path);
+            \CliTools\Utility\PhpUtility::chdir($path);
 
             $command->setCommand('docker-compose');
             $command->executeInteractive();
@@ -165,7 +165,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $path = $this->getDockerPath();
 
         if (!empty($path)) {
-            chdir($path);
+            \CliTools\Utility\PhpUtility::chdir($path);
 
             $this->output->writeln('<info>Executing "' . $command->getCommand() . '" in docker container "' . $containerName . '" ...</info>');
 
