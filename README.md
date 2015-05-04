@@ -50,6 +50,9 @@ Now you can use following aliases (some aliases requires clitools 1.8.0!):
 # Shortcut for docker-compose (autosearch docker-compose.yml in up-dir, you don't have to be in directory with docker-compose.yml)
 alias dcc='ct docker:compose'
 
+# Startup docker-container (and shutdown previous one, v1.9.0 and up)
+alias dcup='ct docker:up'
+
 # Enter main docker container
 alias dcshell='ct docker:shell'
 alias dcsh='ct docker:shell'
