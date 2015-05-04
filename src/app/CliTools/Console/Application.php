@@ -21,6 +21,7 @@ namespace CliTools\Console;
  */
 
 use CliTools\Database\DatabaseConnection;
+use CliTools\Service\SettingsService;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -54,6 +55,11 @@ class Application extends \Symfony\Component\Console\Application {
      * @var array
      */
     protected $tearDownFuncList = array();
+
+    /**
+     * @var SettingsService
+     */
+    protected $settingsService;
 
     /**
      * Load config
@@ -114,6 +120,10 @@ class Application extends \Symfony\Component\Console\Application {
             call_user_func($func);
         }
         $this->tearDownFuncList = array();
+
+        if ($this->settingsService) {
+            $this->settingsService->store();
+        }
     }
 
     /**
@@ -298,5 +308,17 @@ class Application extends \Symfony\Component\Console\Application {
         $currentUid = (int)posix_getuid();
 
         return $currentUid === 0;
+    }
+
+    /**
+     * Get settings service
+     *
+     * @return SettingsService
+     */
+    public function getSettingsService() {
+        if ($this->settingsService === null) {
+            $this->settingsService = new SettingsService();
+        }
+        return $this->settingsService;
     }
 }
