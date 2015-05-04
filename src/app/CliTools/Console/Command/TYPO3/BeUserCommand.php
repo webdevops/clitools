@@ -36,7 +36,7 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
         $this->setName('typo3:beuser')
             ->setDescription('Add backend admin user to database')
             ->addArgument(
-                'db',
+                'database',
                 InputArgument::OPTIONAL,
                 'Database name'
             )
@@ -70,7 +70,7 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
         // ##################
         // Init
         // ##################
-        $dbName   = $input->getArgument('db');
+        $dbName   = $input->getArgument('database');
         $username = $input->getArgument('user');
         $password = $input->getArgument('password');
 
