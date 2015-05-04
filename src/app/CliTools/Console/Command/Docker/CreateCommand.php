@@ -21,6 +21,7 @@ namespace CliTools\Console\Command\Docker;
  */
 
 use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Builder\SelfCommandBuilder;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -51,13 +52,38 @@ class CreateCommand extends AbstractCommand {
     public function execute(InputInterface $input, OutputInterface $output) {
         $path = $input->getArgument('path');
 
+        $this->createDockerInstance($path);
+        $this->startDockerInstance($path);
+
+        return 0;
+    }
+
+    /**
+     * Create docker instance from git repository
+     *
+     * @param string $path Path
+     */
+    protected function createDockerInstance($path) {
         $boilerplateRepo = $this->getApplication()->getConfigValue('docker', 'boilerplate');
 
-        $output->writeln('<comment>Create new docker boilerplate in "' . $path . '"</comment>');
+        $this->output->writeln('<comment>Create new docker boilerplate in "' . $path . '"</comment>');
 
         $command = new CommandBuilder('git','clone --branch=master --recursive %s %s', array($boilerplateRepo, $path));
         $command->executeInteractive();
+    }
 
-        return 0;
+    /**
+     * Build and startup docker instance
+     *
+     * @param string $path Path
+     */
+    protected function startDockerInstance($path) {
+        $this->output->writeln('<comment>Building docker containers "' . $path . '"</comment>');
+
+        \CliTools\Utility\PhpUtility::chdir($path);
+
+        $command = new SelfCommandBuilder();
+        $command->addArgument('docker:up');
+        $command->executeInteractive();
     }
 }
