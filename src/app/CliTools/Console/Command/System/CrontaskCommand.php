@@ -82,16 +82,20 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
         $this->systemCheckDiskUsage();
 
         if (!empty($this->sysCheckMessageList)) {
-            // Growl notification
-            $message = 'WARNING:' . "\n\n" . implode("\n", $this->sysCheckMessageList);
-            $this->sendGrowlMessage('CliTools :: System Check Warnings', $message);
+            if ($this->getApplication()->getConfigValue('syscheck', 'growl', 0)) {
+                // Growl notification
+                $message = 'WARNING:' . "\n\n" . implode("\n", $this->sysCheckMessageList);
+                $this->sendGrowlMessage('CliTools :: System Check Warnings', $message);
+            }
 
-            // Local wall message
-            $msgPrefix = ' - ';
-            $message   = ' -- CliTools :: System Check Warnings --' . "\n\n";
-            $message .= $msgPrefix . implode("\n" . $msgPrefix, $this->sysCheckMessageList);
-            $message .= "\n\n" . '(This warning can be disabled in /etc/clitools.ini)';
-            UnixUtility::sendWallMessage($message);
+            if ($this->getApplication()->getConfigValue('syscheck', 'wall', 0)) {
+                // Local wall message
+                $msgPrefix = ' - ';
+                $message   = ' -- CliTools :: System Check Warnings --' . "\n\n";
+                $message .= $msgPrefix . implode("\n" . $msgPrefix, $this->sysCheckMessageList);
+                $message .= "\n\n" . '(This warning can be disabled in /etc/clitools.ini)';
+                UnixUtility::sendWallMessage($message);
+            }
         }
     }
 
