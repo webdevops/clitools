@@ -114,10 +114,7 @@ class CreateCommand extends AbstractCommand {
         if (is_dir($path)) {
             if (file_exists($path . '/.gitkeep')) {
                 // Remove gitkeep
-                $command = new CommandBuilder('rm', '-f');
-                $command->addArgumentSeparator()
-                    ->addArgument($path . '/.gitkeep')
-                    ->executeInteractive();
+                unlink($path . '/.gitkeep');
             }
 
             // Remove code directory
