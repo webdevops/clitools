@@ -86,7 +86,7 @@ abstract class AbstractTraceCommand extends AbstractCommand {
         $pid        = null;
         $grep       = $input->getArgument('grep');
 
-        $command = new CommandBuilder('strace');
+        $command = new CommandBuilder('strace', '-f');
         $command->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_ALL_STDOUT);
 
 
