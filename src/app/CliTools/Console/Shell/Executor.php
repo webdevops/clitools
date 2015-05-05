@@ -193,8 +193,7 @@ class Executor {
         $process = proc_open($this->command->build(), $descriptorSpec, $pipes);
 
         if (is_resource($process)) {
-            $execStatus = proc_close($process);
-            $this->returnCode = pcntl_wexitstatus($execStatus);
+            $this->returnCode = proc_close($process);
 
             if ($this->strictMode && $this->returnCode !== 0) {
                 throw $this->generateException('Process ' . $this->command->getCommand() . ' did not finished successfully');
