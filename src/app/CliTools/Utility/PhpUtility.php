@@ -22,8 +22,26 @@ namespace CliTools\Utility;
 
 class PhpUtility {
 
+    /**
+     * Change current working directory
+     *
+     * @param string $path Target path
+     * @throws \RuntimeException
+     */
     public static function chdir($path) {
         if (!chdir($path)) {
+            throw new \RuntimeException('Could not change working directory to "' . $path . '"');
+        }
+    }
+
+    /**
+     * Remove file
+     *
+     * @param string $path Path to file
+     * @throws \RuntimeException
+     */
+    public static function unlink($path) {
+        if (!unlink($path)) {
             throw new \RuntimeException('Could not change working directory to "' . $path . '"');
         }
     }
