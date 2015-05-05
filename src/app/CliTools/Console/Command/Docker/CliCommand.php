@@ -31,7 +31,7 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
      */
     protected function configure() {
         $this->setName('docker:cli')
-             ->setDescription('Run cli command in docker container (defined by CLI_SCRIPT as docker env)');
+             ->setDescription('Run cli command in docker container (defined by CLI_SCRIPT and CLI_USER as docker environment variable)');
     }
 
     /**
