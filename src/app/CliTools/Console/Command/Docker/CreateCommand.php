@@ -23,6 +23,7 @@ namespace CliTools\Console\Command\Docker;
 use CliTools\Console\Builder\CommandBuilder;
 use CliTools\Console\Builder\SelfCommandBuilder;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -38,6 +39,18 @@ class CreateCommand extends AbstractCommand {
                 'path',
                 InputArgument::REQUIRED,
                 'Directory for new docker boilerplate instance'
+            )
+            ->addOption(
+                'docker',
+                'd',
+                InputOption::VALUE_OPTIONAL,
+                'Docker Boilerplate repository'
+            )
+            ->addOption(
+                'code',
+                'c',
+                InputOption::VALUE_OPTIONAL,
+                'Code repository'
             );
     }
 
@@ -52,7 +65,23 @@ class CreateCommand extends AbstractCommand {
     public function execute(InputInterface $input, OutputInterface $output) {
         $path = $input->getArgument('path');
 
-        $this->createDockerInstance($path);
+        if ($this->input->getOption('docker')) {
+            // Custom boilerplate
+            $boilerplateRepo = $this->input->getOption('docker');
+        } else {
+            // Boilerplate from config
+            $boilerplateRepo = $this->getApplication()->getConfigValue('docker', 'boilerplate');
+        }
+
+        // Init docker boilerplate
+        $this->createDockerInstance($path, $boilerplateRepo);
+
+        // Init code
+        if ($this->input->getOption('code')) {
+            $this->initCode($path, $input->getOption('code'));
+        }
+
+        // Start docker
         $this->startDockerInstance($path);
 
         return 0;
@@ -62,13 +91,43 @@ class CreateCommand extends AbstractCommand {
      * Create docker instance from git repository
      *
      * @param string $path Path
+     * @param string $repo Repository
      */
-    protected function createDockerInstance($path) {
-        $boilerplateRepo = $this->getApplication()->getConfigValue('docker', 'boilerplate');
-
+    protected function createDockerInstance($path, $repo) {
         $this->output->writeln('<comment>Create new docker boilerplate in "' . $path . '"</comment>');
 
-        $command = new CommandBuilder('git','clone --branch=master --recursive %s %s', array($boilerplateRepo, $path));
+        $command = new CommandBuilder('git','clone --branch=master --recursive %s %s', array($repo, $path));
+        $command->executeInteractive();
+    }
+
+    /**
+     * Create docker instance from git repository
+     *
+     * @param string $path Path
+     * @param string $repo Repository
+     */
+    protected function initCode($path, $repo) {
+        $path .= '/code';
+
+        $this->output->writeln('<comment>Initialize new code instance in "' . $path . '"</comment>');
+
+        if (is_dir($path)) {
+            if (file_exists($path . '/.gitkeep')) {
+                // Remove gitkeep
+                $command = new CommandBuilder('rm', '-f');
+                $command->addArgumentSeparator()
+                    ->addArgument($path . '/.gitkeep')
+                    ->executeInteractive();
+            }
+
+            // Remove code directory
+            $command = new CommandBuilder('rmdir');
+            $command->addArgumentSeparator()
+                ->addArgument($path)
+                ->executeInteractive();
+        }
+
+        $command = new CommandBuilder('git','clone --branch=master --recursive %s %s', array($repo, $path));
         $command->executeInteractive();
     }
 
