@@ -189,6 +189,16 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     }
 
     /**
+     * Set arguments list raw (unescaped)
+     *
+     * @param  array $arg... Argument
+     * @return $this
+     */
+    public function addArgumentListRaw($arg) {
+        return $this->addArgumentList($arg, false);
+    }
+
+    /**
      * Set arguments
      *
      * @param  string $arg... Argument
@@ -305,7 +315,7 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      * Append another command builder
      *
      * @param CommandBuilderInterface $command  Command builder
-     * @param boolean        $inline   Add command as inline string (one big parameter)
+     * @param boolean                 $inline   Add command as inline string (one big parameter)
      *
      * @return $this
      */
