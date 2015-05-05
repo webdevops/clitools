@@ -22,6 +22,7 @@ namespace CliTools\Console\Command\Docker;
 
 use CliTools\Console\Builder\CommandBuilder;
 use CliTools\Console\Builder\SelfCommandBuilder;
+use CliTools\Utility\PhpUtility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
@@ -114,7 +115,7 @@ class CreateCommand extends AbstractCommand {
         if (is_dir($path)) {
             if (file_exists($path . '/.gitkeep')) {
                 // Remove gitkeep
-                unlink($path . '/.gitkeep');
+                PhpUtility::unlink($path . '/.gitkeep');
             }
 
             // Remove code directory
@@ -136,7 +137,7 @@ class CreateCommand extends AbstractCommand {
     protected function startDockerInstance($path) {
         $this->output->writeln('<comment>Building docker containers "' . $path . '"</comment>');
 
-        \CliTools\Utility\PhpUtility::chdir($path);
+        PhpUtility::chdir($path);
 
         $command = new SelfCommandBuilder();
         $command->addArgument('docker:up');
