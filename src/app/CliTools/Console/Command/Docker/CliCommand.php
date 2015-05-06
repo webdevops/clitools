@@ -69,7 +69,7 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
 
                 if (!empty($cliUser)) {
                     // sudo wrapping as cli user
-                    $commandSudo = new RemoteCommandBuilder('sudo', '-E -u %s', array($cliUser));
+                    $commandSudo = new RemoteCommandBuilder('sudo', '-H -E -u %s', array($cliUser));
                     $commandSudo->append($command, false);
                     $command = $commandSudo;
                 }
