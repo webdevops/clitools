@@ -21,6 +21,7 @@ namespace CliTools\Console\Command\Docker;
  */
 
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use CliTools\Console\Builder\RemoteCommandBuilder;
@@ -37,6 +38,12 @@ class ShellCommand extends AbstractCommand {
                 'container',
                 InputArgument::OPTIONAL,
                 'Container'
+            )
+            ->addOption(
+                'user',
+                'u',
+                InputOption::VALUE_REQUIRED,
+                'User for sudo'
             );
     }
 
@@ -55,7 +62,23 @@ class ShellCommand extends AbstractCommand {
             $container = $input->getArgument('container');
         }
 
+        if ($input->getOption('user')) {
+            // User user by option
+            $cliUser = $input->getOption('user');
+        } else {
+            // Use docker env
+            $cliUser = $this->getDockerEnv($container, 'CLI_USER');
+        }
+
         $command = new RemoteCommandBuilder('bash');
+
+        if (!empty($cliUser)) {
+            // sudo wrapping as cli user
+            $commandSudo = new RemoteCommandBuilder('sudo', '-E -u %s', array($cliUser));
+            $commandSudo->append($command, false);
+            $command = $commandSudo;
+        }
+
         $ret = $this->executeDockerExec($container, $command);
 
         return $ret;
