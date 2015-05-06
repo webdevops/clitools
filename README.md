@@ -1,6 +1,6 @@
 # CliTools for Vagrant VM, Debian and Ubuntu (and others)
 
-![latest v1.8.0](https://img.shields.io/badge/latest-v1.8.0-green.svg?style=flat)
+![latest v1.9.0](https://img.shields.io/badge/latest-v1.9.0-green.svg?style=flat)
 ![License GPL3](https://img.shields.io/badge/license-GPL3-blue.svg?style=flat)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/mblaschke/vagrant-clitools.svg)](http://isitmaintained.com/project/mblaschke/vagrant-clitools "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/mblaschke/vagrant-clitools.svg)](http://isitmaintained.com/project/mblaschke/vagrant-clitools "Percentage of issues still open")
