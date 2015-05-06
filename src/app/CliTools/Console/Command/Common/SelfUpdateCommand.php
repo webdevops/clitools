@@ -44,9 +44,19 @@ class SelfUpdateCommand extends \CliTools\Console\Command\AbstractCommand {
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
-        $this->elevateProcess($input, $output);
-
         $updateService = new SelfUpdateService($this->getApplication(), $output);
+
+        // Check if we need root rights
+        if (!$this->getApplication()->isRunningAsRoot()
+            && $updateService->isElevationNeeded())
+        {
+            $this->elevateProcess($input, $output);
+        }
+
         $updateService->update();
+
+
+
+
     }
 }
