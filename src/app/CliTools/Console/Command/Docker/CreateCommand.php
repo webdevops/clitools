@@ -44,13 +44,13 @@ class CreateCommand extends AbstractCommand {
             ->addOption(
                 'docker',
                 'd',
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Docker Boilerplate repository'
             )
             ->addOption(
                 'code',
                 'c',
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Code repository'
             );
     }
