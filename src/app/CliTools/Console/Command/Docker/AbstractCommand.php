@@ -68,13 +68,17 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             return false;
         }
 
+        // Search updir for docker-compose.yml
         $path = $this->getDockerPath();
 
         if (!empty($path)) {
+            // Genrate full docker container name
             $dockerContainerName = \CliTools\Utility\DockerUtility::getDockerInstanceName($containerName, 1, $path);
 
+            // Switch to directory of docker-compose.yml
             PhpUtility::chdir($path);
 
+            // Get docker confguration (fetched directly from docker)
             $conf = \CliTools\Utility\DockerUtility::getDockerConfiguration($dockerContainerName);
 
             if (empty($conf)) {
@@ -108,11 +112,14 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             return 1;
         }
 
+        // Search updir for docker-compose.yml
         $path = $this->getDockerPath();
 
         if (!empty($path)) {
+            // Genrate full docker container name
             $dockerContainerName = \CliTools\Utility\DockerUtility::getDockerInstanceName($containerName, 1, $path);
 
+            // Switch to directory of docker-compose.yml
             PhpUtility::chdir($path);
 
             $this->output->writeln('<info>Executing "' . $command->getCommand() . '" in docker container "' . $dockerContainerName . '" ...</info>');
@@ -137,10 +144,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @return int|null|void
      */
     protected function executeDockerCompose(CommandBuilderInterface $command = null) {
+        // Search updir for docker-compose.yml
         $path = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
 
         if (!empty($path)) {
             $this->output->writeln('<comment>Found docker directory: ' . $path . '</comment>');
+
+            // Switch to directory of docker-compose.yml
             PhpUtility::chdir($path);
 
             $command->setCommand('docker-compose');
@@ -163,9 +173,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @return int|null|void
      */
     protected function executeDockerComposeRun($containerName, CommandBuilderInterface $command) {
+        // Search updir for docker-compose.yml
         $path = $this->getDockerPath();
 
         if (!empty($path)) {
+            // Switch to directory of docker-compose.yml
             PhpUtility::chdir($path);
 
             $this->output->writeln('<info>Executing "' . $command->getCommand() . '" in docker container "' . $containerName . '" ...</info>');

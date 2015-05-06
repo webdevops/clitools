@@ -28,9 +28,20 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     // Constants
     // ##########################################
 
+    /**
+     * Redirect STDOUT and STDERR to /dev/null (no output)
+     */
     const OUTPUT_REDIRECT_NULL       = ' &> /dev/null';
+
+    /**
+     * Redirect STDERR to STDOUT
+     */
     const OUTPUT_REDIRECT_ALL_STDOUT = ' 2>&1';
-    const OUTPUT_REDIRECT_NO_STDERR = ' 2> /dev/null';
+
+    /**
+     * Redirect STDERR to /dev/null (no error output)
+     */
+    const OUTPUT_REDIRECT_NO_STDERR  = ' 2> /dev/null';
 
     // ##########################################
     // Attributs
@@ -55,7 +66,7 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      *
      * @var null|string
      */
-    protected $outputRedirect = null;
+    protected $outputRedirect;
 
     /**
      * Command pipe

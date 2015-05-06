@@ -54,9 +54,5 @@ class SelfUpdateCommand extends \CliTools\Console\Command\AbstractCommand {
         }
 
         $updateService->update();
-
-
-
-
     }
 }

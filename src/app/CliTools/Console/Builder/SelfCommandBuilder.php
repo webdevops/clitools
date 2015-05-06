@@ -22,7 +22,6 @@ namespace CliTools\Console\Builder;
 
 class SelfCommandBuilder extends CommandBuilder {
 
-
     /**
      * Initalized command
      */
@@ -31,10 +30,12 @@ class SelfCommandBuilder extends CommandBuilder {
 
         $arguments = $_SERVER['argv'];
 
+        // Check if command is run inside PHAR
         if (\Phar::running()) {
-            // running as phar
+            // PHAR version
             $this->setCommand(array_shift($arguments));
         } elseif (!empty($_SERVER['_'])) {
+            // Plain PHP version
             if ($_SERVER['argv'][0] !== $_SERVER['_']) {
                 $this->setCommand($_SERVER['_']);
                 $this->addArgument(reset($arguments));
