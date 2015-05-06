@@ -63,6 +63,7 @@ alias dcroot='ct docker:root'
 
 # Execute predefined cli in docker container
 alias dccrun='ct docker:cli'
+alias dcrun='ct docker:cli'
 
 # Execute mysql client in docker container
 alias dcsql='ct docker:mysql'
