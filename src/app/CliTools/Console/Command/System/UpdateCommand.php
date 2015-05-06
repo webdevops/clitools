@@ -77,7 +77,7 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
             // SSH Git repo exists, update now
             $originalCwd = getcwd();
 
-            chdir($reposDirectory);
+            \CliTools\Utility\PhpUtility::chdir($reposDirectory);
 
             try {
                 // Update git repository
@@ -94,7 +94,7 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
                 $output->writeln('<error>' . $msg . '</error>');
             }
 
-            chdir($originalCwd);
+            \CliTools\Utility\PhpUtility::chdir($originalCwd);
         }
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace CliTools\Console\Builder;
+namespace CliTools\Utility;
 
 /*
  * CliTools Command
@@ -20,34 +20,29 @@ namespace CliTools\Console\Builder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class FullSelfCommandBuilder extends CommandBuilder {
-
+class PhpUtility {
 
     /**
-     * Initalized command
+     * Change current working directory
+     *
+     * @param string $path Target path
+     * @throws \RuntimeException
      */
-    protected function initialize() {
-        parent::initialize();
-
-        $arguments = $_SERVER['argv'];
-
-        if (\Phar::running()) {
-            // running as phar
-            $this->setCommand(array_shift($arguments));
-        } elseif (!empty($_SERVER['_'])) {
-            if ($_SERVER['argv'][0] !== $_SERVER['_']) {
-                $this->setCommand($_SERVER['_']);
-                $this->addArgument(array_shift($arguments));
-            }
+    public static function chdir($path) {
+        if (!chdir($path)) {
+            throw new \RuntimeException('Could not change working directory to "' . $path . '"');
         }
+    }
 
-        // Fallback
-        if (!$this->getCommand()) {
-            $this->setCommand('php');
-            $this->addArgument($_SERVER['PHP_SELF']);
+    /**
+     * Remove file
+     *
+     * @param string $path Path to file
+     * @throws \RuntimeException
+     */
+    public static function unlink($path) {
+        if (!unlink($path)) {
+            throw new \RuntimeException('Could not change working directory to "' . $path . '"');
         }
-
-        // All other arguments
-        $this->addArgumentList($arguments);
     }
 }

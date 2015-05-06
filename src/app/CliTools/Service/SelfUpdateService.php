@@ -2,6 +2,8 @@
 
 namespace CliTools\Service;
 
+use CliTools\Console\Builder\CommandBuilder;
+
 /*
  * CliTools Command
  * Copyright (C) 2015 Markus Blaschke <markus@familie-blaschke.net>
@@ -24,15 +26,17 @@ class SelfUpdateService {
 
     /**
      * Update url
+     *
+     * @var null|string
      */
-    protected $updateUrl = 'https://www.achenar.net/clicommand/clitools.phar';
+    protected $updateUrl;
 
     /**
      * Path to current clitools command
      *
      * @var null|string
      */
-    protected $cliToolsCommandPath = null;
+    protected $cliToolsCommandPath;
 
     /**
      * Permissions
@@ -44,19 +48,19 @@ class SelfUpdateService {
     /**
      * Update path
      *
-     * @var null
+     * @var null|string
      */
-    protected $cliToolsUpdatePath = null;
+    protected $cliToolsUpdatePath;
 
     /**
      * @var null|\Symfony\Component\Console\Output\OutputInterface
      */
-    protected $output = null;
+    protected $output;
 
     /**
      * @var null|\CliTools\Console\Application
      */
-    protected $application = null;
+    protected $application;
 
     /**
      * Constructor
@@ -67,6 +71,23 @@ class SelfUpdateService {
     public function __construct($app, $output) {
         $this->application = $app;
         $this->output      = $output;
+
+        $this->collectInformations();
+    }
+
+    /**
+     * Check if super user rights are required
+     *
+     * @return boolean
+     */
+    public function isElevationNeeded() {
+        $ret = false;
+
+        if (posix_getuid() !== $this->cliToolsCommandPerms['owner']) {
+            $ret = true;
+        }
+
+        return $ret;
     }
 
     /**
@@ -79,16 +100,24 @@ class SelfUpdateService {
             throw new \RuntimeException('Self-Update url is not set');
         }
 
-        $this->output->writeln('<info>Collecting informations...</info>');
-        $this->collectInformations();
-
         $this->output->writeln('<info>Update URL: ' . $this->updateUrl . '</info>');
 
         $this->output->writeln('<info>Download new clitools command version...</info>');
         $this->downloadUpdate();
 
-        $this->output->writeln('<info>Deploy update...</info>');
-        $this->deployUpdate();
+        try {
+            $versionString = $this->testUpdate();
+
+            $this->output->writeln('<info>Deploy update...</info>');
+            $this->deployUpdate();
+
+            $this->output->writeln('');
+            $this->output->writeln('<info>Updated to:</info>');
+            $this->output->writeln('   ' . $versionString);
+            $this->output->writeln('');
+        } catch (\Exception $e) {
+            $this->output->writeln('<error>Update failed</error>');
+        }
 
         $this->cleanup();
     }
@@ -97,6 +126,8 @@ class SelfUpdateService {
      * Get current file informations=
      */
     protected function collectInformations() {
+        $this->output->writeln('<info>Collecting informations...</info>');
+
         // ##################
         // Current path
         // ##################
@@ -113,8 +144,8 @@ class SelfUpdateService {
         // Get perms
         // ##################
         $this->cliToolsCommandPerms['perms'] = fileperms($this->cliToolsCommandPath);
-        $this->cliToolsCommandPerms['owner'] = fileowner($this->cliToolsCommandPath);
-        $this->cliToolsCommandPerms['group'] = filegroup($this->cliToolsCommandPath);
+        $this->cliToolsCommandPerms['owner'] = (int)fileowner($this->cliToolsCommandPath);
+        $this->cliToolsCommandPerms['group'] = (int)filegroup($this->cliToolsCommandPath);
     }
 
     /**
@@ -136,7 +167,7 @@ class SelfUpdateService {
         }
         curl_close($curlHandle);
 
-        $tmpFile = tempnam(sys_get_temp_dir(), 'upg');
+        $tmpFile = tempnam(sys_get_temp_dir(), 'ct');
         file_put_contents($tmpFile, $curlData);
 
         $this->cliToolsUpdatePath = $tmpFile;
@@ -167,14 +198,30 @@ class SelfUpdateService {
         // Move to current location
         rename($this->cliToolsUpdatePath, $this->cliToolsCommandPath);
 
-        // Apply owner
-        chown($this->cliToolsCommandPath, $this->cliToolsCommandPerms['owner']);
+        if ($this->application->isRunningAsRoot()) {
+            // Apply owner
+            chown($this->cliToolsCommandPath, $this->cliToolsCommandPerms['owner']);
 
-        // Apply group
-        chgrp($this->cliToolsCommandPath, $this->cliToolsCommandPerms['group']);
+            // Apply group
+            chgrp($this->cliToolsCommandPath, $this->cliToolsCommandPerms['group']);
+        }
 
         // Apply perms
         chmod($this->cliToolsCommandPath, $this->cliToolsCommandPerms['perms']);
+    }
+
+    /**
+     * Test update and show version
+     *
+     * @return string
+     */
+    protected function testUpdate() {
+        $command = new CommandBuilder('php');
+        $ret = $command->addArgument($this->cliToolsUpdatePath)
+            ->addArgument('--version')
+            ->addArgument('--no-ansi')
+            ->execute()->getOutputString();
+        return $ret;
     }
 
     /**

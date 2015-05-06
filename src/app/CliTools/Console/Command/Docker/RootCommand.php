@@ -1,6 +1,6 @@
 <?php
 
-namespace CliTools\Console\Command\Common;
+namespace CliTools\Console\Command\Docker;
 
 /*
  * CliTools Command
@@ -20,19 +20,24 @@ namespace CliTools\Console\Command\Common;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Service\SelfUpdateService;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use CliTools\Console\Builder\RemoteCommandBuilder;
 
-class SelfUpdateCommand extends \CliTools\Console\Command\AbstractCommand {
+class RootCommand extends AbstractCommand {
 
     /**
      * Configure command
      */
     protected function configure() {
-        $this->setName('self-update')
-            ->setAliases(array('selfupdate'))
-            ->setDescription('Self update of CliTools Command');
+        $this->setName('docker:root')
+            ->setDescription('Enter shell as root in docker container')
+            ->addArgument(
+                'container',
+                InputArgument::OPTIONAL,
+                'Container'
+            );
     }
 
     /**
@@ -44,19 +49,15 @@ class SelfUpdateCommand extends \CliTools\Console\Command\AbstractCommand {
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
-        $updateService = new SelfUpdateService($this->getApplication(), $output);
+        $container = $this->getApplication()->getConfigValue('docker', 'container');
 
-        // Check if we need root rights
-        if (!$this->getApplication()->isRunningAsRoot()
-            && $updateService->isElevationNeeded())
-        {
-            $this->elevateProcess($input, $output);
+        if ($input->getArgument('container')) {
+            $container = $input->getArgument('container');
         }
 
-        $updateService->update();
+        $command = new RemoteCommandBuilder('bash');
+        $ret = $this->executeDockerExec($container, $command);
 
-
-
-
+        return $ret;
     }
 }

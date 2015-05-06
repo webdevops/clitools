@@ -21,6 +21,7 @@ namespace CliTools\Console;
  */
 
 use CliTools\Database\DatabaseConnection;
+use CliTools\Service\SettingsService;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -37,8 +38,16 @@ class Application extends \Symfony\Component\Console\Application {
         'commands' => array(
             'class'  => array(),
             'ignore' => array(),
-        )
+        ),
+        '_files' => array(),
     );
+
+    /**
+     * Configuration files
+     *
+     * @var array
+     */
+    protected $configFiles = array();
 
     /**
      * Tear down funcs
@@ -46,6 +55,11 @@ class Application extends \Symfony\Component\Console\Application {
      * @var array
      */
     protected $tearDownFuncList = array();
+
+    /**
+     * @var SettingsService
+     */
+    protected $settingsService;
 
     /**
      * Load config
@@ -56,6 +70,8 @@ class Application extends \Symfony\Component\Console\Application {
         if (is_readable($file)) {
             $parsedConfig = parse_ini_file($file, true);
             $this->config = array_replace_recursive($this->config, $parsedConfig);
+
+            $this->configFiles[] = $file;
         }
     }
 
@@ -104,6 +120,10 @@ class Application extends \Symfony\Component\Console\Application {
             call_user_func($func);
         }
         $this->tearDownFuncList = array();
+
+        if ($this->settingsService) {
+            $this->settingsService->store();
+        }
     }
 
     /**
@@ -127,6 +147,8 @@ class Application extends \Symfony\Component\Console\Application {
             }
 
             if (!empty($command) && $command instanceof \CliTools\Console\Filter\AnyParameterFilterInterface) {
+                // Remove all paramters and fake input without any paramters
+                // prevent eg. --help message
                 $argCount = $command->getDefinition()->getArgumentRequiredCount();
 
                 $argvFiltered = array_splice($_SERVER['argv'], 0, 2 + $argCount);
@@ -160,7 +182,6 @@ class Application extends \Symfony\Component\Console\Application {
             // Prevent terminal messup
             echo "\n";
         };
-
 
         pcntl_signal(SIGTERM, $signalHandler);
         pcntl_signal(SIGINT, $signalHandler);
@@ -234,25 +255,43 @@ class Application extends \Symfony\Component\Console\Application {
      * @return bool
      */
     protected function checkCommandClass($class) {
-        // Ignores
-        foreach ($this->config['commands']['ignore'] as $ignore) {
+        // Ignores (deprecated)
+        foreach ($this->config['commands']['ignore'] as $exclude) {
 
             // Check if there is any wildcard and generate regexp for it
-            if (strpos($ignore, '*') !== false) {
-                $regExp = '/' . preg_quote($ignore, '/') . '/i';
+            if (strpos($exclude, '*') !== false) {
+                $regExp = '/' . preg_quote($exclude, '/') . '/i';
                 $regExp = str_replace('\\*', '.*', $regExp);
 
                 if (preg_match($regExp, $class)) {
                     return false;
                 }
 
-            } elseif( $class === $ignore) {
+            } elseif ($class === $exclude) {
                 // direct ignore
                 return false;
             }
         }
 
-        if(!class_exists($class)) {
+        // Excludes
+        foreach ($this->config['commands']['exclude'] as $exclude) {
+
+            // Check if there is any wildcard and generate regexp for it
+            if (strpos($exclude, '*') !== false) {
+                $regExp = '/' . preg_quote($exclude, '/') . '/i';
+                $regExp = str_replace('\\*', '.*', $regExp);
+
+                if (preg_match($regExp, $class)) {
+                    return false;
+                }
+
+            } elseif ($class === $exclude) {
+                // direct ignore
+                return false;
+            }
+        }
+
+        if (!class_exists($class)) {
             return false;
         }
 
@@ -269,5 +308,17 @@ class Application extends \Symfony\Component\Console\Application {
         $currentUid = (int)posix_getuid();
 
         return $currentUid === 0;
+    }
+
+    /**
+     * Get settings service
+     *
+     * @return SettingsService
+     */
+    public function getSettingsService() {
+        if ($this->settingsService === null) {
+            $this->settingsService = new SettingsService();
+        }
+        return $this->settingsService;
     }
 }

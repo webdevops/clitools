@@ -21,6 +21,8 @@ namespace CliTools\Console\Command\Docker;
  */
 
 use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Builder\CommandBuilderInterface;
+use CliTools\Utility\PhpUtility;
 
 abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand {
 
@@ -51,9 +53,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @param  string $containerName Container name
      * @param  string $envName       Environment variable
      *
-     * @return string|bool
+     * @return string|bool|null
      */
     protected function getDockerEnv($containerName, $envName) {
+        $ret = null;
+
         if (empty($containerName)) {
             $this->output->writeln('<error>No container specified</error>');
             return false;
@@ -69,31 +73,31 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         if (!empty($path)) {
             $dockerContainerName = \CliTools\Utility\DockerUtility::getDockerInstanceName($containerName, 1, $path);
 
-            chdir($path);
+            PhpUtility::chdir($path);
 
             $conf = \CliTools\Utility\DockerUtility::getDockerConfiguration($dockerContainerName);
 
             if (empty($conf)) {
-                throw new \RuntimeException('Could not read docker configuration');
+                throw new \RuntimeException('Could not read docker configuration from container  "' . $dockerContainerName . '"');
             }
 
             if (!empty($conf->Config->Env[$envName])) {
-                return $conf->Config->Env[$envName];
-            } else {
-                throw new \RuntimeException('Docker don\'t have environment variable "' . $envName . '"');
+                $ret = $conf->Config->Env[$envName];
             }
         }
+
+        return $ret;
     }
 
     /**
      * Execute docker command
      *
-     * @param  string         $containerName Container name
-     * @param  CommandBuilder $comamnd       Command
+     * @param  string                  $containerName Container name
+     * @param  CommandBuilderInterface $comamnd       Command
      *
      * @return int|null|void
      */
-    protected function executeDockerExec($containerName, CommandBuilder $command) {
+    protected function executeDockerExec($containerName, CommandBuilderInterface $command) {
         if (empty($containerName)) {
             $this->output->writeln('<error>No container specified</error>');
             return 1;
@@ -109,7 +113,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         if (!empty($path)) {
             $dockerContainerName = \CliTools\Utility\DockerUtility::getDockerInstanceName($containerName, 1, $path);
 
-            chdir($path);
+            PhpUtility::chdir($path);
 
             $this->output->writeln('<info>Executing "' . $command->getCommand() . '" in docker container "' . $dockerContainerName . '" ...</info>');
 
@@ -128,16 +132,16 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Execute docker compose run
      *
-     * @param  null|CommandBuilder $command   Command
+     * @param  null|CommandBuilderInterface $command   Command
      *
      * @return int|null|void
      */
-    protected function executeDockerCompose(CommandBuilder $command = null) {
+    protected function executeDockerCompose(CommandBuilderInterface $command = null) {
         $path = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
 
         if (!empty($path)) {
             $this->output->writeln('<comment>Found docker directory: ' . $path . '</comment>');
-            chdir($path);
+            PhpUtility::chdir($path);
 
             $command->setCommand('docker-compose');
             $command->executeInteractive();
@@ -154,15 +158,15 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * Execute docker compose run
      *
      * @param  string          $containerName Container name
-     * @param  CommandBuilder  $command       Command
+     * @param  CommandBuilderInterface  $command       Command
      *
      * @return int|null|void
      */
-    protected function executeDockerComposeRun($containerName, CommandBuilder $command) {
+    protected function executeDockerComposeRun($containerName, CommandBuilderInterface $command) {
         $path = $this->getDockerPath();
 
         if (!empty($path)) {
-            chdir($path);
+            PhpUtility::chdir($path);
 
             $this->output->writeln('<info>Executing "' . $command->getCommand() . '" in docker container "' . $containerName . '" ...</info>');
 

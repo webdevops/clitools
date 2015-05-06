@@ -82,7 +82,7 @@ class SlowLogCommand extends \CliTools\Console\Command\AbstractCommand {
 
         // Create directory if not exists
         if (!is_dir($debugLogDir)) {
-            if(!mkdir($debugLogDir, 0777, true)) {
+            if (!mkdir($debugLogDir, 0777, true)) {
                 $output->writeln('<error>Could not create "' . $debugLogDir . '" directory</error>');
                 exit(1);
             }

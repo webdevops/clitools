@@ -1,16 +1,20 @@
-# CliTools for Vagrant VM, Debian and Ubuntu
+# CliTools for Vagrant VM, Debian and Ubuntu (and others)
 
-![latest v1.8.0](https://img.shields.io/badge/latest-v1.8.0-green.svg?style=flat)
+![latest v1.9.0](https://img.shields.io/badge/latest-v1.9.0-green.svg?style=flat)
 ![License GPL3](https://img.shields.io/badge/license-GPL3-blue.svg?style=flat)
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/mblaschke/vagrant-clitools.svg)](http://isitmaintained.com/project/mblaschke/vagrant-clitools "Average time to resolve an issue")
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/mblaschke/vagrant-clitools.svg)](http://isitmaintained.com/project/mblaschke/vagrant-clitools "Percentage of issues still open")
 
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416/big.png)](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416)
 
+
+CliTools is a terminal utility for some handy convierence tasks based on Symfony Components (Console).
 
 Documentation is still WIP :)
 
 ## Requirements
 
-- PHP 5.5
+- PHP 5.5 (CLI)
 - Tools
   - git
   - wget
@@ -30,14 +34,14 @@ Documentation is still WIP :)
 
 
 ```bash
-# Download latest tools
+# Download latest tools (or in ~/bin if you have it in $PATH)
 wget -O/usr/local/bin/ct https://www.achenar.net/clicommand/clitools.phar
 
 # Set executable bit
 chmod 777 /usr/local/bin/ct
 
 # Download example config
-wget -O/etc/clitools.ini https://raw.githubusercontent.com/mblaschke/vagrant-development/develop/provision/ansible/roles/clitools/files/clitools.ini
+wget -O"$HOME/.clitools.ini" https://raw.githubusercontent.com/mblaschke/vagrant-development/develop/provision/ansible/roles/clitools/files/clitools.ini
 ```
 
 Now you can use following aliases (some aliases requires clitools 1.8.0!):
@@ -46,12 +50,20 @@ Now you can use following aliases (some aliases requires clitools 1.8.0!):
 # Shortcut for docker-compose (autosearch docker-compose.yml in up-dir, you don't have to be in directory with docker-compose.yml)
 alias dcc='ct docker:compose'
 
-# Enter main docker container
+# Startup docker-container (and shutdown previous one, v1.9.0 and up)
+alias dccup='ct docker:up'
+alias dccstop='ct docker:compose stop'
+
+# Enter main docker container (as CLI_USER if available - if not specified then root is used)
 alias dcshell='ct docker:shell'
 alias dcsh='ct docker:shell'
 
+# Enter main docker container (as root)
+alias dcroot='ct docker:root'
+
 # Execute predefined cli in docker container
-alias dcli='ct docker:cli'
+alias dccrun='ct docker:cli'
+alias dcrun='ct docker:cli'
 
 # Execute mysql client in docker container
 alias dcsql='ct docker:mysql'
@@ -60,9 +72,9 @@ alias dcmysql='ct docker:mysql'
 
 ## Configuration
 
-CliTools will read /etc/clitools.ini for system wide configuration.
+CliTools will read /etc/clitools.ini (system wide) and ~/.clitools.ini (personal) for configuration
 
-Defaults available in [config.ini](https://github.com/mblaschke/vagrant-clitools/blob/master/src/config.ini)
+The [default configuration](https://github.com/mblaschke/vagrant-clitools/blob/develop/src/config.ini) is inside the phar.
 
 ### Docker specific configuration
 ```ini
@@ -124,9 +136,15 @@ All log commands are using a grep-filter (specified as optional argument)
 
 | Command                    | Description                                                               |
 |----------------------------|---------------------------------------------------------------------------|
-| ct docker:shell            | Jump into a shell inside a docker container                               |
+| ct docker:create           | Create new docker boilerplate in directory (first argument)               |
+|                            | __ct docker:create projectname__ -> Create new docker boilerplate instance in directory "projectname" |
+|                            | __ct docker:create projectname --code=git@github.com/foo/bar__ -> Create new docker boilerplate instance in directory "projectname" and custom code repository |
+|                            | __ct docker:create projectname --docker=git@github.com/foo/bar__ -> Create new docker boilerplate instance in directory "projectname" and custom docker boilerplate repository |
+| ct docker:shell            | Jump into a shell inside a docker container (using predefined user defined with CLI_USER in docker env) |
 |                            | __ct docker:shell__ -> enter main container                               |
 |                            | __ct docker:shell mysql__ -> enter mysql container                        |
+|                            | __ct docker:shell --user=www-data -> enter main container as user www-data |
+| ct docker:root             | Jump into a shell inside a docker container as root user                  |
 | ct docker:mysql            | Jump into a mysql client inside a docker container                        |
 |                            | __ct docker:mysql__ -> execute mysql client inside main container         |
 | ct docker:sniff            | Start network sniffer for various protocols                               |
@@ -158,6 +176,13 @@ All log commands are using a grep-filter (specified as optional argument)
 |                            | __ct mysql:drop typo3__                                                   |
 | ct mysql:list              | Lists all databases with some statitics                                   |
 | ct mysql:restart           | Restart MySQL server                                                      |
+| ct mysql:backup            | Backup a database to file                                                 |
+|                            | Compression type will be detected from file extension (default plain sql) |
+|                            | __ct mysql:restore typo3 dump.sql__ -> plain sql dump                     |
+|                            | __ct mysql:restore typo3 dump.sql.gz__ -> gzip'ed sql dump                |
+|                            | __ct mysql:restore typo3 dump.sql.bzip2__ -> bzip2'ed sql dump            |
+|                            | __ct mysql:restore typo3 dump.sql.xz__ -> xz'ed (lzma'ed) sql dump        |
+|                            | __ct mysql:restore typo3 dump.sql --filter=typo3__ -> No TYPO3 cache tables in dump |
 | ct mysql:restore           | Create (and drops if already exists) a database and restore from a dump   |
 |                            | Dump file can be plaintext, gziped, bzip2 or lzma compressed              |
 |                            | and will automatically detected                                           |

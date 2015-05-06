@@ -31,7 +31,7 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
      */
     protected function configure() {
         $this->setName('docker:cli')
-             ->setDescription('Run cli command in docker container');
+             ->setDescription('Run cli command in docker container (defined by CLI_SCRIPT and CLI_USER as docker environment variable)');
     }
 
     /**
@@ -43,6 +43,8 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
+        $ret = 0;
+
         $paramList = $this->getFullParameterList();
         $container = $this->getApplication()->getConfigValue('docker', 'container');
         $cliMethod = $this->getApplication()->getConfigValue('docker', 'climethod');
@@ -53,31 +55,43 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
             ###########################
             case 'docker-exec':
                 $cliScript = $this->getDockerEnv($container, 'CLI_SCRIPT');
+                $cliUser   = $this->getDockerEnv($container, 'CLI_USER');
 
+                if (empty($cliScript)) {
+                    $output->writeln('<error>Docker container "' . $container . '" doesn\'t have environment variable "CLI_SCRIPT"</error>');
+                    return 1;
+                }
+
+                // Create remote cli command
                 $command = new RemoteCommandBuilder();
                 $command->parse($cliScript)
-                    ->addArgumentList($paramList);
+                        ->addArgumentList($paramList);
+
+                if (!empty($cliUser)) {
+                    // sudo wrapping as cli user
+                    $commandSudo = new RemoteCommandBuilder('sudo', '-H -E -u %s', array($cliUser));
+                    $commandSudo->append($command, false);
+                    $command = $commandSudo;
+                }
 
                 $this->executeDockerExec($container, $command);
                 break;
 
             ###########################
-            # with docker-compose run (simple, slower)
+            # with docker-compose run (simple, slower, requires entrypoint modification)
             ###########################
             case 'dockercompose-run':
                 $command = new RemoteCommandBuilder('cli');
                 $command->addArgumentList($paramList);
 
-               $ret = $this->executeDockerComposeRun($container, $command);
+                $ret = $this->executeDockerComposeRun($container, $command);
                 break;
 
             default:
                 $output->writeln('<error>CliMethod "' . $cliMethod .'" not defined</error>');
-                return 1;
+                $ret = 1;
                 break;
         }
-
-
 
         return $ret;
     }

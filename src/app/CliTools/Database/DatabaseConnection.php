@@ -29,28 +29,28 @@ class DatabaseConnection {
      *
      * @var null|string
      */
-    static protected $dbDsn = null;
+    static protected $dbDsn;
 
     /**
      * Database connection username
      *
      * @var null|string
      */
-    static protected $dbUsername = null;
+    static protected $dbUsername;
 
     /**
      * Database connection password
      *
      * @var null|string
      */
-    static protected $dbPassword = null;
+    static protected $dbPassword;
 
     /**
      * PDO connection
      *
      * @var null|\PDO
      */
-    static protected $connection = null;
+    static protected $connection;
 
     /**
      * Set dns
@@ -340,6 +340,34 @@ class DatabaseConnection {
             $value     = next($row);
             $ret[$key] = $value;
         }
+
+        return $ret;
+    }
+
+    /**
+     * Check if database exists
+     *
+     * @param string $database Database name
+     * @return boolean
+     */
+    public static function databaseExists($database) {
+        $query = 'SELECT COUNT(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = %s';
+        $query = sprintf($query, self::quote($database));
+        $ret   = (int)self::getOne($query);
+
+        return ($ret === 1 );
+    }
+
+    /**
+     * Return list of tables of one database
+     *
+     * @param string $database Database name
+     * @return array
+     */
+    public static function tableList($database) {
+        $query = 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s';
+        $query = sprintf($query, self::quote($database));
+        $ret   = self::getCol($query);
 
         return $ret;
     }

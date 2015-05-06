@@ -102,8 +102,6 @@ abstract class UnixUtility {
             $ret = $command->execute()->getOutputString();
 
             $ret = trim($ret);
-
-            return $ret;
         } catch (\Exception $e) {
             // no docker found?!
         }
@@ -240,7 +238,7 @@ abstract class UnixUtility {
      */
     public static function checkExecutable($command) {
 
-        if(strpos($command,'/') !== false) {
+        if (strpos($command,'/') !== false) {
             // command with path
             if (file_exists($command) && is_executable($command)) {
                 return true;

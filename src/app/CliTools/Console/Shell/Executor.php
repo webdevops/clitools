@@ -22,6 +22,7 @@ namespace CliTools\Console\Shell;
 
 use CliTools\Exception\CommandExecutionException;
 use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Builder\CommandBuilderInterface;
 use CliTools\Utility\ConsoleUtility;
 
 class Executor {
@@ -38,7 +39,7 @@ class Executor {
     /**
      * Command
      *
-     * @var CommandBuilder
+     * @var CommandBuilderInterface
      */
     protected $command;
 
@@ -70,9 +71,9 @@ class Executor {
     /**
      * Constructor
      *
-     * @param null|CommandBuilder $command   Command for execution
+     * @param null|CommandBuilderInterface $command   Command for execution
      */
-    public function __construct(CommandBuilder $command = null) {
+    public function __construct(CommandBuilderInterface $command = null) {
         if ($command !== null) {
             $this->command = $command;
         }
@@ -81,7 +82,7 @@ class Executor {
     /**
      * Get command
      *
-     * @return CommandBuilder
+     * @return CommandBuilderInterface
      */
     public function getCommand() {
         return $this->command;
@@ -90,10 +91,10 @@ class Executor {
     /**
      * Set command
      *
-     * @param CommandBuilder $command
+     * @param CommandBuilderInterface $command
      * @return $this
      */
-    public function setCommand($command) {
+    public function setCommand(CommandBuilderInterface $command) {
         $this->command = $command;
         return $this;
     }
@@ -192,8 +193,7 @@ class Executor {
         $process = proc_open($this->command->build(), $descriptorSpec, $pipes);
 
         if (is_resource($process)) {
-            $execStatus = proc_close($process);
-            $this->returnCode = pcntl_wexitstatus($execStatus);
+            $this->returnCode = proc_close($process);
 
             if ($this->strictMode && $this->returnCode !== 0) {
                 throw $this->generateException('Process ' . $this->command->getCommand() . ' did not finished successfully');

@@ -34,14 +34,14 @@ abstract class AbstractCommand extends Command {
      *
      * @var InputInterface
      */
-    protected $input = null;
+    protected $input;
 
     /**
      * Input
      *
      * @var OutputInterface
      */
-    protected $output = null;
+    protected $output;
 
     /**
      * Initializes the command just after the input has been validated.
