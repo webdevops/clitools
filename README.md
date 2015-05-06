@@ -51,14 +51,18 @@ Now you can use following aliases (some aliases requires clitools 1.8.0!):
 alias dcc='ct docker:compose'
 
 # Startup docker-container (and shutdown previous one, v1.9.0 and up)
-alias dcup='ct docker:up'
+alias dccup='ct docker:up'
+alias dccstop='ct docker:compose stop'
 
-# Enter main docker container
+# Enter main docker container (as CLI_USER if available - if not specified then root is used)
 alias dcshell='ct docker:shell'
 alias dcsh='ct docker:shell'
 
+# Enter main docker container (as root)
+alias dcroot='ct docker:root'
+
 # Execute predefined cli in docker container
-alias dcli='ct docker:cli'
+alias dccrun='ct docker:cli'
 
 # Execute mysql client in docker container
 alias dcsql='ct docker:mysql'
@@ -135,9 +139,11 @@ All log commands are using a grep-filter (specified as optional argument)
 |                            | __ct docker:create projectname__ -> Create new docker boilerplate instance in directory "projectname" |
 |                            | __ct docker:create projectname --code=git@github.com/foo/bar__ -> Create new docker boilerplate instance in directory "projectname" and custom code repository |
 |                            | __ct docker:create projectname --docker=git@github.com/foo/bar__ -> Create new docker boilerplate instance in directory "projectname" and custom docker boilerplate repository |
-| ct docker:shell            | Jump into a shell inside a docker container                               |
+| ct docker:shell            | Jump into a shell inside a docker container (using predefined user defined with CLI_USER in docker env) |
 |                            | __ct docker:shell__ -> enter main container                               |
 |                            | __ct docker:shell mysql__ -> enter mysql container                        |
+|                            | __ct docker:shell --user=www-data -> enter main container as user www-data |
+| ct docker:root             | Jump into a shell inside a docker container as root user                  |
 | ct docker:mysql            | Jump into a mysql client inside a docker container                        |
 |                            | __ct docker:mysql__ -> execute mysql client inside main container         |
 | ct docker:sniff            | Start network sniffer for various protocols                               |
