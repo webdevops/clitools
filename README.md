@@ -230,3 +230,6 @@ All log commands are using a grep-filter (specified as optional argument)
 |----------------------------|---------------------------------------------------------------------------|
 | ct user:rebuildsshconfig   | Rebuild SSH config from ct repository (/vagrant/provision/sshconfig)      |
 
+## Credits
+
+Thanks to my colleagues at [cron IT GmbH](http://www.cron.eu/) and Ingo Pfennigstorf for testing and some usefull ideas.
