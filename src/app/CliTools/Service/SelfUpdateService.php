@@ -212,6 +212,17 @@ class SelfUpdateService {
         $data = json_decode($data, true);
 
         if (!empty($data)) {
+            // Check release
+            if (!empty($data['draft']) || !empty($data['prerelease'])) {
+                throw new \RuntimeException('Fetched release of GitHub was not valid (either draft or prerelease)');
+            }
+
+            // Check for required tag_name
+            if (empty($data['tag_name'])) {
+                throw new \RuntimeException('Fetched release of GitHub was not valid (tag_name is empty)');
+            }
+
+            // Get basic informations
             $this->updateVersion   = trim($data['tag_name']);
             $this->updateChangelog = $data['body'];
 
