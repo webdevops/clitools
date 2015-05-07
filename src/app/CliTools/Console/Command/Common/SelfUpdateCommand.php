@@ -21,6 +21,7 @@ namespace CliTools\Console\Command\Common;
  */
 
 use CliTools\Service\SelfUpdateService;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -32,7 +33,13 @@ class SelfUpdateCommand extends \CliTools\Console\Command\AbstractCommand {
     protected function configure() {
         $this->setName('self-update')
             ->setAliases(array('selfupdate'))
-            ->setDescription('Self update of CliTools Command');
+            ->setDescription('Self update of CliTools Command')
+            ->addOption(
+                'force',
+                'f',
+                InputOption::VALUE_NONE,
+                'Force update'
+            );
     }
 
     /**
@@ -44,6 +51,8 @@ class SelfUpdateCommand extends \CliTools\Console\Command\AbstractCommand {
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
+        $force = (bool)$input->getOption('force');
+
         $updateService = new SelfUpdateService($this->getApplication(), $output);
 
         // Check if we need root rights
@@ -53,6 +62,6 @@ class SelfUpdateCommand extends \CliTools\Console\Command\AbstractCommand {
             $this->elevateProcess($input, $output);
         }
 
-        $updateService->update();
+        $updateService->update($force);
     }
 }

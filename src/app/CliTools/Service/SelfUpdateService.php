@@ -32,6 +32,27 @@ class SelfUpdateService {
     protected $updateUrl;
 
     /**
+     * Version
+     *
+     * @var null|string
+     */
+    protected $updateVersion;
+
+    /**
+     * Changelog
+     *
+     * @var null|string
+     */
+    protected $updateChangelog;
+
+    /**
+     * Update github url
+     *
+     * @var null|string
+     */
+    protected $githubReleaseUrl;
+
+    /**
      * Path to current clitools command
      *
      * @var null|string
@@ -92,34 +113,137 @@ class SelfUpdateService {
 
     /**
      * Update clitools command
+     *
+     * @param boolean $force Force update
      */
-    public function update() {
-        $this->updateUrl = $this->application->getConfigValue('config', 'self_update_url', null);
+    public function update($force = false) {
+        $this->githubReleaseUrl = $this->application->getConfigValue('config', 'self_update_github', null);
 
+        if (!empty($this->githubReleaseUrl)) {
+            $this->fetchLatestReleaseFromGithub();
+        } else {
+            throw new \RuntimeException('GitHub Release URL not set');
+        }
+
+        if ($this->checkIfUpdateNeeded($force)) {
+            // Update needed
+            $this->doUpdate();
+        }
+    }
+
+    /**
+     * Check if update is needed
+     *
+     * @param boolean $force Force update
+     *
+     * @return bool
+     */
+    protected function checkIfUpdateNeeded($force) {
+        $ret = false;
+
+        $this->output->write('<comment>Checking version... </comment>');
+
+        // Check if version is equal
+        if ($this->updateVersion !== CLITOOLS_COMMAND_VERSION) {
+            $this->output->write('<comment>new version "' . $this->updateVersion . '" found</comment>');
+            $ret = true;
+        } else {
+            $this->output->write('<comment>already up to date</comment>');
+        }
+
+        // Check if update is forced
+        if ($force) {
+            $this->output->write('<info> [forced]</info>');
+            $ret = true;
+        }
+
+        $this->output->writeln('');
+
+        return $ret;
+    }
+
+    /**
+     * Do update
+     */
+    protected function doUpdate() {
         if (empty($this->updateUrl)) {
-            throw new \RuntimeException('Self-Update url is not set');
+            throw new \RuntimeException('Self-Update url is not found');
         }
 
         $this->output->writeln('<info>Update URL: ' . $this->updateUrl . '</info>');
 
-        $this->output->writeln('<info>Download new clitools command version...</info>');
+        $this->output->write('<info>Downloading.</info>');
         $this->downloadUpdate();
+        $this->output->writeln('<info> done</info>');
 
         try {
+            // Test update
             $versionString = $this->testUpdate();
 
-            $this->output->writeln('<info>Deploy update...</info>');
+            // Deploy update
+            $this->output->writeln('<info>Deploying update... </info>');
             $this->deployUpdate();
 
+            // Show version
             $this->output->writeln('');
             $this->output->writeln('<info>Updated to:</info>');
             $this->output->writeln('   ' . $versionString);
             $this->output->writeln('');
+
+            // Show changelog
+            if (!empty($this->updateChangelog)) {
+                $this->showChangelog();
+            }
+
         } catch (\Exception $e) {
             $this->output->writeln('<error>Update failed</error>');
         }
 
         $this->cleanup();
+    }
+
+    /**
+     * Fetch latest release from github api
+     */
+    protected function fetchLatestReleaseFromGithub() {
+        $this->output->write('<info>Getting informations from GitHub... </info>');
+
+        $data = \CliTools\Utility\PhpUtility::curlFetch($this->githubReleaseUrl);
+        $data = json_decode($data, true);
+
+        if (!empty($data)) {
+            $this->updateVersion   = trim($data['tag_name']);
+            $this->updateChangelog = $data['body'];
+
+            foreach ($data['assets'] as $asset) {
+                if ($asset['name'] === 'clitools.phar') {
+                    $this->updateUrl = $asset['browser_download_url'];
+                }
+            }
+        }
+
+        $this->output->writeln('<info>done</info>');
+    }
+
+    /**
+     * Show changelog
+     */
+    protected function showChangelog() {
+
+        $message = $this->updateChangelog;
+
+        // Pad lines
+        $message = explode("\n", $message);
+        $message = array_map(function($line) {
+            return '  ' . $line;
+        }, $message);
+        $message = implode("\n", $message);
+
+        $message = preg_replace('/`([^`]+)`/', '<comment>\1</comment>', $message);
+
+        $this->output->writeln('<info>Changelog:</info>');
+        $this->output->writeln($message);
+        $this->output->writeln('');
     }
 
     /**
@@ -152,23 +276,23 @@ class SelfUpdateService {
      * Download file
      */
     protected function downloadUpdate() {
-        $curlHandle = curl_init();
-        curl_setopt($curlHandle, CURLOPT_URL, $this->updateUrl);
-        curl_setopt($curlHandle, CURLOPT_VERBOSE, 0);
-        curl_setopt($curlHandle, CURLOPT_HEADER, 0);
-        curl_setopt($curlHandle, CURLOPT_SSL_VERIFYPEER, 1);
-        curl_setopt($curlHandle, CURLOPT_SSL_VERIFYHOST, 2);
-        curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curlHandle, CURLOPT_FOLLOWLOCATION, 1);
+        $output = $this->output;
 
-        $curlData = curl_exec($curlHandle);
-        if (curl_errno($curlHandle) || empty($curlData)) {
-            throw new \RuntimeException('Could not download update: ' . curl_error($curlHandle));
-        }
-        curl_close($curlHandle);
+        // Progress counter
+        $progress = function($downloadTotal, $downoadProgress) use ($output) {
+            static $counter = 0;
+
+            if($counter % 30 === 0) {
+                $output->write('<info>.</info>');
+            }
+
+            $counter++;
+        };
+
+        $data = \CliTools\Utility\PhpUtility::curlFetch($this->updateUrl, $progress);
 
         $tmpFile = tempnam(sys_get_temp_dir(), 'ct');
-        file_put_contents($tmpFile, $curlData);
+        file_put_contents($tmpFile, $data);
 
         $this->cliToolsUpdatePath = $tmpFile;
     }

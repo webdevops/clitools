@@ -29,7 +29,7 @@ class PhpUtility {
      * @throws \RuntimeException
      */
     public static function chdir($path) {
-        if (!chdir($path)) {
+        if (!is_dir($path) && !chdir($path)) {
             throw new \RuntimeException('Could not change working directory to "' . $path . '"');
         }
     }
@@ -44,5 +44,38 @@ class PhpUtility {
         if (!unlink($path)) {
             throw new \RuntimeException('Could not change working directory to "' . $path . '"');
         }
+    }
+
+    /**
+     * Fetch content from url using curl
+     *
+     * @param string   $url      Url
+     * @param callable $progress Progress callback
+     *
+     * @return mixed
+     */
+    public static function curlFetch($url, callable $progress = null) {
+        $curlHandle = curl_init();
+        curl_setopt($curlHandle, CURLOPT_URL, $url);
+        curl_setopt($curlHandle, CURLOPT_VERBOSE, 0);
+        curl_setopt($curlHandle, CURLOPT_HEADER, 0);
+        curl_setopt($curlHandle, CURLOPT_SSL_VERIFYPEER, 1);
+        curl_setopt($curlHandle, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curlHandle, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($curlHandle, CURLOPT_USERAGENT, 'CliTools ' . CLITOOLS_COMMAND_VERSION . '(https://github.com/mblaschke/vagrant-clitools)');
+
+        if($progress) {
+            curl_setopt($curlHandle, CURLOPT_NOPROGRESS, false);
+            curl_setopt($curlHandle, CURLOPT_PROGRESSFUNCTION, $progress);
+        }
+
+        $ret = curl_exec($curlHandle);
+        if (curl_errno($curlHandle) || empty($ret)) {
+            throw new \RuntimeException('Could not fetch url "' . $url . '", error: ' . curl_error($curlHandle));
+        }
+        curl_close($curlHandle);
+
+        return $ret;
     }
 }
