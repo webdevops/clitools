@@ -1,6 +1,11 @@
 CliTools Changelog
 ==================
 
+1.10.0 - Upcoming
+------------------
+- Added GitHub based `self-update`
+- Fixed some issues
+
 1.9.0 - 2015-05-06
 ------------------
 - Added `mysql:backup` (with --filter=typo3, support for plain sql, gzip, bzip2, lzma compression)

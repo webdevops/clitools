@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-define('CLITOOLS_COMMAND_VERSION', '1.9.0');
+define('CLITOOLS_COMMAND_VERSION', '1.10.0');
 define('CLITOOLS_ROOT_FS', __DIR__);
 
 require __DIR__ . '/vendor/autoload.php';
