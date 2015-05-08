@@ -141,14 +141,14 @@ class SelfUpdateService {
     protected function checkIfUpdateNeeded($force) {
         $ret = false;
 
-        $this->output->write('<comment>Checking version... </comment>');
+        $this->output->write('<info>Checking version... </info>');
 
         // Check if version is equal
         if ($this->updateVersion !== CLITOOLS_COMMAND_VERSION) {
-            $this->output->write('<comment>new version "' . $this->updateVersion . '" found</comment>');
+            $this->output->write('<info>new version "' . $this->updateVersion . '" found</info>');
             $ret = true;
         } else {
-            $this->output->write('<comment>already up to date</comment>');
+            $this->output->write('<info>already up to date</info>');
         }
 
         // Check if update is forced
@@ -170,31 +170,41 @@ class SelfUpdateService {
             throw new \RuntimeException('Self-Update url is not found');
         }
 
-        $this->output->writeln('<info>Update URL: ' . $this->updateUrl . '</info>');
-
-        $this->output->write('<info>Downloading.</info>');
-        $this->downloadUpdate();
-        $this->output->writeln('<info> done</info>');
-
         try {
-            // Test update
-            $versionString = $this->testUpdate();
+            // ##############
+            // Download
+            // ##############
 
-            // Deploy update
+            $this->output->writeln('<info>Update URL: ' . $this->updateUrl . '</info>');
+
+            $this->output->write('<info>Downloading.</info>');
+            $this->downloadUpdate();
+            $this->output->writeln('<info> done</info>');
+
+            // ##############
+            // Test
+            // ##############
+            $this->testUpdate();
+
+            // ##############
+            // Deploy
+            // ##############
             $this->output->writeln('<info>Deploying update... </info>');
             $this->deployUpdate();
 
-            // Show version
+            // ##############
+            // Summary
+            // ##############
+
+            // Version
             $this->output->writeln('');
-            $this->output->writeln('<info>Updated to:</info>');
-            $this->output->writeln('   ' . $versionString);
+            $this->output->writeln('<info>Updated from Version </info><comment>' . CLITOOLS_COMMAND_VERSION . '</comment><info> to </info><comment>' . $this->updateVersion . '</comment>');
             $this->output->writeln('');
 
-            // Show changelog
+            // Changelog
             if (!empty($this->updateChangelog)) {
                 $this->showChangelog();
             }
-
         } catch (\Exception $e) {
             $this->output->writeln('<error>Update failed</error>');
         }
@@ -208,32 +218,48 @@ class SelfUpdateService {
     protected function fetchLatestReleaseFromGithub() {
         $this->output->write('<info>Getting informations from GitHub... </info>');
 
-        $data = \CliTools\Utility\PhpUtility::curlFetch($this->githubReleaseUrl);
-        $data = json_decode($data, true);
+        $releaseList = \CliTools\Utility\PhpUtility::curlFetch($this->githubReleaseUrl);
+        $releaseList = json_decode($releaseList, true);
 
-        if (!empty($data)) {
-            // Check release
-            if (!empty($data['draft']) || !empty($data['prerelease'])) {
-                throw new \RuntimeException('Fetched release of GitHub was not valid (either draft or prerelease)');
-            }
+        $releaseFound = false;
 
-            // Check for required tag_name
-            if (empty($data['tag_name'])) {
-                throw new \RuntimeException('Fetched release of GitHub was not valid (tag_name is empty)');
-            }
+        if (!empty($releaseList)) {
+            foreach ($releaseList as $release) {
+                // Check release
+                if (!empty($release['draft']) || !empty($release['prerelease'])) {
+                    // no valid release
+                    continue;
+                }
 
-            // Get basic informations
-            $this->updateVersion   = trim($data['tag_name']);
-            $this->updateChangelog = $data['body'];
+                // Check for required tag_name
+                if (empty($release['tag_name'])) {
+                    // no valid release (requires version tag)
+                    continue;
+                }
 
-            foreach ($data['assets'] as $asset) {
-                if ($asset['name'] === 'clitools.phar') {
-                    $this->updateUrl = $asset['browser_download_url'];
+                // Get basic informations
+                $this->updateVersion   = trim($release['tag_name']);
+                $this->updateChangelog = $release['body'];
+
+                foreach ($release['assets'] as $asset) {
+                    if ($asset['name'] === 'clitools.phar') {
+                        $this->updateUrl = $asset['browser_download_url'];
+                    }
+                }
+
+                if (!empty($this->updateVersion) && !empty($this->updateUrl)) {
+                    // valid version found
+                    break;
                 }
             }
         }
 
-        $this->output->writeln('<info>done</info>');
+        if (!empty($this->updateUrl)) {
+            $this->output->writeln('<info>done</info>');
+        } else {
+            $this->output->writeln('<error>failed</error>');
+            throw new \RuntimeException('Could not fetch new version - maybe GitHub API is down or other error occurred');
+        }
     }
 
     /**
@@ -346,7 +372,7 @@ class SelfUpdateService {
     }
 
     /**
-     * Test update and show version
+     * Test update and try to get version
      *
      * @return string
      */
@@ -363,5 +389,9 @@ class SelfUpdateService {
      * Cleanup
      */
     protected function cleanup() {
+        // Remove old update file if set and exists
+        if ($this->cliToolsUpdatePath && file_exists($this->cliToolsUpdatePath)) {
+            unlink($this->cliToolsUpdatePath);
+        }
     }
 }
