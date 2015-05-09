@@ -314,10 +314,20 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      * @return $this
      */
     public function parse($str) {
-        list($command, $attributs) = explode(' ', $str, 2);
+        $parsedCmd = explode(' ', $str, 2);
 
-        $this->setCommand($command);
-        $this->setArgumentList(array($attributs), false);
+        // Check required command
+        if (empty($parsedCmd[0])) {
+            throw new \RuntimeException('Command is empty');
+        }
+
+        // Set command (first value)
+        $this->setCommand($parsedCmd[0]);
+
+        // Set arguments (second values)
+        if (!empty($parsedCmd[1])) {
+            $this->setArgumentList(array($parsedCmd[1]), false);
+        }
         return $this;
     }
 
