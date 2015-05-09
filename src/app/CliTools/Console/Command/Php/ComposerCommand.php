@@ -26,13 +26,13 @@ use CliTools\Console\Builder\CommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ComposeCommand extends \CliTools\Console\Command\AbstractCommand implements \CliTools\Console\Filter\AnyParameterFilterInterface {
+class ComposerCommand extends \CliTools\Console\Command\AbstractCommand implements \CliTools\Console\Filter\AnyParameterFilterInterface {
 
     /**
      * Configure command
      */
     protected function configure() {
-        $this->setName('php:compose')
+        $this->setName('php:composer')
              ->setDescription('Search composer.json updir and start composer');
     }
 

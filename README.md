@@ -198,7 +198,7 @@ All log commands are using a grep-filter (specified as optional argument)
 |----------------------------|---------------------------------------------------------------------------|
 | ct php:trace               | Trace syscalls from one or all PHP processes (strace)                     |
 |                            | __ct php:trace --all__ -> Trace all php processes immediately             |
-| ct php:compose             | Search for "composer.yml" in tree and start "composer" in this directory  |
+| ct php:composer            | Search for "composer.yml" in tree and start "composer" in this directory  |
 
 ### Samba commands
 
