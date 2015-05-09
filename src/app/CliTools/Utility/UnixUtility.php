@@ -256,4 +256,35 @@ abstract class UnixUtility {
 
         return false;
     }
+
+    /**
+     * Search directory upwards for a file
+     *
+     * @param string $file Filename
+     * @param string $path Path
+     * @return boolean|string
+     */
+    public static function findFileInDirectortyTree($file, $path = null) {
+        $ret = false;
+
+        // Set path to current path (if not specified)
+        if ($path === null) {
+            $path = getcwd();
+        }
+
+        if (!empty($path) && $path !== '/') {
+            // Check if file exists in path
+            if (file_exists($file)) {
+                // Docker found
+                $ret = $path;
+            } else {
+                // go up in directory
+                $path .= '/../';
+                $path = realpath($path);
+                $ret  = self::searchUpDirForFile($path);
+            }
+        }
+
+        return $ret;
+    }
 }

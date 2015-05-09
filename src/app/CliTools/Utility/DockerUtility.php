@@ -73,27 +73,7 @@ class DockerUtility {
      * @return bool|string
      */
     public static function searchDockerDirectoryRecursive($path = null) {
-        $ret = false;
-
-        // Set path to current path (if not specified)
-        if ($path === null) {
-            $path = getcwd();
-        }
-
-        if (!empty($path) && $path !== '/') {
-            // Check if current path is docker directory
-            if (self::isDockerDirectory($path)) {
-                // Docker found
-                $ret = $path;
-            } else {
-                // go up in directory
-                $path .= '/../';
-                $path = realpath($path);
-                $ret  = self::searchDockerDirectoryRecursive($path);
-            }
-        }
-
-        return $ret;
+        return UnixUtility::findFileInDirectortyTree('docker-compose.yml', $path)
     }
 
     /**
@@ -109,8 +89,7 @@ class DockerUtility {
         }
 
         $dockerFileList = array(
-            'docker-compose.yml',
-            'fig.yml',
+            'docker-compose.yml'
         );
 
         foreach ($dockerFileList as $dockerFile) {
