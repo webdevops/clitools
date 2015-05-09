@@ -29,7 +29,7 @@ class PhpUtility {
      * @throws \RuntimeException
      */
     public static function chdir($path) {
-        if (!is_dir($path) && !chdir($path)) {
+        if (!is_dir($path) || !chdir($path)) {
             throw new \RuntimeException('Could not change working directory to "' . $path . '"');
         }
     }
