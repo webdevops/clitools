@@ -50,6 +50,9 @@ Now you can use following aliases (some aliases requires clitools 1.8.0!):
 # Shortcut for auto-tree-searching make
 alias make='ct make'
 
+# Shortcut for auto-tree-searching make
+alias composer='ct php:composer'
+
 # Shortcut for docker-compose (autosearch docker-compose.yml in up-dir, you don't have to be in directory with docker-compose.yml)
 alias dcc='ct docker:compose'
 
