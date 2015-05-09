@@ -73,7 +73,7 @@ class DockerUtility {
      * @return bool|string
      */
     public static function searchDockerDirectoryRecursive($path = null) {
-        return UnixUtility::findFileInDirectortyTree('docker-compose.yml', $path)
+        return UnixUtility::findFileInDirectortyTree('docker-compose.yml', $path);
     }
 
     /**
