@@ -45,6 +45,8 @@ class ComposerCommand extends \CliTools\Console\Command\AbstractCommand implemen
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
+        $composerCmd = $this->getApplication()->getConfigValue('bin', 'composer');
+
         $paramList = $this->getFullParameterList();
         $path = UnixUtility::findFileInDirectortyTree('composer.json');
 
@@ -54,7 +56,8 @@ class ComposerCommand extends \CliTools\Console\Command\AbstractCommand implemen
             // Switch to directory of docker-compose.yml
             PhpUtility::chdir($path);
 
-            $command = new CommandBuilder('composer');
+            $command = new CommandBuilder();
+            $command->parse($composerCmd);
 
             if (!empty($paramList)) {
                 $command->setArgumentList($paramList);
