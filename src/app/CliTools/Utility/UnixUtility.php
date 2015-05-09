@@ -281,7 +281,7 @@ abstract class UnixUtility {
                 // go up in directory
                 $path .= '/../';
                 $path = realpath($path);
-                $ret  = self::searchUpDirForFile($path);
+                $ret  = self::findFileInDirectortyTree($path);
             }
         }
 
