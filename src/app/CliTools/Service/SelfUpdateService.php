@@ -221,8 +221,6 @@ class SelfUpdateService {
         $releaseList = \CliTools\Utility\PhpUtility::curlFetch($this->githubReleaseUrl);
         $releaseList = json_decode($releaseList, true);
 
-        $releaseFound = false;
-
         if (!empty($releaseList)) {
             foreach ($releaseList as $release) {
                 // Check release
