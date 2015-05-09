@@ -47,6 +47,9 @@ wget -O"$HOME/.clitools.ini" https://raw.githubusercontent.com/mblaschke/vagrant
 Now you can use following aliases (some aliases requires clitools 1.8.0!):
 
 ```bash
+# Shortcut for auto-tree-searching make
+alias make='ct make'
+
 # Shortcut for docker-compose (autosearch docker-compose.yml in up-dir, you don't have to be in directory with docker-compose.yml)
 alias dcc='ct docker:compose'
 
@@ -117,6 +120,7 @@ ignore[] = "CliTools\Console\Command\System\RebootCommand"
 |----------------------------|---------------------------------------------------------------------------|
 | ct self-update             | Update ct command (download new version)                                  |
 | ct update                  | Updates all system components, ssh configuration, ct command update etc.  |
+| ct make                    | Search for "Makefile" in tree and start "make" in this directory          |
 
 ### System commands
 

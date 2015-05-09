@@ -4,6 +4,7 @@ CliTools Changelog
 1.10.0 - Upcoming
 ------------------
 - Added GitHub based `self-update`
+- Added `make` (auto search for Makefile in tree)
 - Fixed some issues
 
 1.9.0 - 2015-05-06
