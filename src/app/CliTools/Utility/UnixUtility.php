@@ -274,14 +274,14 @@ abstract class UnixUtility {
 
         if (!empty($path) && $path !== '/') {
             // Check if file exists in path
-            if (file_exists($file)) {
-                // Docker found
+            if (file_exists($path . '/' . $file)) {
+                // File found
                 $ret = $path;
             } else {
                 // go up in directory
                 $path .= '/../';
                 $path = realpath($path);
-                $ret  = self::findFileInDirectortyTree($path);
+                $ret  = self::findFileInDirectortyTree($file, $path);
             }
         }
 
