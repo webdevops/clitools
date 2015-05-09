@@ -5,6 +5,7 @@ CliTools Changelog
 ------------------
 - Added GitHub based `self-update`
 - Added `make` (auto search for Makefile in tree)
+- Added `php:compose` (auto search for compose.yml in tree)
 - Fixed some issues
 
 1.9.0 - 2015-05-06
