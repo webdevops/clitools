@@ -193,9 +193,18 @@ class Executor {
         $process = proc_open($this->command->build(), $descriptorSpec, $pipes);
 
         if (is_resource($process)) {
-            $this->returnCode = proc_close($process);
 
-            if ($this->strictMode && $this->returnCode !== 0) {
+            do {
+                usleep(50 * 1000);
+                $status = proc_get_status($process);
+            } while (is_array($status) && $status['running'] === true);
+
+            $this->returnCode = $status['exitcode'];
+
+            if ($status['signaled'] === true && $status['exitcode'] === -1) {
+                // user may hit CTRL+C
+                ConsoleUtility::getOutput()->writeln('<comment>Processed stopped by signal</comment>');
+            } elseif ($this->strictMode && $this->returnCode !== 0) {
                 throw $this->generateException('Process ' . $this->command->getCommand() . ' did not finished successfully');
             }
         } else {
