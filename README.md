@@ -194,6 +194,13 @@ All log commands are using a grep-filter (specified as optional argument)
 |                            | Dump file can be plaintext, gziped, bzip2 or lzma compressed              |
 |                            | and will automatically detected                                           |
 |                            | __ct mysql:restore typo3 dump.sql.bz2__                                   |
+| ct mysql:convert           | Convert character set and collation of a database                         |
+|                            | __ct mysql:convert typo3__ -> Convert typo3 into UTF-8 with utf8_general_ci |
+|                            | __ct mysql:convert typo3 --charset=latin1__ -> Convert typo3 into LATIN-1 |
+|                            | __ct mysql:convert typo3 --collation=utf8_unicode_ci__ -> Convert typo3 into UTF-8 with utf8_unicode_ci |
+|                            | __ct mysql:convert typo3 --stdout__ -> Print sql statements to stdout     |
+
+
 
 ### PHP commands
 

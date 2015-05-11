@@ -6,6 +6,7 @@ CliTools Changelog
 - Added GitHub based `self-update`
 - Added `make` (auto search for Makefile in tree)
 - Added `php:composer` (auto search for composer.yml in tree)
+- Added `mysql:convert` for automatic changing charset and collation of one database
 - Fixed some issues
 
 1.9.0 - 2015-05-06
