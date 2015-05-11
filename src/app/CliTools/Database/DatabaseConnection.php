@@ -487,7 +487,7 @@ class DatabaseConnection {
      * @return string
      */
     public static function sanitizeSqlTable($table) {
-        return preg_replace('/[^_a-zA-Z0-9]/', '', $table);
+        return '`' . preg_replace('/[^_a-zA-Z0-9]/', '', $table) . '`';
     }
 
     /**
@@ -498,6 +498,6 @@ class DatabaseConnection {
      * @return string
      */
     public static function sanitizeSqlDatabase($database) {
-        return preg_replace('/[^_a-zA-Z0-9]/', '', $database);
+        return '`' . preg_replace('/[^_a-zA-Z0-9]/', '', $database) . '`';
     }
 }
