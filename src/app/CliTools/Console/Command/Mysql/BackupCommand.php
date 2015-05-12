@@ -95,6 +95,7 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
                 break;
 
             case 'lzma':
+            case 'lz':
             case 'xz':
                 $output->writeln('<comment>Using LZMA compression</comment>');
                 $commandCompressor = new CommandBuilder('xz');
