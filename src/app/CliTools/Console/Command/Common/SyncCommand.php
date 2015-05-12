@@ -166,6 +166,8 @@ class SyncCommand extends \CliTools\Console\Command\AbstractCommand {
         // Backup dirs
         // ##################
         foreach ($this->config["shared"]["database"] as $database) {
+            $this->output->writeln('<info>Dumping database ' . $database . '</info>');
+
             // dump database
             $dumpFile = $this->tempDir . '/mysql/' . $database . '.sql.bz2';
 
@@ -218,6 +220,8 @@ class SyncCommand extends \CliTools\Console\Command\AbstractCommand {
             list($database) = explode('.', $item->getFilename(), 2);
 
             if (!empty($database)) {
+                $this->output->writeln('<info>Restoring database ' . $database . '</info>');
+
                 $mysqldump = new SelfCommandBuilder();
                 $mysqldump->addArgumentTemplate('mysql:restore %s %s', $database, $item->getPathname());
                 $mysqldump->executeInteractive();
