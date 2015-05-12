@@ -35,6 +35,27 @@ class PhpUtility {
     }
 
     /**
+     * Create new directory
+     *
+     * @param string    $path      Directory
+     * @param integer   $mode      Perms
+     * @param boolean   $recursive Creation of nested directories
+     * @param resource  $context   Context
+     * @throws \RuntimeException
+     */
+    public static function mkdir($path, $mode = 0777, $recursive = false, $context = null) {
+        if ($context !== null) {
+            $res = mkdir($path, $mode, $recursive, $context);
+        } else {
+            $res = mkdir($path, $mode, $recursive);
+        }
+
+        if (!$res) {
+            throw new \RuntimeException('Could not create directory "' . $path . '"');
+        }
+    }
+
+    /**
      * Remove file
      *
      * @param string $path Path to file
