@@ -82,6 +82,7 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
 
         switch ($fileExt) {
             case 'bz':
+            case 'bz2':
             case 'bzip2':
                 $output->writeln('<comment>Using BZIP2 compression</comment>');
                 $commandCompressor = new CommandBuilder('bzip2');
