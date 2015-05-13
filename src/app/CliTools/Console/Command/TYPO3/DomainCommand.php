@@ -120,7 +120,7 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
         // ##################
         $isMultiSite = false;
 
-        $query            = 'SELECT uid
+        $query = 'SELECT uid
                     FROM ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.pages
                    WHERE is_siteroot = 1
                      AND deleted = 0';
