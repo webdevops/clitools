@@ -142,7 +142,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         $command = new CommandBuilder('rsync', '-rlptD --delete-after');
 
-        if (!empty($this->config->share['rsync']['directory'])) {
+        if ($useExcludeInclude && !empty($this->config->share['rsync']['directory'])) {
             $rsyncFilter = $this->tempDir . '/.rsync-filelist';
 
             $filterContent = $this->config->share['rsync']['directory'];

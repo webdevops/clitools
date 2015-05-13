@@ -39,8 +39,8 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
         // ##################
         // Backup dirs
         // ##################
-        $source = $this->workingPath;
-        $target = $this->config->share['rsync']['server'] . self::PATH_DATA;
+        $source  = $this->workingPath;
+        $target  = $this->config->share['rsync']['server'] . self::PATH_DATA;
         $command = $this->createShareRsyncCommand($source, $target, true);
         $command->executeInteractive();
 
