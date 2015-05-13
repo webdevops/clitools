@@ -142,6 +142,8 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
             throw new \RuntimeException('MySQL dump filters "' . $filter . '" not available"');
         }
 
+        $this->output->writeln('<comment>Using filter "' . $filter . '"</comment>');
+
         // Get filtered tables
         $tableList = DatabaseConnection::tableList($database);
 
