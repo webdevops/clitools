@@ -7,6 +7,7 @@ CliTools Changelog
 - Added `make` (auto search for Makefile in tree)
 - Added `php:composer` (auto search for composer.yml in tree)
 - Added `mysql:convert` for automatic changing charset and collation of one database
+- Added `sync:server` for syncing any configured server to your local development system (reads clisync.yml)
 - Added `sync:backup` for backup to a shared server (reads clisync.yml)
 - Added `sync:restore` for restore from a shared server (reads clisync.yml)
 - Fixed some issues
