@@ -125,4 +125,31 @@ class PhpUtility {
 
         return $ret;
     }
+
+
+    /**
+     * Get MIME type for file
+     *
+     * @param string $file Path to file
+     *
+     * @return string
+     */
+    public static function getMimeType($file) {
+        // Get mime type from file
+        $finfo  = finfo_open(FILEINFO_MIME_TYPE);
+        $ret    = finfo_file($finfo, $file);
+        finfo_close($finfo);
+
+        if ($ret === 'application/octet-stream') {
+            $finfo        = finfo_open();
+            $dumpFileInfo = finfo_file($finfo, $file);
+            finfo_close($finfo);
+
+            if (strpos($dumpFileInfo, 'LZMA compressed data') !== false) {
+                $ret = 'application/x-lzma';
+            }
+        }
+
+        return $ret;
+    }
 }

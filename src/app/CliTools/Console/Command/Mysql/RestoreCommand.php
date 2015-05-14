@@ -21,6 +21,7 @@ namespace CliTools\Console\Command\Mysql;
  */
 
 use CliTools\Database\DatabaseConnection;
+use CliTools\Utility\PhpUtility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -64,7 +65,7 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
             return 1;
         }
 
-        $dumpFileType = $this->getMimeTypeFromDump($dumpFile);
+        $dumpFileType = PhpUtility::getMimeType($dumpFile);
 
         if (DatabaseConnection::databaseExists($database)) {
             // Dropping
@@ -121,29 +122,4 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
     }
 
 
-    /**
-     * Get MIME type from dump file
-     *
-     * @param string $dumpFile Path to mysql dump file
-     *
-     * @return string
-     */
-    protected function getMimeTypeFromDump($dumpFile) {
-        // Get mime type from file
-        $finfo  = finfo_open(FILEINFO_MIME_TYPE);
-        $ret    = finfo_file($finfo, $dumpFile);
-        finfo_close($finfo);
-
-        if ($ret === 'application/octet-stream') {
-            $finfo        = finfo_open();
-            $dumpFileInfo = finfo_file($finfo, $dumpFile);
-            finfo_close($finfo);
-
-            if (strpos($dumpFileInfo, 'LZMA compressed data') !== false) {
-                $ret = 'application/x-lzma';
-            }
-        }
-
-        return $ret;
-    }
 }
