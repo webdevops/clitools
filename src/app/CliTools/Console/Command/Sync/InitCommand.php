@@ -75,7 +75,8 @@ sync:
    ##################
   production:
         # ssh server host or name (see .ssh/config, eg for mysql/mysqldump)
-      ssh: live-server
+      ssh:
+        hostname: live-server
 
         # rsync for some directories
       rsync:
@@ -105,8 +106,8 @@ sync:
 share:
 
   rsync:
-      # target directory or server via ssh (eg. backup-server:/backup/projectname)
-    target: "/tmp/foo/"
+      # source/target directory or server via ssh (eg. backup-server:/backup/projectname)
+    source: "/tmp/foo/"
 
       # List of directories for backup
     directory:
