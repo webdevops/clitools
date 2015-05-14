@@ -25,15 +25,54 @@ use CliTools\Console\Builder\CommandBuilder;
 use CliTools\Console\Builder\RemoteCommandBuilder;
 use CliTools\Console\Builder\OutputCombineCommandBuilder;
 use CliTools\Console\Builder\CommandBuilderInterface;
+use Symfony\Component\Console\Input\InputArgument;
 
-class SyncCommand extends AbstractSyncCommand {
+class ServerCommand extends AbstractSyncCommand {
+
+    /**
+     * Server configuration name
+     * @var string
+     */
+    protected $serverName;
 
     /**
      * Configure command
      */
     protected function configure() {
-        $this->setName('sync:sync')
-             ->setDescription('Sync from live server');
+        $this
+            ->setName('sync:server')
+            ->setDescription('Sync files and database from server')
+            ->addArgument(
+                'server',
+                InputArgument::REQUIRED,
+                'Configuration name for server'
+            );
+    }
+
+
+    /**
+     * Read and validate configuration
+     */
+    protected function readConfiguration() {
+        parent::readConfiguration();
+
+        $this->serverName = $this->input->getArgument('server');
+
+        if (empty($this->serverName) || $this->serverName === '_' || empty($this->config[$this->serverName])) {
+            throw new \RuntimeException('No valid configuration found for server "' . $this->serverName . '"');
+        }
+
+        // Use server specific configuration
+        $this->output->writeln('<info>Syncing from "' . $this->serverName . '" server');
+
+        $fullConfig = $this->config;
+
+        if (!empty($fullConfig['_'])) {
+            // Merge global config with specific config
+            $this->config = array_replace_recursive($fullConfig['_'], $this->config[$this->serverName]);
+        } else {
+            $this->config = $this->config[$this->serverName];
+        }
     }
 
     /**

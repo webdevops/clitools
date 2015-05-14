@@ -27,6 +27,6 @@ abstract class AbstractSyncCommand extends \CliTools\Console\Command\Sync\Abstra
      *
      * @var string
      */
-    protected $confArea = 'sync';
+    protected $confArea = 'server';
 
 }
