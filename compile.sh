@@ -10,7 +10,8 @@ SCRIPT_DIR=$(dirname $(readlink -f "$0"))
 OLD_PWD=`pwd`
 
 cd "$SCRIPT_DIR/src"
-composer install
+composer install --no-dev
+composer dump-autoload --optimize --no-dev
 
 cd "$SCRIPT_DIR/"
 box.phar build -c build.json
