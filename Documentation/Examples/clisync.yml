@@ -18,7 +18,7 @@ sync:
 
   mysql:
       # mysql connection
-    host: localhost
+    host:     localhost
     username: typo3
     password: loremipsum
 
@@ -28,7 +28,7 @@ sync:
       # MySQL filter for typo3 (eg. no caching tables)
     filter: typo3
 
-      # List of databases for sync (local:foreign or  o)
+      # List of databases for sync ("local:foreign" for different database names - or only "database" if same name should be used localy)
     database:
       - typo3:website_live
       - other_database
