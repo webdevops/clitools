@@ -8,42 +8,42 @@ sync:
    ##################
   _:
     mysql:
-          # MySQL filter for typo3 (eg. no caching tables)
-        filter: typo3
+        # MySQL filter for typo3 (eg. no caching tables)
+      filter: typo3
 
-          # specific mysqldump settings
-        mysqldump:
-          option: "--opt --single-transaction"
+        # specific mysqldump settings
+      mysqldump:
+        option: "--opt --single-transaction"
 
    ##################
    # Config "production"
    ##################
   production:
-        # ssh server host or name (see .ssh/config, eg for mysql/mysqldump)
-      ssh:
-        hostname: live-server
+      # ssh server host or name (see .ssh/config, eg for mysql/mysqldump)
+    ssh:
+      hostname: live-server
 
-        # rsync for some directories
-      rsync:
-          # server and source directory (server host or name - see .ssh/config)
-        source: "live-server:/var/www/website/htdocs"
+      # rsync for some directories
+    rsync:
+        # server and source directory (server host or name - see .ssh/config)
+      source: "live-server:/var/www/website/htdocs"
 
-          # directory list/patterns
-        directory:
-          - "/fileadmin/"
-          - "/uploads/"
-          - "/typo3conf/l10n/"
+        # directory list/patterns
+      directory:
+        - "/fileadmin/"
+        - "/uploads/"
+        - "/typo3conf/l10n/"
 
-      mysql:
-          # mysql connection
-        hostname: localhost
-        username: typo3
-        password: loremipsum
+    mysql:
+        # mysql connection
+      hostname: localhost
+      username: typo3
+      password: loremipsum
 
-          # List of databases for sync ("local:foreign" for different database names - or only "database" if same name should be used localy)
-        database:
-          - typo3:website_live
-          - other_database
+        # List of databases for sync ("local:foreign" for different database names - or only "database" if same name should be used localy)
+      database:
+        - typo3:website_live
+        - other_database
 
 #######################################
 # Shared server (sharing between developers)
