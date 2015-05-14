@@ -21,7 +21,7 @@ namespace CliTools\Console\Shell;
  */
 
 use CliTools\Exception\CommandExecutionException;
-use CliTools\Console\Builder\CommandBuilderInterface;
+use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
 use CliTools\Utility\ConsoleUtility;
 
 class Executor {

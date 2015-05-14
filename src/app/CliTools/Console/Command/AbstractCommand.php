@@ -24,8 +24,8 @@ use CliTools\Utility\ConsoleUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\FullSelfCommandBuilder;
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\FullSelfCommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
 
 abstract class AbstractCommand extends Command {
 

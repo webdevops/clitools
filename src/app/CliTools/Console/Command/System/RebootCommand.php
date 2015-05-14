@@ -22,7 +22,7 @@ namespace CliTools\Console\Command\System;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
 
 class RebootCommand extends \CliTools\Console\Command\AbstractCommand {
 

@@ -22,8 +22,8 @@ namespace CliTools\Console\Command\Sync;
 
 use CliTools\Utility\PhpUtility;
 use CliTools\Utility\UnixUtility;
-use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Builder\SelfCommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\SelfCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;

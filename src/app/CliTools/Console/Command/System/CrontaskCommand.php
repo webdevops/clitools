@@ -21,7 +21,7 @@ namespace CliTools\Console\Command\System;
  */
 
 use CliTools\Utility\UnixUtility;
-use CliTools\Console\Builder\SelfCommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\SelfCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 

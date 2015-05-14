@@ -20,7 +20,7 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Console\Builder\CommandBuilderInterface;
+use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
 
 abstract class AbstractShareCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
 

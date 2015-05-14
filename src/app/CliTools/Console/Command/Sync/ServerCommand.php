@@ -21,10 +21,10 @@ namespace CliTools\Console\Command\Sync;
  */
 
 use CliTools\Utility\FilterUtility;
-use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Builder\RemoteCommandBuilder;
-use CliTools\Console\Builder\OutputCombineCommandBuilder;
-use CliTools\Console\Builder\CommandBuilderInterface;
+use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\RemoteCommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\OutputCombineCommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
 use Symfony\Component\Console\Input\InputArgument;
 
 class ServerCommand extends AbstractSyncCommand {

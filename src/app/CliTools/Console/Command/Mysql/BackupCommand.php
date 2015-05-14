@@ -21,8 +21,8 @@ namespace CliTools\Console\Command\Mysql;
  */
 
 use CliTools\Database\DatabaseConnection;
-use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Builder\CommandBuilderInterface;
+use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
 use CliTools\Utility\FilterUtility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -160,7 +160,7 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
             ->addArgumentList($tableList);
 
         // Combine both commands to one
-        $command = new \CliTools\Console\Builder\OutputCombineCommandBuilder();
+        $command = new \CliTools\Console\Shell\CommandBuilder\OutputCombineCommandBuilder();
         $command
             ->addCommandForCombinedOutput($commandStructure)
             ->addCommandForCombinedOutput($commandData);

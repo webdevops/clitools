@@ -20,8 +20,8 @@ namespace CliTools\Console\Command\Docker;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Builder\SelfCommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\SelfCommandBuilder;
 use CliTools\Utility\PhpUtility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;

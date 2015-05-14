@@ -2,7 +2,7 @@
 
 namespace CliTools\Service;
 
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
 
 /*
  * CliTools Command
