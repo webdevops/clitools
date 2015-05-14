@@ -105,19 +105,23 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
 
         switch ($dumpFileType) {
             case 'application/x-bzip2':
+                $output->writeln('<comment>Using BZIP2 uncompression</comment>');
                 $commandFile->setCommand('bzcat');
                 break;
 
             case 'application/gzip':
+                $output->writeln('<comment>Using GZIP uncompression</comment>');
                 $commandFile->setCommand('gzcat');
                 break;
 
             case 'application/x-lzma':
             case 'application/x-xz':
+            $output->writeln('<comment>Using LZMA uncompression</comment>');
                 $commandFile->setCommand('xzcat');
                 break;
 
             default:
+                $output->writeln('<comment>Using plaintext (no uncompression)</comment>');
                 $commandFile->setCommand('cat');
                 break;
         }

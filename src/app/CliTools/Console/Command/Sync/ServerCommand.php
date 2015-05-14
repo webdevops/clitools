@@ -162,10 +162,25 @@ class ServerCommand extends AbstractSyncCommand {
     protected function createMySqlCommand($database = null) {
         $command = new RemoteCommandBuilder('mysql');
         $command
-            ->addArgument('--skip-column-names')
-            ->addArgumentTemplate('-u%s', $this->config['mysql']['username'])
-            ->addArgumentTemplate('-p%s', $this->config['mysql']['password'])
-            ->addArgumentTemplate('-h%s', $this->config['mysql']['host']);
+              // batch mode
+            ->addArgument('-B')
+              // skip column names
+            ->addArgument('-N');
+
+        // Add username
+        if (!empty($this->config['mysql']['username'])) {
+            $command->addArgumentTemplate('-u%s', $this->config['mysql']['username']);
+        }
+
+        // Add password
+        if (!empty($this->config['mysql']['password'])) {
+            $command->addArgumentTemplate('-p%s', $this->config['mysql']['password']);
+        }
+
+        // Add hostname
+        if (!empty($this->config['mysql']['hostname'])) {
+            $command->addArgumentTemplate('-h%s', $this->config['mysql']['hostname']);
+        }
 
         if ($database !== null) {
             $command->addArgument($database);
@@ -183,15 +198,30 @@ class ServerCommand extends AbstractSyncCommand {
      */
     protected function createMySqlDumpCommand($database = null) {
         $command = new RemoteCommandBuilder('mysqldump');
-        $command
-            ->addArgumentTemplate('-u%s', $this->config['mysql']['username'])
-            ->addArgumentTemplate('-p%s', $this->config['mysql']['password'])
-            ->addArgumentTemplate('-h%s', $this->config['mysql']['host'])
-            ->addPipeCommand( new CommandBuilder('bzip2', '--compress --stdout') );
 
+
+        // Add username
+        if (!empty($this->config['mysql']['username'])) {
+            $command->addArgumentTemplate('-u%s', $this->config['mysql']['username']);
+        }
+
+        // Add password
+        if (!empty($this->config['mysql']['password'])) {
+            $command->addArgumentTemplate('-p%s', $this->config['mysql']['password']);
+        }
+
+        // Add hostname
+        if (!empty($this->config['mysql']['hostname'])) {
+            $command->addArgumentTemplate('-h%s', $this->config['mysql']['hostname']);
+        }
+
+        // Add custom options
         if (!empty($this->config['mysqldump']['option'])) {
             $command->addArgumentRaw($this->config['mysqldump']['option']);
         }
+
+        // Add pipe (bzip2 compressed transfer via ssh)
+        $command->addPipeCommand( new CommandBuilder('bzip2', '--compress --stdout') );
 
         if ($database !== null) {
             $command->addArgument($database);
