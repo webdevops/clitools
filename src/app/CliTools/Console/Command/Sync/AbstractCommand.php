@@ -208,7 +208,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     protected function createRsyncCommand($source, $target, array $filelist = null, array $exclude = null) {
         $this->output->writeln('<info>Rsync from ' . $source . ' to ' . $target . '</info>');
 
-        $command = new CommandBuilder('rsync', '-rlptD --delete-after');
+        $command = new CommandBuilder('rsync', '-rlptD --delete-after --progress -h');
 
         // Add file list (external file with --files-from option)
         if (!empty($filelist)) {
