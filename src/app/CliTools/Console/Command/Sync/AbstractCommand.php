@@ -146,7 +146,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
             // Add file list (external file with --files-from option)
             if (!empty($this->config->share['rsync']['directory'])) {
-                $this->rsyncAddFileList($command,    $this->config->share['rsync']['directory']);
+                $this->rsyncAddFileList($command, $this->config->share['rsync']['directory']);
             }
 
             // Add exclude (external file with --exclude-from option)
@@ -162,9 +162,6 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         // Set source and target
         $command->addArgument($source)
                 ->addArgument($target);
-
-
-        // Register teardown
 
         return $command;
     }
