@@ -20,6 +20,7 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Utility\FilterUtility;
 use CliTools\Console\Builder\CommandBuilder;
 use CliTools\Console\Builder\SelfCommandBuilder;
 use CliTools\Console\Builder\CommandBuilderInterface;
@@ -45,6 +46,7 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
 
         // Sync database to local server
         if (!empty($this->config->sync['mysql']) && !empty($this->config->sync['mysql']['database'])) {
+            // Full mysql transfer
             $this->runTaskDatabase();
         }
     }
@@ -93,8 +95,11 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
             $mysqldump = clone $mysqlDumpTemplate;
             $mysqldump->addArgument($foreignDatabase);
 
-            $command = $this->wrapCommand($mysqldump);
+            if ($this->config->sync['mysql']['filter']) {
+                $mysqldump = $this->addFilterArguments($mysqldump, $foreignDatabase, $this->config->sync['mysql']['filter']);
+            }
 
+            $command = $this->wrapCommand($mysqldump);
             $command->setOutputRedirectToFile($dumpFile);
 
             $command->executeInteractive();
@@ -151,6 +156,60 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
         }
 
         return parent::createRsyncCommand($source, $target, $filelist, $exclude);
+    }
+
+    /**
+     * Add filter to command
+     *
+     * @param CommandBuilderInterface $command  Command
+     * @param string                  $database Database
+     * @param string                  $filter   Filter name
+     *
+     * @return CommandBuilderInterface
+     */
+    protected function addFilterArguments(CommandBuilderInterface $commandDump, $database, $filter) {
+        $command = $commandDump;
+
+        // get filter
+        $filterList = $this->getApplication()->getConfigValue('mysql-backup-filter', $filter);
+
+        if (empty($filterList)) {
+            throw new \RuntimeException('MySQL dump filters "' . $filter . '" not available"');
+        }
+
+        $this->output->writeln('<comment>Using filter "' . $filter . '"</comment>');
+
+        // Get table list
+        $tableListDumper = clone $commandDump;
+        $tableListDumper->setCommand('mysql')
+            ->addArgument('--skip-column-names')
+            ->addArgumentTemplate('-e %s', 'show tables;')
+            ->clearOutputRedirect()
+            ->clearPipes();
+
+        $tableListDumper = $this->wrapCommand($tableListDumper);
+        $tableList       = $tableListDumper->execute()->getOutput();
+
+        // Filter table list
+        $tableList = FilterUtility::mysqlTableFilter($tableList, $filterList);
+
+        // Dump only structure
+        $commandStructure = clone $command;
+        $commandStructure->addArgument('--no-data');
+
+        // Dump only data (only filtered tables)
+        $commandData = clone $command;
+        $commandData
+            ->addArgument('--no-create-info')
+            ->addArgumentList($tableList);
+
+        // Combine both commands to one
+        $command = new \CliTools\Console\Builder\OutputCombineCommandBuilder();
+        $command
+            ->addCommandForCombinedOutput($commandStructure)
+            ->addCommandForCombinedOutput($commandData);
+
+        return $command;
     }
 
 }
