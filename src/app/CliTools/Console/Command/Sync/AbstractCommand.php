@@ -138,21 +138,44 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @return CommandBuilder
      */
     protected function createShareRsyncCommand($source, $target, $useExcludeInclude = false) {
+        // File list
+        $filelist = null;
+        if (!empty($this->config->share['rsync']['directory'])) {
+            $filelist = $this->config->share['rsync']['directory'];
+        }
+
+        // Exclude list
+        $exclude  = null;
+        if (!empty($this->config->share['rsync']['exclude'])) {
+            $exclude = $this->config->share['rsync']['exclude'];
+        }
+
+        return $this->createRsyncCommand($source, $target, $filelist, $exclude);
+    }
+
+    /**
+     * Create rsync command for share sync
+     *
+     * @param string     $source    Source directory
+     * @param string     $target    Target directory
+     * @param array|null $filelist  List of files (patterns)
+     * @param array|null $exclude   List of excludes (patterns)
+     *
+     * @return CommandBuilder
+     */
+    protected function createRsyncCommand($source, $target, array $filelist = null, array $exclude = null) {
         $this->output->writeln('<info>Sync from ' . $source . ' to ' . $target . '</info>');
 
         $command = new CommandBuilder('rsync', '-rlptD --delete-after');
 
-        if ($useExcludeInclude && !empty($this->config->share['rsync']['directory'])) {
+        // Add file list (external file with --files-from option)
+        if (!empty($filelist)) {
+            $this->rsyncAddFileList($command, $filelist);
+        }
 
-            // Add file list (external file with --files-from option)
-            if (!empty($this->config->share['rsync']['directory'])) {
-                $this->rsyncAddFileList($command, $this->config->share['rsync']['directory']);
-            }
-
-            // Add exclude (external file with --exclude-from option)
-            if (!empty($this->config->share['rsync']['exclude'])) {
-                $this->rsyncAddExcludeList($command, $this->config->share['rsync']['exclude']);
-            }
+        // Add exclude (external file with --exclude-from option)
+        if (!empty($exclude)) {
+            $this->rsyncAddExcludeList($command, $exclude);
         }
 
         // Paths should have leading / to prevent sync issues
@@ -172,7 +195,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @param CommandBuilder $command Rsync Command
      * @param array          $list    List of files
      */
-    protected function rsyncAddFileList(CommandBuilder $command, $list) {
+    protected function rsyncAddFileList(CommandBuilder $command, array $list) {
         $rsyncFilter = $this->tempDir . '/.rsync-filelist';
 
         PhpUtility::filePutContents($rsyncFilter, implode("\n", $list));

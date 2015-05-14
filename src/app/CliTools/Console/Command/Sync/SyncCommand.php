@@ -57,7 +57,7 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
         // ##################
         $source = $this->config->sync['rsync']['source'];
         $target = $this->workingPath;
-        $command = $this->createSyncRsyncCommand($source, $target, true);
+        $command = $this->createRsyncCommand($source, $target);
 
         $command->executeInteractive();
     }
@@ -132,35 +132,25 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
     /**
      * Create rsync command for share sync
      *
+     * @param string     $source    Source directory
+     * @param string     $target    Target directory
+     * @param array|null $filelist  List of files (patterns)
+     * @param array|null $exclude   List of excludes (patterns)
+     *
      * @return CommandBuilder
      */
-    protected function createSyncRsyncCommand($source, $target, $useExcludeInclude = false) {
-        $this->output->writeln('<info>Sync from ' . $source . ' to ' . $target . '</info>');
-
-        $command = new CommandBuilder('rsync', '-rlptD --delete-after');
-
-        if ($useExcludeInclude && !empty($this->config->share['rsync']['directory'])) {
-
-            // Add file list (external file with --files-from option)
-            if (!empty($this->config->sync['rsync']['directory'])) {
-                $this->rsyncAddFileList($command, $this->config->sync['rsync']['directory']);
-            }
-
-            // Add exclude (external file with --exclude-from option)
-            if (!empty($this->config->sync['rsync']['exclude'])) {
-                $this->rsyncAddExcludeList($command, $this->config->sync['rsync']['exclude']);
-            }
+    protected function createRsyncCommand($source, $target, array $filelist = null, array $exclude = null) {
+        // Add file list (external file with --files-from option)
+        if (!$filelist && !empty($this->config->sync['rsync']['directory'])) {
+            $filelist = $this->config->sync['rsync']['directory'];
         }
 
-        // Paths should have leading / to prevent sync issues
-        $source = rtrim($source, '/') . '/';
-        $target = rtrim($target, '/') . '/';
+        // Add exclude (external file with --exclude-from option)
+        if (!$exclude && !empty($this->config->sync['rsync']['exclude'])) {
+            $exclude = $this->config->sync['rsync']['exclude'];
+        }
 
-        // Set source and target
-        $command->addArgument($source)
-                ->addArgument($target);
-
-        return $command;
+        return parent::createRsyncCommand($source, $target, $filelist, $exclude);
     }
 
 }
