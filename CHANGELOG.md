@@ -10,7 +10,9 @@ CliTools Changelog
 - Added `sync:server` for syncing any configured server to your local development system (reads clisync.yml)
 - Added `sync:backup` for backup to a shared server (reads clisync.yml)
 - Added `sync:restore` for restore from a shared server (reads clisync.yml)
+- Refactored some classes
 - Fixed some issues
+- Added gzip compression for PHAR
 
 1.9.0 - 2015-05-06
 ------------------
