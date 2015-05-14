@@ -43,7 +43,7 @@ class PhpUtility {
      * @param string $content Content
      */
     public static function filePutContents($file, $content) {
-        if (!file_put_contents($file, $content)) {
+        if (file_put_contents($file, $content) === false) {
             throw new \RuntimeException('Could not write "' . $file . '"');
         }
     }
