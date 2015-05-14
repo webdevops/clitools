@@ -200,6 +200,13 @@ All log commands are using a grep-filter (specified as optional argument)
 |                            | __ct mysql:convert typo3 --collation=utf8_unicode_ci__ -> Convert typo3 into UTF-8 with utf8_unicode_ci |
 |                            | __ct mysql:convert typo3 --stdout__ -> Print sql statements to stdout     |
 
+### Sync commands
+
+| Command                    | Description                                                               |
+|----------------------------|---------------------------------------------------------------------------|
+| ct sync:init               | Create example clisync.yml in current working directory                   |
+| ct sync:backup             | Search for clisync.yml in tree and start backup to shared server          |
+| ct sync:restore            | Search for clisync.yml in tree and start restore from shared server       |
 
 
 ### PHP commands
