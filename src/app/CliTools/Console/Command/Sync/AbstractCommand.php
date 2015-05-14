@@ -143,13 +143,16 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $command = new CommandBuilder('rsync', '-rlptD --delete-after');
 
         if ($useExcludeInclude && !empty($this->config->share['rsync']['directory'])) {
-            $rsyncFilter = $this->tempDir . '/.rsync-filelist';
 
-            $filterContent = $this->config->share['rsync']['directory'];
-            $filterContent = implode("\n", $filterContent);
+            // Add file list (external file with --files-from option)
+            if (!empty($this->config->share['rsync']['directory'])) {
+                $this->rsyncAddFileList($command,    $this->config->share['rsync']['directory']);
+            }
 
-            PhpUtility::filePutContents($rsyncFilter, $filterContent);
-            $command->addArgumentTemplate('--files-from=%s', $rsyncFilter);
+            // Add exclude (external file with --exclude-from option)
+            if (!empty($this->config->share['rsync']['exclude'])) {
+                $this->rsyncAddExcludeList($command, $this->config->share['rsync']['exclude']);
+            }
         }
 
         // Paths should have leading / to prevent sync issues
@@ -160,7 +163,48 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $command->addArgument($source)
                 ->addArgument($target);
 
+
+        // Register teardown
+
         return $command;
     }
 
+    /**
+     * Add file (pattern) list to rsync command
+     *
+     * @param CommandBuilder $command Rsync Command
+     * @param array          $list    List of files
+     */
+    protected function rsyncAddFileList(CommandBuilder $command, $list) {
+        $rsyncFilter = $this->tempDir . '/.rsync-filelist';
+
+        PhpUtility::filePutContents($rsyncFilter, implode("\n", $list));
+
+        $command->addArgumentTemplate('--files-from=%s', $rsyncFilter);
+
+        // cleanup rsync file
+        $command->getExecutor()->addFinisherCallback(function () use ($rsyncFilter) {
+            unlink($rsyncFilter);
+        });
+
+    }
+
+    /**
+     * Add exclude (pattern) list to rsync command
+     *
+     * @param CommandBuilder $command  Rsync Command
+     * @param array          $list     List of excludes
+     */
+    protected function rsyncAddExcludeList(CommandBuilder $command, $list) {
+        $rsyncFilter = $this->tempDir . '/.rsync-exclude';
+
+        PhpUtility::filePutContents($rsyncFilter, implode("\n", $list));
+
+        $command->addArgumentTemplate('--exclude-from=%s', $rsyncFilter);
+
+        // cleanup rsync file
+        $command->getExecutor()->addFinisherCallback(function () use ($rsyncFilter) {
+            unlink($rsyncFilter);
+        });
+    }
 }

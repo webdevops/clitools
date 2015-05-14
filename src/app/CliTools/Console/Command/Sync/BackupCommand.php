@@ -40,7 +40,7 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
         // Backup dirs
         // ##################
         $source  = $this->workingPath;
-        $target  = $this->config->share['rsync']['server'] . self::PATH_DATA;
+        $target  = $this->config->share['rsync']['target'] . self::PATH_DATA;
         $command = $this->createShareRsyncCommand($source, $target, true);
         $command->executeInteractive();
 
@@ -68,7 +68,7 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
             // Backup mysql dump
             // ##################
             $source = $this->tempDir;
-            $target = $this->config->share['rsync']['server'] . self::PATH_DUMP;
+            $target = $this->config->share['rsync']['target'] . self::PATH_DUMP;
             $command = $this->createShareRsyncCommand($source, $target, false);
             $command->executeInteractive();
         }

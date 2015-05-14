@@ -39,7 +39,7 @@ class RestoreCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
         // ##################
         // Restore dirs
         // ##################
-        $source = $this->config->share['rsync']['server'] . self::PATH_DUMP;
+        $source = $this->config->share['rsync']['target'] . self::PATH_DUMP;
         $target = $this->workingPath;
         $command = $this->createShareRsyncCommand($source, $target, true);
         $command->executeInteractive();
@@ -47,7 +47,7 @@ class RestoreCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
         // ##################
         // Restore mysql dump
         // ##################
-        $source = $this->config->share['rsync']['server'] . self::PATH_DUMP;
+        $source = $this->config->share['rsync']['target'] . self::PATH_DUMP;
         $target = $this->tempDir;
         $command = $this->createShareRsyncCommand($source, $target, false);
         $command->executeInteractive();
