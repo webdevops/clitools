@@ -14,6 +14,6 @@ composer install --no-dev
 composer dump-autoload --optimize --no-dev
 
 cd "$SCRIPT_DIR/"
-box.phar build -c build.json
+box.phar build -c box.json
 
 cd "$OLD_PWD"
