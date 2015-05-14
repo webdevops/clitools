@@ -185,7 +185,8 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      * @return $this
      */
     public function setArgumentList(array $args) {
-        $this->argumentList = $args;
+        $this->clearArguments();
+        $this->appendArgumentsToList($args);
         return $this;
     }
 
@@ -222,8 +223,8 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     /**
      * Set argument with template
      *
-     * @param string $arg     Argument sprintf
-     * @param string $params  Argument parameters
+     * @param string $arg        Argument sprintf
+     * @param string $params...  Argument parameters
      *
      * @return $this
      */
@@ -243,6 +244,8 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      * @return $this
      */
     public function addArgumentTemplateList($arg, array $params) {
+        $this->validateArgumentValue($arg);
+
         $params = array_map('escapeshellarg', $params);
         $this->argumentList[] = vsprintf($arg, $params);
         return $this;
@@ -256,12 +259,45 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      * @return $this
      */
     public function addArgumentList(array $arg, $escape = true) {
+        $this->appendArgumentsToList($arg, $escape);
+        return $this;
+    }
+
+    /**
+     * Append one argument to list
+     *
+     * @param array   $arg    Arguments
+     * @param boolean $escape Enable argument escaping
+     *
+     * @return $this
+     */
+    protected function appendArgumentToList($arg, $escape = true) {
+        $this->validateArgumentValue($arg);
+
         if ($escape) {
-            $arg = array_map('escapeshellarg', $arg);
+            $arg = escapeshellarg($arg);
         }
 
-        $this->argumentList = array_merge($this->argumentList, $arg);
-        return $this;
+        $this->argumentList[] = $arg;
+    }
+
+    /**
+     * Append multiple arguments to list
+     *
+     * @param array   $args    Arguments
+     * @param boolean $escape Enable argument escaping
+     *
+     * @return $this
+     */
+    protected function appendArgumentsToList($args, $escape = true) {
+        // Validate each argument value
+        array_walk($args, array($this, 'validateArgumentValue'));
+
+        if ($escape) {
+            $args = array_map('escapeshellarg', $args);
+        }
+
+        $this->argumentList = array_merge($this->argumentList, $args);
     }
 
     /**
@@ -485,6 +521,18 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      */
     public function executeInteractive() {
         return $this->getExecutor()->execInteractive();
+    }
+
+    /**
+     * Validate argument value
+     *
+     * @param mixed $value Value
+     * @throws \RuntimeException
+     */
+    protected function validateArgumentValue($value) {
+        if (strlen($value) === 0) {
+            throw new \RuntimeException('Argument value cannot be empty');
+        }
     }
 
     // ##########################################
