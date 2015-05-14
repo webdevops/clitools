@@ -29,4 +29,33 @@ abstract class AbstractSyncCommand extends \CliTools\Console\Command\Sync\Abstra
      */
     protected $confArea = 'server';
 
+
+    /**
+     * Validate configuration
+     *
+     * @return boolean
+     */
+    protected function validateConfiguration() {
+        $ret = parent::validateConfiguration();
+
+        $output = $this->output;
+
+        // ##################
+        // SSH (optional)
+        // ##################
+
+        if (!empty($this->config['ssh'])) {
+
+            // Check if one database is configured
+            if (empty($this->config['ssh']['hostname'])) {
+                $output->writeln('<error>No ssh hostname configuration found</error>');
+                $ret = false;
+            }
+
+        }
+
+        return $ret;
+    }
+
+
 }

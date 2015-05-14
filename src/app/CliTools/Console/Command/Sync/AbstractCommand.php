@@ -82,6 +82,9 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $this->output->writeln('<comment>Found ' . self::CONFIG_FILE . ' directory: ' . $this->workingPath . '</comment>');
 
         $this->readConfiguration();
+        if (!$this->validateConfiguration()) {
+            exit(1);
+        }
         $this->startup();
 
         try {
@@ -111,6 +114,55 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         } else {
             throw new \RuntimeException('Could not parse "' . $confFile . '"');
         }
+    }
+
+    /**
+     * Validate configuration
+     *
+     * @return boolean
+     */
+    protected function validateConfiguration() {
+        $ret = true;
+
+        $output = $this->output;
+
+        // ##################
+        // Rsync (required)
+        // ##################
+
+        // Check for rsync directive
+        if (empty($this->config['rsync'])) {
+            $output->writeln('<error>No rsync configuration found</error>');
+            $ret = false;
+        }
+
+        // Check if rsync target exists
+        if (empty($this->config['rsync']['path'])) {
+            $output->writeln('<error>No rsync path configuration found</error>');
+            $ret = false;
+        }
+
+        // Check if there are any rsync directories
+        if (empty($this->config['rsync']['directory'])) {
+            $output->writeln('<error>No rsync directory configuration found</error>');
+            $ret = false;
+        }
+
+        // ##################
+        // MySQL (optional)
+        // ##################
+
+        if (!empty($this->config['mysql'])) {
+
+            // Check if one database is configured
+            if (empty($this->config['mysql']['database'])) {
+                $output->writeln('<error>No mysql database configuration found</error>');
+                $ret = false;
+            }
+
+        }
+
+        return $ret;
     }
 
     /**

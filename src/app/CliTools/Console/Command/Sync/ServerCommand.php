@@ -97,7 +97,7 @@ class ServerCommand extends AbstractSyncCommand {
         // ##################
         // Restore dirs
         // ##################
-        $source = $this->config['rsync']['source'];
+        $source = $this->config['rsync']['path'];
         $target = $this->workingPath;
         $command = $this->createRsyncCommand($source, $target);
 
@@ -208,9 +208,9 @@ class ServerCommand extends AbstractSyncCommand {
      */
     protected function wrapCommand(CommandBuilderInterface $command) {
         // Wrap in ssh if needed
-        if (!empty($this->config['ssh'])) {
+        if (!empty($this->config['ssh']['hostname'])) {
             $sshCommand = new CommandBuilder('ssh', '-o BatchMode=yes');
-            $sshCommand->addArgument($this->config['ssh'])
+            $sshCommand->addArgument($this->config['ssh']['hostname'])
                 ->append($command, true);
 
             $command = $sshCommand;
