@@ -23,6 +23,32 @@ namespace CliTools\Utility;
 class PhpUtility {
 
     /**
+     * Get content of file
+     *
+     * @param  string $file Filename
+     * @return string
+     */
+    public static function fileGetContents($file) {
+        if (!is_file($file) || !is_readable($file)) {
+            throw new \RuntimeException('Could not read "' . $file . '"');
+        }
+
+        return file_get_contents($file);
+    }
+
+    /**
+     * Get content of file
+     *
+     * @param string $file    Filename
+     * @param string $content Content
+     */
+    public static function filePutContents($file, $content) {
+        if (file_put_contents($file, $content) === false) {
+            throw new \RuntimeException('Could not write "' . $file . '"');
+        }
+    }
+
+    /**
      * Change current working directory
      *
      * @param string $path Target path

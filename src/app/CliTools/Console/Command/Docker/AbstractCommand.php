@@ -20,8 +20,8 @@ namespace CliTools\Console\Command\Docker;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Builder\CommandBuilderInterface;
+use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
 use CliTools\Utility\PhpUtility;
 
 abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand {

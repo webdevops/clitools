@@ -1,6 +1,6 @@
 <?php
 
-namespace CliTools\Console\Builder;
+namespace CliTools\Console\Command\Sync;
 
 /*
  * CliTools Command
@@ -20,6 +20,13 @@ namespace CliTools\Console\Builder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class RemoteCommandBuilder extends CommandBuilder {
+abstract class AbstractSyncCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
+    
+    /**
+     * Config area
+     *
+     * @var string
+     */
+    protected $confArea = 'server';
 
 }

@@ -22,7 +22,7 @@ namespace CliTools\Console\Command\Mysql;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
 
 class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
 

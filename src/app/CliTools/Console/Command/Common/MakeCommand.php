@@ -22,7 +22,7 @@ namespace CliTools\Console\Command\Common;
 
 use CliTools\Utility\UnixUtility;
 use CliTools\Utility\PhpUtility;
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
