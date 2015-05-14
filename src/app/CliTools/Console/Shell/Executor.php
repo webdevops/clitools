@@ -21,7 +21,6 @@ namespace CliTools\Console\Shell;
  */
 
 use CliTools\Exception\CommandExecutionException;
-use CliTools\Console\Builder\CommandBuilder;
 use CliTools\Console\Builder\CommandBuilderInterface;
 use CliTools\Utility\ConsoleUtility;
 
@@ -63,6 +62,13 @@ class Executor {
      * @var bool
      */
     protected $strictMode = true;
+
+    /**
+     * Finisher callback list
+     *
+     * @var array<callable>
+     */
+    protected $finishers = array();
 
     // ##########################################
     // Methods
@@ -152,6 +158,15 @@ class Executor {
         return $this;
     }
 
+    /**
+     * Clear state
+     */
+    public function clear() {
+        $this->output = null;
+        $this->returnCode = null;
+        $this->finishers = array();
+    }
+
 
     /**
      * Execute command
@@ -165,6 +180,8 @@ class Executor {
         ConsoleUtility::verboseWriteln('EXEC::STD', $this->command->build());
 
         exec($this->command->build(), $this->output, $this->returnCode);
+
+        $this->runFinishers();
 
         if ($this->strictMode && $this->returnCode !== 0) {
             throw $this->generateException('Process ' . $this->command->getCommand() . ' did not finished successfully');
@@ -200,6 +217,8 @@ class Executor {
             } while (is_array($status) && $status['running'] === true);
 
             $this->returnCode = $status['exitcode'];
+
+            $this->runFinishers();
 
             if ($status['signaled'] === true && $status['exitcode'] === -1) {
                 // user may hit CTRL+C
@@ -251,5 +270,23 @@ class Executor {
         }
 
         return $e;
+    }
+
+    /**
+     * Add finisher callback (will run after command execution)
+     *
+     * @param callable $callback
+     */
+    public function addFinisherCallback(callable $callback) {
+        $this->finishers[] = $callback;
+    }
+
+    /**
+     * Run finisher commands
+     */
+    public function runFinishers() {
+        foreach ($this->finishers as $call) {
+            $call($this);
+        }
     }
 }
