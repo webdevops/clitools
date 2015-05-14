@@ -54,7 +54,44 @@ class InitCommand extends \CliTools\Console\Command\AbstractCommand {
         $content = '# Example clisync configuration file
 
 
-# Shared server for backup and restore sync
+#######################################
+# Sync from server (eg. live server)
+#######################################
+sync:
+    # ssh server host or name (see .ssh/config)
+  ssh: live-server
+
+    # rsync for some directories
+  rsync:
+      # server and source directory (server host or name - see .ssh/config)
+    source: "live-server:/var/www/website/htdocs"
+
+      # directory list/patterns
+    directory:
+      - "/fileadmin/"
+      - "/uploads/"
+      - "/typo3conf/l10n/"
+
+  mysql:
+      # mysql connection
+    host:     localhost
+    username: typo3
+    password: loremipsum
+
+    mysqldump:
+      option: "--single-transaction"
+
+      # MySQL filter for typo3 (eg. no caching tables)
+    filter: typo3
+
+      # List of databases for sync ("local:foreign" for different database names - or only "database" if same name should be used localy)
+    database:
+      - typo3:website_live
+      - other_database
+
+#######################################
+# Shared server (sharing between developers)
+#######################################
 share:
 
   rsync:
@@ -81,6 +118,7 @@ share:
       # List of databases for backup
     database:
       - typo3
+
 ';
 
         PhpUtility::filePutContents($cliSyncFilePath, $content);

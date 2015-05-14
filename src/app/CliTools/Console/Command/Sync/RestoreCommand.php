@@ -20,9 +20,7 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Console\Builder\SelfCommandBuilder;
-
-class RestoreCommand extends \CliTools\Console\Command\Sync\AbstractShareCommand {
+class RestoreCommand extends AbstractShareCommand {
 
     /**
      * Configure command

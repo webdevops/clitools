@@ -20,6 +20,8 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Console\Builder\CommandBuilderInterface;
+
 abstract class AbstractShareCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
 
     /**
@@ -32,18 +34,22 @@ abstract class AbstractShareCommand extends \CliTools\Console\Command\Sync\Abstr
     /**
      * Create rsync command for share sync
      *
-     * @return CommandBuilder
+     * @param string  $source            Rsync Source
+     * @param string  $target            Rsync target
+     * @param boolean $useExcludeInclude Use file/exclude lists
+     *
+     * @return CommandBuilderInterface
      */
     protected function createShareRsyncCommand($source, $target, $useExcludeInclude = false) {
         // File list
         $filelist = null;
-        if (!empty($this->config['rsync']['directory'])) {
+        if ($useExcludeInclude && !empty($this->config['rsync']['directory'])) {
             $filelist = $this->config['rsync']['directory'];
         }
 
         // Exclude list
         $exclude  = null;
-        if (!empty($this->config['rsync']['exclude'])) {
+        if ($useExcludeInclude && !empty($this->config['rsync']['exclude'])) {
             $exclude = $this->config['rsync']['exclude'];
         }
 

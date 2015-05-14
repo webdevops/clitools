@@ -23,10 +23,10 @@ namespace CliTools\Console\Command\Sync;
 use CliTools\Utility\FilterUtility;
 use CliTools\Console\Builder\CommandBuilder;
 use CliTools\Console\Builder\RemoteCommandBuilder;
-use CliTools\Console\Builder\SelfCommandBuilder;
+use CliTools\Console\Builder\OutputCombineCommandBuilder;
 use CliTools\Console\Builder\CommandBuilderInterface;
 
-class BackupCommand extends \CliTools\Console\Command\Sync\AbstractSyncCommand {
+class SyncCommand extends AbstractSyncCommand {
 
     /**
      * Configure command
@@ -207,9 +207,9 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractSyncCommand {
     /**
      * Add filter to command
      *
-     * @param CommandBuilderInterface $command  Command
-     * @param string                  $database Database
-     * @param string                  $filter   Filter name
+     * @param CommandBuilderInterface $commandDump  Command
+     * @param string                  $database     Database
+     * @param string                  $filter       Filter name
      *
      * @return CommandBuilderInterface
      */
@@ -246,7 +246,7 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractSyncCommand {
             ->addArgumentList($tableList);
 
         // Combine both commands to one
-        $command = new \CliTools\Console\Builder\OutputCombineCommandBuilder();
+        $command = new OutputCombineCommandBuilder();
         $command
             ->addCommandForCombinedOutput($commandStructure)
             ->addCommandForCombinedOutput($commandData);

@@ -20,9 +20,7 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Console\Builder\SelfCommandBuilder;
-
-class BackupCommand extends \CliTools\Console\Command\Sync\AbstractShareCommand {
+class BackupCommand extends AbstractShareCommand {
 
     /**
      * Configure command
