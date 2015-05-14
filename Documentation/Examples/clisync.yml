@@ -1,0 +1,64 @@
+#######################################
+# Sync from server (eg. live server)
+#######################################
+sync:
+    # ssh server host or name (see .ssh/config)
+  ssh: live-server
+
+    # rsync for some directories
+  rsync:
+      # server and source directory (server host or name - see .ssh/config)
+    source: "live-server:/var/www/website/htdocs"
+
+      # directory list/patterns
+    directory:
+      - "/fileadmin/"
+      - "/uploads/"
+      - "/typo3conf/l10n/"
+
+  mysql:
+      # mysql connection
+    host: localhost
+    username: typo3
+    password: loremipsum
+
+    mysqldump:
+      option: "--single-transaction"
+
+      # MySQL filter for typo3 (eg. no caching tables)
+    filter: typo3
+
+      # List of databases for sync (local:foreign or  o)
+    database:
+      - typo3:website_live
+      - other_database
+
+#######################################
+# Shared server (sharing between developers)
+#######################################
+share:
+
+  rsync:
+      # target directory or server via ssh (eg. backup-server:/backup/projectname)
+    target: "/tmp/foo/"
+
+      # List of directories for backup
+    directory:
+      - "/fileadmin/"
+      - "/uploads/"
+      - "/typo3conf/l10n/"
+
+      # List of excludes (eg. specific files)
+    exclude:
+        # no avi files
+      - "/example/**/*.avi"
+        # no mp4 files
+      - "/example/**/*.mp4"
+
+  mysql:
+      # MySQL filter for typo3 (eg. no caching tables)
+    filter: typo3
+
+      # List of databases for backup
+    database:
+      - typo3
