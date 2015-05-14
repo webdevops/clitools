@@ -52,9 +52,11 @@ class ClearCommand extends \CliTools\Console\Command\AbstractCommand {
     public function execute(InputInterface $input, OutputInterface $output) {
         $database = $input->getArgument('db');
 
-        $output->writeln('<comment>Dropping Database "' . $database . '"...</comment>');
-        $query = 'DROP DATABASE IF EXISTS ' . DatabaseConnection::sanitizeSqlDatabase($database);
-        DatabaseConnection::exec($query);
+        if (DatabaseConnection::databaseExists($database)) {
+            $output->writeln('<comment>Dropping Database "' . $database . '"...</comment>');
+            $query = 'DROP DATABASE ' . DatabaseConnection::sanitizeSqlDatabase($database);
+            DatabaseConnection::exec($query);
+        }
 
         $output->writeln('<comment>Creating Database "' . $database . '"...</comment>');
         $query = 'CREATE DATABASE ' . DatabaseConnection::sanitizeSqlDatabase($database);
