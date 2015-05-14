@@ -81,18 +81,18 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
 
         if (DatabaseConnection::databaseExists($database)) {
             // Dropping
-            $output->writeln('<comment>Dropping Database "' . $database . '"...</comment>');
+            $output->writeln('<info>Dropping Database "' . $database . '"...</info>');
             $query = 'DROP DATABASE IF EXISTS ' . DatabaseConnection::sanitizeSqlDatabase($database);
             DatabaseConnection::exec($query);
         }
 
         // Creating
-        $output->writeln('<comment>Creating Database "' . $database . '"...</comment>');
+        $output->writeln('<info>Creating Database "' . $database . '"...</info>');
         $query = 'CREATE DATABASE ' . DatabaseConnection::sanitizeSqlDatabase($database);
         DatabaseConnection::exec($query);
 
         // Inserting
-        $output->writeln('<comment>Restoring dump into Database "' . $database . '"...</comment>');
+        $output->writeln('<info>Restoring dump into Database "' . $database . '"...</info>');
         putenv('USER=' . DatabaseConnection::getDbUsername());
         putenv('MYSQL_PWD=' . DatabaseConnection::getDbPassword());
 

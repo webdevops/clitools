@@ -130,7 +130,7 @@ class ServerCommand extends AbstractSyncCommand {
             // ##########
             // Dump from server
             // ##########
-            $this->output->writeln('<info>Fetching foreign database ' . $foreignDatabase . '</info>');
+            $this->output->writeln('<info>Fetching foreign database "' . $foreignDatabase . '"</info>');
 
             $mysqldump = $this->createMySqlDumpCommand($foreignDatabase);
 
@@ -146,7 +146,7 @@ class ServerCommand extends AbstractSyncCommand {
             // ##########
             // Restore local
             // ##########
-            $this->output->writeln('<info>Restoring database ' . $localDatabase . '</info>');
+            $this->output->writeln('<info>Restoring database "' . $localDatabase . '"</info>');
 
             $this->createMysqlRestoreCommand($localDatabase, $dumpFile)->executeInteractive();
         }
