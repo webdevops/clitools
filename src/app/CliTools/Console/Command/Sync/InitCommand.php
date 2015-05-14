@@ -68,7 +68,7 @@ sync:
 
           # specific mysqldump settings
         mysqldump:
-          option: "--single-transaction"
+          option: "--opt --single-transaction"
 
    ##################
    # Config "production"
@@ -91,7 +91,7 @@ sync:
 
       mysql:
           # mysql connection
-        host:     localhost
+        hostname: localhost
         username: typo3
         password: loremipsum
 
@@ -129,7 +129,6 @@ share:
       # List of databases for backup
     database:
       - typo3
-
 ';
 
         PhpUtility::filePutContents($cliSyncFilePath, $content);
