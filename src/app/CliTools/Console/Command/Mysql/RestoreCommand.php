@@ -64,20 +64,7 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
             return 1;
         }
 
-        // Get mime type from file
-        $finfo        = finfo_open(FILEINFO_MIME_TYPE);
-        $dumpFileType = finfo_file($finfo, $dumpFile);
-        finfo_close($finfo);
-
-        if ($dumpFileType === 'application/octet-stream') {
-            $finfo        = finfo_open();
-            $dumpFileInfo = finfo_file($finfo, $dumpFile);
-            finfo_close($finfo);
-
-            if (strpos($dumpFileInfo, 'LZMA compressed data') !== false) {
-                $dumpFileType = 'application/x-lzma';
-            }
-        }
+        $dumpFileType = $this->getMimeTypeFromDump($dumpFile);
 
         if (DatabaseConnection::databaseExists($database)) {
             // Dropping
@@ -131,5 +118,32 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
         $output->writeln('<info>Database "' . $database . '" restored</info>');
 
         return 0;
+    }
+
+
+    /**
+     * Get MIME type from dump file
+     *
+     * @param string $dumpFile Path to mysql dump file
+     *
+     * @return string
+     */
+    protected function getMimeTypeFromDump($dumpFile) {
+        // Get mime type from file
+        $finfo  = finfo_open(FILEINFO_MIME_TYPE);
+        $ret    = finfo_file($finfo, $dumpFile);
+        finfo_close($finfo);
+
+        if ($ret === 'application/octet-stream') {
+            $finfo        = finfo_open();
+            $dumpFileInfo = finfo_file($finfo, $dumpFile);
+            finfo_close($finfo);
+
+            if (strpos($dumpFileInfo, 'LZMA compressed data') !== false) {
+                $ret = 'application/x-lzma';
+            }
+        }
+
+        return $ret;
     }
 }
