@@ -22,7 +22,7 @@ namespace CliTools\Console\Command\Sync;
 
 use CliTools\Console\Builder\SelfCommandBuilder;
 
-class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
+class BackupCommand extends \CliTools\Console\Command\Sync\AbstractShareCommand {
 
     /**
      * Configure command
@@ -40,35 +40,31 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
         // Backup dirs
         // ##################
         $source  = $this->workingPath;
-        $target  = $this->config->share['rsync']['target'] . self::PATH_DATA;
+        $target  = $this->config['rsync']['target'] . self::PATH_DATA;
         $command = $this->createShareRsyncCommand($source, $target, true);
         $command->executeInteractive();
 
         // ##################
         // Backup databases
         // ##################
-        if (!empty($this->config->share['mysql']) && !empty($this->config->share['mysql']['database'])) {
-            foreach ($this->config->share['mysql']['database'] as $database) {
+        if (!empty($this->config['mysql']) && !empty($this->config['mysql']['database'])) {
+            foreach ($this->config['mysql']['database'] as $database) {
                 $this->output->writeln('<info>Dumping database ' . $database . '</info>');
 
                 // dump database
                 $dumpFile = $this->tempDir . '/mysql/' . $database . '.sql.bz2';
 
-                $mysqldump = new SelfCommandBuilder();
-                $mysqldump->addArgumentTemplate('mysql:backup %s %s', $database, $dumpFile);
+                $dumpFilter = $this->config['mysql']['filter'] ? $this->config['mysql']['filter'] : null;
 
-                if (!empty($this->config->share['mysql']['filter'])) {
-                    $mysqldump->addArgumentTemplate('--filter=%s', $this->config->share['mysql']['filter']);
-                }
-
-                $mysqldump->executeInteractive();
+                $this->createMysqlBackupCommand($database, $dumpFile, $dumpFilter)
+                    ->executeInteractive();
             }
 
             // ##################
             // Backup mysql dump
             // ##################
             $source = $this->tempDir;
-            $target = $this->config->share['rsync']['target'] . self::PATH_DUMP;
+            $target = $this->config['rsync']['target'] . self::PATH_DUMP;
             $command = $this->createShareRsyncCommand($source, $target, false);
             $command->executeInteractive();
         }

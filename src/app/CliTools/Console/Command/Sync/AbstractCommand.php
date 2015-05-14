@@ -23,6 +23,7 @@ namespace CliTools\Console\Command\Sync;
 use CliTools\Utility\PhpUtility;
 use CliTools\Utility\UnixUtility;
 use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Console\Builder\SelfCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
@@ -32,6 +33,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     const CONFIG_FILE = 'clisync.yml';
     const PATH_DUMP   = '/dump/';
     const PATH_DATA   = '/data/';
+
+    /**
+     * Config area
+     *
+     * @var string
+     */
+    protected $confArea;
 
     /**
      * Project working path
@@ -90,13 +98,16 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * Read and validate configuration
      */
     protected function readConfiguration() {
+
+        if (empty($this->confArea)) {
+            throw new \RuntimeException('Config area not set, cannot continue');
+        }
+
         $confFile = $this->workingPath . '/' . self::CONFIG_FILE;
         $conf = Yaml::parse(PhpUtility::fileGetContents($confFile));
 
         if (!empty($conf)) {
-            $this->config = new \ArrayObject();
-            $this->config->setFlags(\ArrayObject::STD_PROP_LIST|\ArrayObject::ARRAY_AS_PROPS);
-            $this->config->exchangeArray($conf);
+            $this->config = $conf[$this->confArea];
         } else {
             throw new \RuntimeException('Could not parse "' . $confFile . '"');
         }
@@ -133,28 +144,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     }
 
     /**
-     * Create rsync command for share sync
-     *
-     * @return CommandBuilder
-     */
-    protected function createShareRsyncCommand($source, $target, $useExcludeInclude = false) {
-        // File list
-        $filelist = null;
-        if (!empty($this->config->share['rsync']['directory'])) {
-            $filelist = $this->config->share['rsync']['directory'];
-        }
-
-        // Exclude list
-        $exclude  = null;
-        if (!empty($this->config->share['rsync']['exclude'])) {
-            $exclude = $this->config->share['rsync']['exclude'];
-        }
-
-        return $this->createRsyncCommand($source, $target, $filelist, $exclude);
-    }
-
-    /**
-     * Create rsync command for share sync
+     * Create rsync command for sync
      *
      * @param string     $source    Source directory
      * @param string     $target    Target directory
@@ -227,4 +217,39 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             unlink($rsyncFilter);
         });
     }
+
+    /**
+     * Create mysql backup command
+     *
+     * @param string      $database Database name
+     * @param string      $dumpFile MySQL dump file
+     *
+     * @return SelfCommandBuilder
+     */
+    protected function createMysqlRestoreCommand($database, $dumpFile) {
+        $command = new SelfCommandBuilder();
+        $command->addArgumentTemplate('mysql:restore %s %s', $database, $dumpFile);
+        return $command;
+    }
+
+    /**
+     * Create mysql backup command
+     *
+     * @param string      $database Database name
+     * @param string      $dumpFile MySQL dump file
+     * @param null|string $filter   Filter name
+     *
+     * @return SelfCommandBuilder
+     */
+    protected function createMysqlBackupCommand($database, $dumpFile, $filter = null) {
+        $command = new SelfCommandBuilder();
+        $command->addArgumentTemplate('mysql:backup %s %s', $database, $dumpFile);
+
+        if ($filter !== null) {
+            $command->addArgumentTemplate('--filter=%s', $filter);
+        }
+
+        return $command;
+    }
+
 }

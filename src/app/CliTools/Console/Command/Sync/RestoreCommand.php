@@ -22,7 +22,7 @@ namespace CliTools\Console\Command\Sync;
 
 use CliTools\Console\Builder\SelfCommandBuilder;
 
-class RestoreCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
+class RestoreCommand extends \CliTools\Console\Command\Sync\AbstractShareCommand {
 
     /**
      * Configure command
@@ -39,7 +39,7 @@ class RestoreCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
         // ##################
         // Restore dirs
         // ##################
-        $source = $this->config->share['rsync']['target'] . self::PATH_DUMP;
+        $source = $this->config['rsync']['target'] . self::PATH_DUMP;
         $target = $this->workingPath;
         $command = $this->createShareRsyncCommand($source, $target, true);
         $command->executeInteractive();
@@ -47,7 +47,7 @@ class RestoreCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
         // ##################
         // Restore mysql dump
         // ##################
-        $source = $this->config->share['rsync']['target'] . self::PATH_DUMP;
+        $source = $this->config['rsync']['target'] . self::PATH_DUMP;
         $target = $this->tempDir;
         $command = $this->createShareRsyncCommand($source, $target, false);
         $command->executeInteractive();
@@ -64,9 +64,7 @@ class RestoreCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
             if (!empty($database)) {
                 $this->output->writeln('<info>Restoring database ' . $database . '</info>');
 
-                $mysqldump = new SelfCommandBuilder();
-                $mysqldump->addArgumentTemplate('mysql:restore %s %s', $database, $item->getPathname());
-                $mysqldump->executeInteractive();
+                $this->createMysqlRestoreCommand($database, $item->getPathname())->executeInteractive();
             }
         }
     }

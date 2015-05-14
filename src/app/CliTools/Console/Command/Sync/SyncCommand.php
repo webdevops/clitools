@@ -26,7 +26,7 @@ use CliTools\Console\Builder\RemoteCommandBuilder;
 use CliTools\Console\Builder\SelfCommandBuilder;
 use CliTools\Console\Builder\CommandBuilderInterface;
 
-class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
+class BackupCommand extends \CliTools\Console\Command\Sync\AbstractSyncCommand {
 
     /**
      * Configure command
@@ -41,12 +41,12 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
      */
     protected function runTask() {
         // Sync files with rsync to local storage
-        if (!empty($this->config->sync['rsync'])) {
+        if (!empty($this->config['rsync'])) {
             $this->runTaskRsync();
         }
 
         // Sync database to local server
-        if (!empty($this->config->sync['mysql']) && !empty($this->config->sync['mysql']['database'])) {
+        if (!empty($this->config['mysql']) && !empty($this->config['mysql']['database'])) {
             // Full mysql transfer
             $this->runTaskDatabase();
         }
@@ -58,7 +58,7 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
         // ##################
         // Restore dirs
         // ##################
-        $source = $this->config->sync['rsync']['source'];
+        $source = $this->config['rsync']['source'];
         $target = $this->workingPath;
         $command = $this->createRsyncCommand($source, $target);
 
@@ -72,7 +72,7 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
         // ##################
         // Sync databases
         // ##################
-        $mysqlConf = $this->config->sync['mysql'];
+        $mysqlConf = $this->config['mysql'];
 
         $mysqlTemplate = new RemoteCommandBuilder('mysql');
         $mysqlTemplate
@@ -90,7 +90,7 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
         }
 
         $sshConnectionTemplate = new CommandBuilder('ssh');
-        $sshConnectionTemplate->addArgument($this->config->sync['ssh']);
+        $sshConnectionTemplate->addArgument($this->config['ssh']);
 
         foreach ($mysqlConf['database'] as $databaseConf) {
             if (strpos($databaseConf, ':') !== false) {
@@ -114,11 +114,11 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
             $mysqldump = clone $mysqlDumpTemplate;
             $mysqldump->addArgument($foreignDatabase);
 
-            if ($this->config->sync['mysql']['filter']) {
+            if ($this->config['mysql']['filter']) {
                 $mysql = clone $mysqlTemplate;
                 $mysql->addArgument($foreignDatabase);
 
-                $mysqldump = $this->addFilterArguments($mysqldump, $mysql, $this->config->sync['mysql']['filter']);
+                $mysqldump = $this->addFilterArguments($mysqldump, $mysql, $this->config['mysql']['filter']);
             }
 
             $command = $this->wrapCommand($mysqldump);
@@ -131,9 +131,7 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
             // ##########
             $this->output->writeln('<info>Restoring database ' . $localDatabase . '</info>');
 
-            $mysqldump = new SelfCommandBuilder();
-            $mysqldump->addArgumentTemplate('mysql:restore %s %s', $localDatabase, $dumpFile);
-            $mysqldump->executeInteractive();
+            $this->createMysqlRestoreCommand($localDatabase, $dumpFile)->executeInteractive();
         }
     }
 
@@ -145,9 +143,9 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
      */
     protected function wrapCommand(CommandBuilderInterface $command) {
         // Wrap in ssh if available
-        if (!empty($this->config->sync['ssh'])) {
+        if (!empty($this->config['ssh'])) {
             $sshCommand = new CommandBuilder('ssh', '-o BatchMode=yes');
-            $sshCommand->addArgument($this->config->sync['ssh'])
+            $sshCommand->addArgument($this->config['ssh'])
                 ->append($command, true);
 
             $command = $sshCommand;
@@ -168,13 +166,13 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
      */
     protected function createRsyncCommand($source, $target, array $filelist = null, array $exclude = null) {
         // Add file list (external file with --files-from option)
-        if (!$filelist && !empty($this->config->sync['rsync']['directory'])) {
-            $filelist = $this->config->sync['rsync']['directory'];
+        if (!$filelist && !empty($this->config['rsync']['directory'])) {
+            $filelist = $this->config['rsync']['directory'];
         }
 
         // Add exclude (external file with --exclude-from option)
-        if (!$exclude && !empty($this->config->sync['rsync']['exclude'])) {
-            $exclude = $this->config->sync['rsync']['exclude'];
+        if (!$exclude && !empty($this->config['rsync']['exclude'])) {
+            $exclude = $this->config['rsync']['exclude'];
         }
 
         return parent::createRsyncCommand($source, $target, $filelist, $exclude);
