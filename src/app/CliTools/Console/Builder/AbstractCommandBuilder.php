@@ -342,6 +342,16 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     }
 
     /**
+     * Clear output redirect
+     *
+     * @return $this
+     */
+    public function clearOutputRedirect() {
+        $this->outputRedirect = null;
+        return $this;
+    }
+
+    /**
      * Parse command and attributs from exec line
      *
      * WARNING: Not safe!
@@ -435,6 +445,15 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
         return $this;
     }
 
+    /**
+     * Clear pipe list
+     *
+     * @return $this
+     */
+    public function clearPipes() {
+        $this->pipeList = array();
+        return $this;
+    }
 
     /**
      * Add pipe command
