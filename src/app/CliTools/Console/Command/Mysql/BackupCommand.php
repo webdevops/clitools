@@ -23,6 +23,7 @@ namespace CliTools\Console\Command\Mysql;
 use CliTools\Database\DatabaseConnection;
 use CliTools\Console\Builder\CommandBuilder;
 use CliTools\Console\Builder\CommandBuilderInterface;
+use CliTools\Utility\FilterUtility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
@@ -146,16 +147,7 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
 
         // Get filtered tables
         $tableList = DatabaseConnection::tableList($database);
-
-        $tableListFiltered = array();
-        foreach ($tableList as $table) {
-            foreach ($filterList as $filter) {
-                if (preg_match($filter, $table)) {
-                    continue 2;
-                }
-            }
-            $tableListFiltered[] = $table;
-        }
+        $tableList = FilterUtility::mysqlTableFilter($tableList, $filterList);
 
         // Dump only structure
         $commandStructure = clone $command;
@@ -165,7 +157,7 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
         $commandData = clone $command;
         $commandData
             ->addArgument('--no-create-info')
-            ->addArgumentList($tableListFiltered);
+            ->addArgumentList($tableList);
 
         // Combine both commands to one
         $command = new \CliTools\Console\Builder\OutputCombineCommandBuilder();
