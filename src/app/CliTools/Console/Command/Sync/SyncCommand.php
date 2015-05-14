@@ -74,24 +74,6 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractSyncCommand {
         // ##################
         $mysqlConf = $this->config['mysql'];
 
-        $mysqlTemplate = new RemoteCommandBuilder('mysql');
-        $mysqlTemplate
-              ->addArgumentTemplate('-u%s', $mysqlConf['username'])
-              ->addArgumentTemplate('-p%s', $mysqlConf['password'])
-              ->addArgumentTemplate('-h%s', $mysqlConf['host']);
-
-        $mysqlDumpTemplate = clone $mysqlTemplate;
-        $mysqlDumpTemplate
-            ->setCommand('mysqldump')
-            ->addPipeCommand( new CommandBuilder('bzip2', '--compress --stdout') );
-
-        if (!empty($mysqlConf['mysqldump']['option'])) {
-            $mysqlDumpTemplate->addArgumentRaw($mysqlConf['mysqldump']['option']);
-        }
-
-        $sshConnectionTemplate = new CommandBuilder('ssh');
-        $sshConnectionTemplate->addArgument($this->config['ssh']);
-
         foreach ($mysqlConf['database'] as $databaseConf) {
             if (strpos($databaseConf, ':') !== false) {
                 list($localDatabase, $foreignDatabase) = explode(':', $databaseConf, 2);
@@ -111,14 +93,10 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractSyncCommand {
             // ##########
             $this->output->writeln('<info>Fetching foreign database ' . $foreignDatabase . '</info>');
 
-            $mysqldump = clone $mysqlDumpTemplate;
-            $mysqldump->addArgument($foreignDatabase);
+            $mysqldump = $this->createMySqlDumpCommand($foreignDatabase);
 
             if ($this->config['mysql']['filter']) {
-                $mysql = clone $mysqlTemplate;
-                $mysql->addArgument($foreignDatabase);
-
-                $mysqldump = $this->addFilterArguments($mysqldump, $mysql, $this->config['mysql']['filter']);
+                $mysqldump = $this->addFilterArguments($mysqldump, $foreignDatabase, $this->config['mysql']['filter']);
             }
 
             $command = $this->wrapCommand($mysqldump);
@@ -136,13 +114,61 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractSyncCommand {
     }
 
     /**
+     * Create new mysql command
+     *
+     * @param null|string $database Database name
+     *
+     * @return RemoteCommandBuilder
+     */
+    protected function createMySqlCommand($database = null) {
+        $command = new RemoteCommandBuilder('mysql');
+        $command
+            ->addArgument('--skip-column-names')
+            ->addArgumentTemplate('-u%s', $this->config['mysql']['username'])
+            ->addArgumentTemplate('-p%s', $this->config['mysql']['password'])
+            ->addArgumentTemplate('-h%s', $this->config['mysql']['host']);
+
+        if ($database !== null) {
+            $command->addArgument($database);
+        }
+
+        return $command;
+    }
+
+    /**
+     * Create new mysql command
+     *
+     * @param null|string $database Database name
+     *
+     * @return RemoteCommandBuilder
+     */
+    protected function createMySqlDumpCommand($database = null) {
+        $command = new RemoteCommandBuilder('mysqldump');
+        $command
+            ->addArgumentTemplate('-u%s', $this->config['mysql']['username'])
+            ->addArgumentTemplate('-p%s', $this->config['mysql']['password'])
+            ->addArgumentTemplate('-h%s', $this->config['mysql']['host'])
+            ->addPipeCommand( new CommandBuilder('bzip2', '--compress --stdout') );
+
+        if (!empty($this->config['mysqldump']['option'])) {
+            $command->addArgumentRaw($this->config['mysqldump']['option']);
+        }
+
+        if ($database !== null) {
+            $command->addArgument($database);
+        }
+
+        return $command;
+    }
+
+    /**
      * Wrap command with ssh if needed
      *
      * @param  CommandBuilderInterface $command
      * @return CommandBuilderInterface
      */
     protected function wrapCommand(CommandBuilderInterface $command) {
-        // Wrap in ssh if available
+        // Wrap in ssh if needed
         if (!empty($this->config['ssh'])) {
             $sshCommand = new CommandBuilder('ssh', '-o BatchMode=yes');
             $sshCommand->addArgument($this->config['ssh'])
@@ -181,13 +207,13 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractSyncCommand {
     /**
      * Add filter to command
      *
-     * @param CommandBuilderInterface $command      Command
-     * @param CommandBuilderInterface $mysqlCommand Database
-     * @param string                  $filter       Filter name
+     * @param CommandBuilderInterface $command  Command
+     * @param string                  $database Database
+     * @param string                  $filter   Filter name
      *
      * @return CommandBuilderInterface
      */
-    protected function addFilterArguments(CommandBuilderInterface $commandDump, CommandBuilderInterface $mysqlCommand, $filter) {
+    protected function addFilterArguments(CommandBuilderInterface $commandDump, $database, $filter) {
         $command = $commandDump;
 
         // get filter
@@ -200,12 +226,8 @@ class BackupCommand extends \CliTools\Console\Command\Sync\AbstractSyncCommand {
         $this->output->writeln('<comment>Using filter "' . $filter . '"</comment>');
 
         // Get table list (from cloned mysqldump command)
-        $tableListDumper = clone $mysqlCommand;
-        $tableListDumper->setCommand('mysql')
-            ->addArgument('--skip-column-names')
-            ->addArgumentTemplate('-e %s', 'show tables;')
-            ->clearOutputRedirect()
-            ->clearPipes();
+        $tableListDumper = $this->createMySqlCommand($database);
+        $tableListDumper->addArgumentTemplate('-e %s', 'show tables;');
 
         $tableListDumper = $this->wrapCommand($tableListDumper);
         $tableList       = $tableListDumper->execute()->getOutput();
