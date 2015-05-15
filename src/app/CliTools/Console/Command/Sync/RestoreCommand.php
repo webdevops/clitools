@@ -37,15 +37,17 @@ class RestoreCommand extends AbstractShareCommand {
         // ##################
         // Restore dirs
         // ##################
-        $source = $this->config['rsync']['path'] . self::PATH_DUMP;
-        $target = $this->workingPath;
-        $command = $this->createShareRsyncCommand($source, $target, true);
-        $command->executeInteractive();
+        if (!empty($this->config['rsync']['directory'])) {
+            $source  = $this->getRsyncPathFromConfig() . self::PATH_DUMP;
+            $target  = $this->workingPath;
+            $command = $this->createShareRsyncCommand($source, $target, true);
+            $command->executeInteractive();
+        }
 
         // ##################
         // Restore mysql dump
         // ##################
-        $source = $this->config['rsync']['path'] . self::PATH_DUMP;
+        $source = $this->getRsyncPathFromConfig() . self::PATH_DUMP;
         $target = $this->tempDir;
         $command = $this->createShareRsyncCommand($source, $target, false);
         $command->executeInteractive();

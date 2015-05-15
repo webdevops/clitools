@@ -25,6 +25,7 @@ use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
 use CliTools\Console\Shell\CommandBuilder\RemoteCommandBuilder;
 use CliTools\Console\Shell\CommandBuilder\OutputCombineCommandBuilder;
 use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
+use CliTools\Database\DatabaseConnection;
 use Symfony\Component\Console\Input\InputArgument;
 
 class ServerCommand extends AbstractSyncCommand {
@@ -33,7 +34,7 @@ class ServerCommand extends AbstractSyncCommand {
      * Server configuration name
      * @var string
      */
-    protected $serverName;
+    protected $contextName;
 
     /**
      * Configure command
@@ -43,12 +44,11 @@ class ServerCommand extends AbstractSyncCommand {
             ->setName('sync:server')
             ->setDescription('Sync files and database from server')
             ->addArgument(
-                'server',
+                'context',
                 InputArgument::REQUIRED,
                 'Configuration name for server'
             );
     }
-
 
     /**
      * Read and validate configuration
@@ -56,22 +56,22 @@ class ServerCommand extends AbstractSyncCommand {
     protected function readConfiguration() {
         parent::readConfiguration();
 
-        $this->serverName = $this->input->getArgument('server');
+        $this->contextName = $this->input->getArgument('context');
 
-        if (empty($this->serverName) || $this->serverName === '_' || empty($this->config[$this->serverName])) {
-            throw new \RuntimeException('No valid configuration found for server "' . $this->serverName . '"');
+        if (empty($this->contextName) || $this->contextName === '_' || empty($this->config[$this->contextName])) {
+            throw new \RuntimeException('No valid configuration found for context "' . $this->contextName . '"');
         }
 
         // Use server specific configuration
-        $this->output->writeln('<info>Syncing from "' . $this->serverName . '" server');
+        $this->output->writeln('<info>Syncing from "' . $this->contextName . '" server');
 
         $fullConfig = $this->config;
 
         if (!empty($fullConfig['_'])) {
             // Merge global config with specific config
-            $this->config = array_replace_recursive($fullConfig['_'], $this->config[$this->serverName]);
+            $this->config = array_replace_recursive($fullConfig['_'], $this->config[$this->contextName]);
         } else {
-            $this->config = $this->config[$this->serverName];
+            $this->config = $this->config[$this->contextName];
         }
     }
 
@@ -79,8 +79,13 @@ class ServerCommand extends AbstractSyncCommand {
      * Backup task
      */
     protected function runTask() {
+        // Check database connection
+        if (!empty($this->config['mysql']) && !empty($this->config['mysql']['database'])) {
+            DatabaseConnection::ping();
+        }
+
         // Sync files with rsync to local storage
-        if (!empty($this->config['rsync'])) {
+        if (!empty($this->config['rsync']) && !empty($this->config['rsync']['directory'])) {
             $this->runTaskRsync();
         }
 
@@ -97,7 +102,7 @@ class ServerCommand extends AbstractSyncCommand {
         // ##################
         // Restore dirs
         // ##################
-        $source = $this->config['rsync']['path'];
+        $source = $this->getRsyncPathFromConfig();
         $target = $this->workingPath;
         $command = $this->createRsyncCommand($source, $target);
 
@@ -220,7 +225,7 @@ class ServerCommand extends AbstractSyncCommand {
             $command->addArgumentRaw($this->config['mysqldump']['option']);
         }
 
-        // Add pipe (bzip2 compressed transfer via ssh)
+        // Add pipe compressor (bzip2 compressed transfer via ssh)
         $command->addPipeCommand( new CommandBuilder('bzip2', '--compress --stdout') );
 
         if ($database !== null) {
@@ -302,23 +307,36 @@ class ServerCommand extends AbstractSyncCommand {
         $tableList       = $tableListDumper->execute()->getOutput();
 
         // Filter table list
-        $tableList = FilterUtility::mysqlTableFilter($tableList, $filterList);
+        $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $filterList, $database);
 
         // Dump only structure
         $commandStructure = clone $command;
-        $commandStructure->addArgument('--no-data');
+        $commandStructure
+            ->addArgument('--no-data')
+            ->clearPipes();
 
         // Dump only data (only filtered tables)
         $commandData = clone $command;
         $commandData
             ->addArgument('--no-create-info')
-            ->addArgumentList($tableList);
+            ->clearPipes();
+
+        if (!empty($ignoredTableList)) {
+            $commandData->addArgumentTemplateMultiple('--ignore-table=%s', $ignoredTableList);
+        }
+
+        $commandPipeList = $command->getPipeList();
 
         // Combine both commands to one
         $command = new OutputCombineCommandBuilder();
         $command
             ->addCommandForCombinedOutput($commandStructure)
             ->addCommandForCombinedOutput($commandData);
+
+        // Readd compression pipe
+        if (!empty($commandPipeList)) {
+            $command->setPipeList($commandPipeList);
+        }
 
         return $command;
     }

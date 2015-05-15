@@ -130,22 +130,17 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         // Rsync (required)
         // ##################
 
-        // Check for rsync directive
-        if (empty($this->config['rsync'])) {
-            $output->writeln('<error>No rsync configuration found</error>');
-            $ret = false;
-        }
-
         // Check if rsync target exists
-        if (empty($this->config['rsync']['path'])) {
+        if (!$this->getRsyncPathFromConfig()) {
             $output->writeln('<error>No rsync path configuration found</error>');
             $ret = false;
+        } else {
+            $output->writeln('<comment>Using rsync path "' . $this->getRsyncPathFromConfig()  . '"</comment>');
         }
 
         // Check if there are any rsync directories
         if (empty($this->config['rsync']['directory'])) {
-            $output->writeln('<error>No rsync directory configuration found</error>');
-            $ret = false;
+            $output->writeln('<comment>No rsync directory configuration found, filesync disabled</comment>');
         }
 
         // ##################
@@ -229,6 +224,24 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
                 ->addArgument($target);
 
         return $command;
+    }
+
+    /**
+     * Get rsync path from configuration
+     *
+     * @return boolean|string
+     */
+    protected function getRsyncPathFromConfig() {
+        $ret = false;
+        if (!empty($this->config['rsync']['path'])) {
+            // Use path from rsync
+            $ret = $this->config['rsync']['path'];
+        } elseif(!empty($this->config['ssh']['hostname']) && !empty($this->config['ssh']['path'])) {
+            // Build path from ssh configuration
+            $ret = $this->config['ssh']['hostname'] . ':' . $this->config['ssh']['path'];
+        }
+
+        return $ret;
     }
 
     /**
