@@ -121,6 +121,24 @@ class DatabaseConnection {
         return self::$connection;
     }
 
+
+    /**
+     * Ping server
+     *
+     * @return bool
+     */
+    public static function ping() {
+        ConsoleUtility::verboseWriteln('DB::PING', null);
+        try {
+            self::getConnection()->query('SELECT 1');
+        } catch (\PDOException $e) {
+            ConsoleUtility::verboseWriteln('DB::QUERY::EXCEPTION', $e);
+            throw $e;
+        }
+
+        return true;
+    }
+
     /**
      * Execute SELECT query
      *
@@ -140,6 +158,17 @@ class DatabaseConnection {
         }
 
         return $ret;
+    }
+
+    /**
+     * Switch database
+     *
+     * @param  string $database Database
+     *
+     * @throws \PDOException
+     */
+    public static function switchDatabase($database) {
+        self::exec('USE ' . self::sanitizeSqlDatabase($database));
     }
 
     /**
@@ -356,6 +385,22 @@ class DatabaseConnection {
         $ret   = (int)self::getOne($query);
 
         return ($ret === 1 );
+    }
+
+    /**
+     * Return list of databases
+     *
+     * @return array
+     */
+    public static function databaseList() {
+        // Get list of databases
+        $query = 'SELECT SCHEMA_NAME FROM information_schema.SCHEMATA';
+        $ret   = DatabaseConnection::getCol($query);
+
+        // Filter mysql specific databases
+        $ret = array_diff($ret, array('mysql', 'information_schema', 'performance_schema'));
+
+        return $ret;
     }
 
     /**
