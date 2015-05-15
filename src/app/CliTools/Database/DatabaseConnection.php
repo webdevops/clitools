@@ -417,6 +417,22 @@ class DatabaseConnection {
         return $ret;
     }
 
+
+    /**
+     * Check if table exists in database
+     *
+     * @param string $database Database name
+     * @param string $table    Table name
+     * @return boolean
+     */
+    public static function tableExists($database, $table) {
+        $query = 'SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s';
+        $query = sprintf($query, self::quote($database), self::quote($table) );
+        $ret   = (bool)self::getOne($query);
+
+        return $ret;
+    }
+
     /**
      * Begin transaction
      */
