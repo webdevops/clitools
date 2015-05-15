@@ -34,7 +34,8 @@ class ListCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:list')
+        $this
+            ->setName('mysql:list')
             ->setDescription('List all databases')
             ->addOption(
                 'sort-name', null,

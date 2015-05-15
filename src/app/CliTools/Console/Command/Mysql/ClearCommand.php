@@ -31,7 +31,8 @@ class ClearCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:clear')
+        $this
+            ->setName('mysql:clear')
             ->setAliases(array('mysql:create'))
             ->setDescription('Clear (recreate) database')
             ->addArgument(

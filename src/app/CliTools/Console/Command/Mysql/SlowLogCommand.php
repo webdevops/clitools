@@ -32,25 +32,26 @@ class SlowLogCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:slowlog')
-             ->setDescription('Enable and show slow query log')
-             ->addArgument(
-                 'grep',
-                 InputArgument::OPTIONAL,
-                 'Grep'
-             )
+        $this
+            ->setName('mysql:slowlog')
+            ->setDescription('Enable and show slow query log')
+            ->addArgument(
+                'grep',
+                InputArgument::OPTIONAL,
+                'Grep'
+            )
             ->addOption(
                 'time',
                 't',
                 InputOption::VALUE_REQUIRED,
                 'Slow query time (default 1 second)'
             )
-             ->addOption(
-                 'no-index',
-                 'i',
-                 InputOption::VALUE_NONE,
-                 'Enable log queries without indexes log'
-             );
+            ->addOption(
+                'no-index',
+                'i',
+                InputOption::VALUE_NONE,
+                'Enable log queries without indexes log'
+            );
     }
 
     /**

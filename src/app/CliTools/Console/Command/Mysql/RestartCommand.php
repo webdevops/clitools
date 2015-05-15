@@ -30,7 +30,8 @@ class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:restart')
+        $this
+            ->setName('mysql:restart')
             ->setDescription('Restart MySQL');
     }
 

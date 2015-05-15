@@ -30,7 +30,8 @@ class ExecCommand extends AbstractCommand implements \CliTools\Console\Filter\An
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:exec')
+        $this
+            ->setName('docker:exec')
             ->setDescription('Run defined command in docker container');
     }
 

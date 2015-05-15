@@ -33,7 +33,8 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:restore')
+        $this
+            ->setName('mysql:restore')
             ->setDescription('Restore database')
             ->addArgument(
                 'db',

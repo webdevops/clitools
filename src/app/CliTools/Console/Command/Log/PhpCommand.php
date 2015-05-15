@@ -30,7 +30,8 @@ class PhpCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('log:php')
+        $this
+            ->setName('log:php')
             ->setAliases(array('php:log'))
             ->setDescription('Show up php log')
             ->addArgument(

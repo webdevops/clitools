@@ -30,7 +30,8 @@ class UpCommand extends AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:up')
+        $this
+            ->setName('docker:up')
             ->setDescription('Start docker container (with fast switching)');
     }
 

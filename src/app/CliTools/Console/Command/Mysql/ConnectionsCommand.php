@@ -31,7 +31,8 @@ class ConnectionsCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:connections')
+        $this
+            ->setName('mysql:connections')
             ->setDescription('List current connections');
     }
 

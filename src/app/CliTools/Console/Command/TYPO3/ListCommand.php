@@ -32,7 +32,8 @@ class ListCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('typo3:list')
+        $this
+            ->setName('typo3:list')
             ->setDescription('List all TYPO3 instances')
             ->addArgument(
                 'path',

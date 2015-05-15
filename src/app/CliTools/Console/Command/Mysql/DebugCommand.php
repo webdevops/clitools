@@ -31,7 +31,8 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:debug')
+        $this
+            ->setName('mysql:debug')
             ->setAliases(array('mysql:querylog'))
             ->setDescription('Debug mysql connections')
             ->addArgument(

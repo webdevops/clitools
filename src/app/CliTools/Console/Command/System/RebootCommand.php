@@ -30,7 +30,8 @@ class RebootCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('system:reboot')
+        $this
+            ->setName('system:reboot')
             ->setAliases(array('reboot'))
             ->setDescription('Reboot system');
     }

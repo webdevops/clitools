@@ -30,8 +30,9 @@ class IftopCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:iftop')
-             ->setDescription('Exec iftop for Docker');
+        $this
+            ->setName('docker:iftop')
+            ->setDescription('Exec iftop for Docker');
     }
 
     /**

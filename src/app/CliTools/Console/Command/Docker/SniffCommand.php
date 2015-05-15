@@ -32,7 +32,8 @@ class SniffCommand extends AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:sniff')
+        $this
+            ->setName('docker:sniff')
             ->setDescription('Start network sniffing with docker')
             ->addArgument(
                 'protocol',

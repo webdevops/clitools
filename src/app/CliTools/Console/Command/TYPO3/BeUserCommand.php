@@ -33,7 +33,8 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('typo3:beuser')
+        $this
+            ->setName('typo3:beuser')
             ->setDescription('Add backend admin user to database')
             ->addArgument(
                 'database',

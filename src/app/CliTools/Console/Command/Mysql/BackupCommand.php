@@ -35,18 +35,20 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:backup')
-             ->setDescription('Backup database')
-             ->addArgument(
+        $this
+            ->setName('mysql:backup')
+            ->setDescription('Backup database')
+            ->addArgument(
                  'db',
                  InputArgument::REQUIRED,
                  'Database name'
-             )
-             ->addArgument(
+            )
+            ->addArgument(
                  'file',
                  InputArgument::REQUIRED,
                  'File (mysql dump)'
-             )->addOption(
+            )
+            ->addOption(
                 'filter',
                 'f',
                 InputOption::VALUE_REQUIRED,

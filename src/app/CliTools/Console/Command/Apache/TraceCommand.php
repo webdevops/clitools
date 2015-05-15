@@ -33,7 +33,8 @@ class TraceCommand extends \CliTools\Console\Command\AbstractTraceCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('apache:trace')
+        $this
+            ->setName('apache:trace')
             ->setDescription('Debug Apache processes with strace');
 
         parent::configure();

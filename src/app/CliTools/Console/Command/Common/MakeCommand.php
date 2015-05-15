@@ -32,8 +32,9 @@ class MakeCommand extends \CliTools\Console\Command\AbstractCommand implements \
      * Configure command
      */
     protected function configure() {
-        $this->setName('make')
-             ->setDescription('Search Makefile updir and start makefile');
+        $this
+            ->setName('make')
+            ->setDescription('Search Makefile updir and start makefile');
     }
 
     /**

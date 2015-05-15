@@ -32,7 +32,8 @@ class ConvertCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:convert')
+        $this
+            ->setName('mysql:convert')
             ->setDescription('Convert charset/collation of a database')
             ->addArgument(
                 'database',

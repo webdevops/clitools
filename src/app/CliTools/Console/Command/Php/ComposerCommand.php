@@ -32,8 +32,9 @@ class ComposerCommand extends \CliTools\Console\Command\AbstractCommand implemen
      * Configure command
      */
     protected function configure() {
-        $this->setName('php:composer')
-             ->setDescription('Search composer.json updir and start composer');
+        $this
+            ->setName('php:composer')
+            ->setDescription('Search composer.json updir and start composer');
     }
 
     /**

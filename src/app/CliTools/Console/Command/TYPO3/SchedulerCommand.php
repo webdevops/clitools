@@ -32,13 +32,14 @@ class SchedulerCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('typo3:scheduler')
+        $this
+            ->setName('typo3:scheduler')
             ->setDescription('Run scheduler on all (or one specific) TYPO3 instances')
             ->addArgument(
                 'path',
                 InputArgument::OPTIONAL,
                 'Path to TYPO3 instance'
-            );
+);
     }
 
     /**

@@ -31,7 +31,8 @@ class RootCommand extends AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:root')
+        $this
+            ->setName('docker:root')
             ->setDescription('Enter shell as root in docker container')
             ->addArgument(
                 'container',

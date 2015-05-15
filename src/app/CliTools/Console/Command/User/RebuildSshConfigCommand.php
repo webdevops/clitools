@@ -29,7 +29,8 @@ class RebuildSshConfigCommand extends \CliTools\Console\Command\AbstractCommand 
      * Configure command
      */
     protected function configure() {
-        $this->setName('user:rebuildsshconfig')
+        $this
+            ->setName('user:rebuildsshconfig')
             ->setDescription('Rebuild SSH Config for current user');
     }
 

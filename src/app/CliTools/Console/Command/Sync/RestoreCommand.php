@@ -26,8 +26,9 @@ class RestoreCommand extends AbstractShareCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('sync:restore')
-             ->setDescription('Restore project files');
+        $this
+            ->setName('sync:restore')
+            ->setDescription('Restore project files');
     }
 
     /**

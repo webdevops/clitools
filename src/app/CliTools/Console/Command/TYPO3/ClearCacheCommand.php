@@ -32,7 +32,8 @@ class ClearCacheCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('typo3:clearcache')
+        $this
+            ->setName('typo3:clearcache')
             ->setDescription('Clear cache on all (or one specific) TYPO3 instances')
             ->addArgument(
                 'path',

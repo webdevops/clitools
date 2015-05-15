@@ -30,7 +30,8 @@ class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('apache:restart')
+        $this
+            ->setName('apache:restart')
             ->setDescription('Restart Apache');
     }
 

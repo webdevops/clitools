@@ -31,7 +31,8 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('typo3:cleanup')
+        $this
+            ->setName('typo3:cleanup')
             ->setDescription('Cleanup caches, logs and indexed search')
             ->addArgument(
                 'db',

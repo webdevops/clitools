@@ -34,7 +34,8 @@ class CreateCommand extends AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:create')
+        $this
+            ->setName('docker:create')
             ->setDescription('Create new docker boilerplate')
             ->addArgument(
                 'path',

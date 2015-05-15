@@ -30,8 +30,9 @@ class ComposeCommand extends AbstractCommand implements \CliTools\Console\Filter
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:compose')
-             ->setDescription('Run general docker-compose command in docker container');
+        $this
+            ->setName('docker:compose')
+            ->setDescription('Run general docker-compose command in docker container');
     }
 
     /**

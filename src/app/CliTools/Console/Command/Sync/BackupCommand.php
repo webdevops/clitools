@@ -26,8 +26,9 @@ class BackupCommand extends AbstractShareCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('sync:backup')
-             ->setDescription('Backup project files');
+        $this
+            ->setName('sync:backup')
+            ->setDescription('Backup project files');
     }
 
     /**
