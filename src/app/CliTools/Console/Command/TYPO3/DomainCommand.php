@@ -99,27 +99,31 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
         $domain = '.' . $this->getApplication()->getConfigValue('config', 'domain_dev');
         $domainLength = strlen($domain);
 
-        // ##################
-        // Fix domains
-        // ##################
-        $query = 'UPDATE ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.sys_domain
-                     SET domainName = CONCAT(domainName, ' . DatabaseConnection::quote($domain) . ')
-                   WHERE RIGHT(domainName, ' . $domainLength . ') <> ' . DatabaseConnection::quote($domain);
-        DatabaseConnection::exec($query);
+        if (DatabaseConnection::tableExists($database, 'sys_domain')) {
+            // ##################
+            // Fix domains
+            // ##################
+            $query = 'UPDATE ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.sys_domain
+                         SET domainName = CONCAT(domainName, ' . DatabaseConnection::quote($domain) . ')
+                       WHERE RIGHT(domainName, ' . $domainLength . ') <> ' . DatabaseConnection::quote($domain);
+            DatabaseConnection::exec($query);
 
-        // ##################
-        // Show all domains
-        // ##################
-        $query = 'SELECT domainName
-                    FROM ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.sys_domain
-                   WHERE hidden = 0';
-        $domainList = DatabaseConnection::getCol($query);
+            // ##################
+            // Show all domains
+            // ##################
+            $query = 'SELECT domainName
+                        FROM ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.sys_domain
+                       WHERE hidden = 0';
+            $domainList = DatabaseConnection::getCol($query);
 
-        $this->output->writeln('<info>Domain list of "' . $database . '":</info>');
+            $this->output->writeln('<info>Domain list of "' . $database . '":</info>');
 
-        foreach ($domainList as $domain) {
-            $this->output->writeln('    <info>'. $domain . '</info>');
+            foreach ($domainList as $domain) {
+                $this->output->writeln('    <info>' . $domain . '</info>');
+            }
+            $this->output->writeln('');
+        } else {
+            $this->output->writeln('<info>No sys_domain in "' . $database . '" found');
         }
-        $this->output->writeln('');
     }
 }
