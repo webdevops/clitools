@@ -104,10 +104,7 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
         $cleanupTableList = array();
 
         // Check if database is TYPO3 instance
-        $query     = 'SELECT table_name
-                    FROM information_schema.tables
-                   WHERE table_schema = ' . DatabaseConnection::quote($database);
-        $tableList = DatabaseConnection::getCol($query);
+        $tableList = DatabaseConnection::tableList($database);
 
         foreach ($tableList as $table) {
             $clearTable = false;
@@ -167,10 +164,10 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
 
         $this->output->writeln('<info>Starting cleanup of database ' . $database . '...');
 
-        DatabaseConnection::exec('USE `' . $database . '`');
+        DatabaseConnection::switchDatabase(DatabaseConnection::sanitizeSqlDatabase($database));
 
         foreach ($cleanupTableList as $table) {
-            $query = 'TRUNCATE `' . $table . '`';
+            $query = 'TRUNCATE ' . DatabaseConnection::sanitizeSqlTable($table);
             DatabaseConnection::exec($query);
 
             if ($this->output->isVerbose()) {

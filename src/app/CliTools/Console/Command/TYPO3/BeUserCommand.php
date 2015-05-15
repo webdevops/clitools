@@ -117,20 +117,12 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
             // All databases
             // ##############
 
-            // Get list of databases
-            $query        = 'SELECT SCHEMA_NAME
-                    FROM information_schema.SCHEMATA';
-            $databaseList = DatabaseConnection::getCol($query);
+            $databaseList = DatabaseConnection::databaseList();
 
             $dbFound = false;
             foreach ($databaseList as $dbName) {
-                // Skip internal mysql databases
-                if (in_array(strtolower($dbName), array('mysql', 'information_schema', 'performance_schema'))) {
-                    continue;
-                }
-
                 // Check if database is TYPO3 instance
-                $query           = 'SELECT COUNT(*) as count
+                $query = 'SELECT COUNT(*) as count
                             FROM information_schema.tables
                            WHERE table_schema = ' . DatabaseConnection::quote($dbName) . '
                              AND table_name = \'be_users\'';
@@ -206,13 +198,13 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
         try {
             // Get uid from current dev user (if already existing)
             $query    = 'SELECT uid
-                        FROM `' . DatabaseConnection::sanitizeSqlDatabase($database) . '`.be_users
+                        FROM ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.be_users
                        WHERE username = ' . DatabaseConnection::quote($username) . '
                          AND deleted = 0';
             $beUserId = DatabaseConnection::getOne($query);
 
             // Insert or update user in TYPO3 database
-            $query = 'INSERT INTO `' . DatabaseConnection::sanitizeSqlDatabase($database) . '`.be_users
+            $query = 'INSERT INTO ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.be_users
                                   (uid, tstamp, crdate, realName, username, password, TSconfig, admin, disable, starttime, endtime)
                        VALUES(
                           ' . DatabaseConnection::quote($beUserId) . ',
