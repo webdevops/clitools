@@ -131,6 +131,17 @@ share:
     database:
       - typo3
 
+#######################################
+# Task configuration
+#######################################
+task:
+
+    # These commands will be executed after backup, restore and sync
+  finalize:
+      # create user "dev" with password "dev"
+    - \'ct typo3:beuser\'
+      # append toplevel-domain .vm to all domains
+    - \'ct typo3:domain\'
 ';
 
         PhpUtility::filePutContents($cliSyncFilePath, $content);
