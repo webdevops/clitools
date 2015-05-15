@@ -1,4 +1,4 @@
-# CliTools for Vagrant VM, Debian and Ubuntu (and others)
+# CliTools for Docker, PHP und MySQL development
 
 ![latest v1.9.0](https://img.shields.io/badge/latest-v1.9.0-green.svg?style=flat)
 ![License GPL3](https://img.shields.io/badge/license-GPL3-blue.svg?style=flat)
