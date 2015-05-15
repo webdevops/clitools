@@ -45,4 +45,32 @@ class FilterUtility {
         return $ret;
     }
 
+    /**
+     * Filter mysql table list by filter
+     *
+     * @param array       $tables   List of tables
+     * @param array       $filter   List of filters
+     * @param string|null $database Database
+     *
+     * @return array
+     */
+    public static function mysqlIgnoredTableFilter(array $tables, array $filters, $database = null) {
+        $ret = array();
+
+        foreach ($tables as $table) {
+            foreach ($filters as $filter) {
+                if (preg_match($filter, $table)) {
+
+                    if ($database !== null) {
+                        $ret[] = $database . '.' . $table;
+                    } else {
+                        $ret[] = $table;
+                    }
+                    continue 2;
+                }
+            }
+        }
+
+        return $ret;
+    }
 }
