@@ -146,8 +146,8 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
         $this->output->writeln('<comment>Using filter "' . $filter . '"</comment>');
 
         // Get filtered tables
-        $tableList = DatabaseConnection::tableList($database);
-        $tableList = FilterUtility::mysqlTableFilter($tableList, $filterList);
+        $tableList        = DatabaseConnection::tableList($database);
+        $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $filterList, $database);
 
         // Dump only structure
         $commandStructure = clone $command;
@@ -155,9 +155,11 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
 
         // Dump only data (only filtered tables)
         $commandData = clone $command;
-        $commandData
-            ->addArgument('--no-create-info')
-            ->addArgumentList($tableList);
+        $commandData->addArgument('--no-create-info');
+
+        if (!empty($ignoredTableList)) {
+            $commandData->addArgumentTemplateMultiple('--ignore-table=%s', $ignoredTableList);
+        }
 
         // Combine both commands to one
         $command = new \CliTools\Console\Shell\CommandBuilder\OutputCombineCommandBuilder();

@@ -72,10 +72,7 @@ class ListCommand extends \CliTools\Console\Command\AbstractCommand {
     public function execute(InputInterface $input, OutputInterface $output) {
 
         // Get list of databases
-        $query        = 'SELECT SCHEMA_NAME
-                    FROM information_schema.SCHEMATA';
-        $databaseList = DatabaseConnection::getCol($query);
-
+        $databaseList = DatabaseConnection::databaseList();
         if (!empty($databaseList)) {
 
             // ########################
@@ -84,11 +81,6 @@ class ListCommand extends \CliTools\Console\Command\AbstractCommand {
 
             $databaseRowList = array();
             foreach ($databaseList as $database) {
-                // Skip internal mysql databases
-                if (in_array(strtolower($database), array('mysql', 'information_schema', 'performance_schema'))) {
-                    continue;
-                }
-
                 // Get all tables
                 $query      = 'SELECT COUNT(*) AS count
                             FROM information_schema.tables
