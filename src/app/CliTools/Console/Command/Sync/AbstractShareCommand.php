@@ -31,8 +31,6 @@ abstract class AbstractShareCommand extends \CliTools\Console\Command\Sync\Abstr
      */
     protected $confArea = 'share';
 
-
-
     /**
      * Create rsync command for share sync
      *

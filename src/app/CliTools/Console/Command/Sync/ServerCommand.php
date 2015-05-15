@@ -120,8 +120,10 @@ class ServerCommand extends AbstractSyncCommand {
 
         foreach ($mysqlConf['database'] as $databaseConf) {
             if (strpos($databaseConf, ':') !== false) {
+                // local and foreign database in one string
                 list($localDatabase, $foreignDatabase) = explode(':', $databaseConf, 2);
             } else {
+                // database equal
                 $localDatabase   = $databaseConf;
                 $foreignDatabase = $databaseConf;
             }
