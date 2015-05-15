@@ -63,6 +63,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     protected $config = array();
 
     /**
+     * Task configuration
+     *
+     * @var array
+     */
+    protected $taskConf = array();
+
+    /**
      * Execute command
      *
      * @param  InputInterface  $input  Input instance
@@ -89,6 +96,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         try {
             $this->runTask();
+            $this->runFinalizeTasks();
         } catch (\Exception $e) {
             $this->cleanup();
             throw $e;
@@ -109,6 +117,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $confFile = $this->workingPath . '/' . self::CONFIG_FILE;
         $conf = Yaml::parse(PhpUtility::fileGetContents($confFile));
 
+        // store task specific configuration
+        if (!empty($conf['task'])) {
+            $this->taskConf = $conf['task'];
+        }
+
+        // Switch to area configuration
         if (!empty($conf)) {
             $this->config = $conf[$this->confArea];
         } else {
@@ -187,6 +201,19 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $command->addArgumentSeparator()
                     ->addArgument($this->tempDir);
             $command->executeInteractive();
+        }
+    }
+
+
+    /**
+     * Run finalize tasks
+     */
+    protected function runFinalizeTasks() {
+        foreach ($this->taskConf['finalize'] as $task) {
+            $command = new CommandBuilder();
+            $command
+                ->parse($task)
+                ->executeInteractive();
         }
     }
 
