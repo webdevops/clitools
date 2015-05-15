@@ -221,7 +221,7 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     }
 
     /**
-     * Set argument with template
+     * Add argument with template
      *
      * @param string $arg        Argument sprintf
      * @param string $params...  Argument parameters
@@ -233,6 +233,22 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
         array_shift($funcArgs);
 
         return $this->addArgumentTemplateList($arg, $funcArgs);
+    }
+
+    /**
+     * Add argument with template multiple times
+     *
+     * @param string $arg     Argument sprintf
+     * @param array  $paramList  Argument parameters
+     *
+     * @return $this
+     */
+    public function addArgumentTemplateMultiple($arg, $paramList) {
+        foreach ($paramList as $param) {
+            $this->addArgumentTemplate($arg, $param);
+        }
+
+        return $this;
     }
 
     /**

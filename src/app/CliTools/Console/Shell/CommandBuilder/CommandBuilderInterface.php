@@ -135,26 +135,6 @@ interface CommandBuilderInterface {
     public function addArgumentList(array $arg, $escape = true);
 
     /**
-     * Append one argument to list
-     *
-     * @param array   $arg    Arguments
-     * @param boolean $escape Enable argument escaping
-     *
-     * @return $this
-     */
-    public function appendArgumentToList($arg, $escape = true);
-
-    /**
-     * Append multiple arguments to list
-     *
-     * @param array   $args   Arguments
-     * @param boolean $escape Enable argument escaping
-     *
-     * @return $this
-     */
-    public function appendArgumentsToList($args, $escape = true);
-
-    /**
      * Get arguments list
      *
      * @return array
@@ -289,15 +269,6 @@ interface CommandBuilderInterface {
      * @return \CliTools\Console\Shell\Executor
      */
     public function executeInteractive();
-
-    /**
-     * Validate argument value
-     *
-     * @param mixed $value Value
-     *
-     * @throws \RuntimeException
-     */
-    public function validateArgumentValue($value);
 
     /**
      * To string
