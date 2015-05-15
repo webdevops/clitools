@@ -23,15 +23,7 @@ namespace CliTools\Console\Shell\CommandBuilder;
 use CliTools\Console\Shell\Executor;
 
 interface CommandBuilderInterface {
-
     /**
-     * Construct
-     */
-    public function __construct();
-
-    /**
-     * Get command
-     *
      * @return string
      */
     public function getCommand();
@@ -40,6 +32,7 @@ interface CommandBuilderInterface {
      * Set command
      *
      * @param string $command
+     *
      * @return $this
      */
     public function setCommand($command);
@@ -69,6 +62,7 @@ interface CommandBuilderInterface {
      * Set argument from list
      *
      * @param  array $args Arguments
+     *
      * @return $this
      */
     public function setArgumentList(array $args);
@@ -76,34 +70,55 @@ interface CommandBuilderInterface {
     /**
      * Set arguments raw (unescaped)
      *
-     * @param  string $arg... Argument
+     * @param  string $arg ... Argument
+     *
      * @return $this
      */
     public function addArgumentRaw($arg);
 
     /**
+     * Set arguments list raw (unescaped)
+     *
+     * @param  array $arg ... Argument
+     *
+     * @return $this
+     */
+    public function addArgumentListRaw($arg);
+
+    /**
      * Set arguments
      *
-     * @param  string $arg... Argument
+     * @param  string $arg ... Argument
+     *
      * @return $this
      */
     public function addArgument($arg);
 
     /**
-     * Set argument with template
+     * Add argument with template
      *
-     * @param string $arg     Argument sprintf
-     * @param string $params  Argument parameters
+     * @param string $arg    Argument sprintf
+     * @param string $params ...  Argument parameters
      *
      * @return $this
      */
     public function addArgumentTemplate($arg, $params);
 
     /**
+     * Add argument with template multiple times
+     *
+     * @param string $arg       Argument sprintf
+     * @param array  $paramList Argument parameters
+     *
+     * @return $this
+     */
+    public function addArgumentTemplateMultiple($arg, $paramList);
+
+    /**
      * Set argument with template
      *
-     * @param string $arg     Argument sprintf
-     * @param array  $params  Argument parameters
+     * @param string $arg    Argument sprintf
+     * @param array  $params Argument parameters
      *
      * @return $this
      */
@@ -112,11 +127,32 @@ interface CommandBuilderInterface {
     /**
      * Add arguments list
      *
-     * @param  array   $arg Argument
+     * @param  array   $arg    Argument
      * @param  boolean $escape Escape shell arguments
+     *
      * @return $this
      */
     public function addArgumentList(array $arg, $escape = true);
+
+    /**
+     * Append one argument to list
+     *
+     * @param array   $arg    Arguments
+     * @param boolean $escape Enable argument escaping
+     *
+     * @return $this
+     */
+    public function appendArgumentToList($arg, $escape = true);
+
+    /**
+     * Append multiple arguments to list
+     *
+     * @param array   $args   Arguments
+     * @param boolean $escape Enable argument escaping
+     *
+     * @return $this
+     */
+    public function appendArgumentsToList($args, $escape = true);
 
     /**
      * Get arguments list
@@ -136,18 +172,26 @@ interface CommandBuilderInterface {
      * Set output (stdout and/or stderr) redirection
      *
      * @param null|string $outputRedirect
+     *
      * @return $this
      */
     public function setOutputRedirect($outputRedirect = null);
-
 
     /**
      * Redirect command stdout output to file
      *
      * @param string $filename Filename
+     *
      * @return $this
      */
     public function setOutputRedirectToFile($filename);
+
+    /**
+     * Clear output redirect
+     *
+     * @return $this
+     */
+    public function clearOutputRedirect();
 
     /**
      * Parse command and attributs from exec line
@@ -155,6 +199,7 @@ interface CommandBuilderInterface {
      * WARNING: Not safe!
      *
      * @param  string $str Command string
+     *
      * @return $this
      */
     public function parse($str);
@@ -162,8 +207,8 @@ interface CommandBuilderInterface {
     /**
      * Append another command builder
      *
-     * @param CommandBuilderInterface $command  Command builder
-     * @param boolean                 $inline   Add command as inline string (one big parameter)
+     * @param CommandBuilderInterface $command Command builder
+     * @param boolean                 $inline  Add command as inline string (one big parameter)
      *
      * @return $this
      */
@@ -188,15 +233,23 @@ interface CommandBuilderInterface {
      * Set pipe list
      *
      * @param array $pipeList
+     *
      * @return $this
      */
     public function setPipeList(array $pipeList);
 
+    /**
+     * Clear pipe list
+     *
+     * @return $this
+     */
+    public function clearPipes();
 
     /**
      * Add pipe command
      *
      * @param CommandBuilderInterface $command
+     *
      * @return $this
      */
     public function addPipeCommand(CommandBuilderInterface $command);
@@ -212,29 +265,45 @@ interface CommandBuilderInterface {
     /**
      * Get executor
      *
-     * @return Executor
+     * @return \CliTools\Console\Shell\Executor
      */
     public function getExecutor();
 
     /**
      * Set executor
      *
-     * @param Executor $executor
+     * @param \CliTools\Console\Shell\Executor $executor
      */
-    public function setExecutor(Executor $executor);
+    public function setExecutor(\CliTools\Console\Shell\Executor $executor);
 
     /**
      * Execute command
      *
-     * @return Executor
+     * @return \CliTools\Console\Shell\Executor
      */
     public function execute();
 
     /**
      * Execute command
      *
-     * @return Executor
+     * @return \CliTools\Console\Shell\Executor
      */
     public function executeInteractive();
+
+    /**
+     * Validate argument value
+     *
+     * @param mixed $value Value
+     *
+     * @throws \RuntimeException
+     */
+    public function validateArgumentValue($value);
+
+    /**
+     * To string
+     *
+     * @return string
+     */
+    public function __toString();
 
 }
