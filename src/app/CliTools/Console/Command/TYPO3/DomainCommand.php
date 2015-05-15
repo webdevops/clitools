@@ -123,7 +123,7 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
             }
             $this->output->writeln('');
         } else {
-            $this->output->writeln('<info>No sys_domain in "' . $database . '" found');
+            $this->output->writeln('<info>Table "sys_domain" doesn\'t exists in database "' . $database . '"');
         }
     }
 }
