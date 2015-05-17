@@ -39,12 +39,8 @@ abstract class AbstractShareCommand extends \CliTools\Console\Command\Sync\Abstr
     protected function validateConfiguration() {
         $ret = parent::validateConfiguration();
 
-        var_dump($ret);
-
         // Rsync required for share
         $ret = $ret && $this->validateConfigurationRsync();
-
-        var_dump($ret);
 
         return $ret;
     }
