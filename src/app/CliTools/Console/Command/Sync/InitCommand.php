@@ -57,7 +57,7 @@ class InitCommand extends \CliTools\Console\Command\AbstractCommand {
 #######################################
 # Sync from server (eg. live server)
 #######################################
-sync:
+server:
 
    ##################
    # Global config
@@ -82,7 +82,7 @@ sync:
       # rsync for some directories
     rsync:
         # server and source directory (server host or name - see .ssh/config)
-      source: "live-server:/var/www/website/htdocs"
+      path: "live-server:/var/www/website/htdocs"
 
         # directory list/patterns
       directory:
@@ -108,7 +108,7 @@ share:
 
   rsync:
       # source/target directory or server via ssh (eg. backup-server:/backup/projectname)
-    source: "/tmp/foo/"
+    path: "/tmp/foo/"
 
       # List of directories for backup
     directory:

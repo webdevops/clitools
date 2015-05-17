@@ -138,37 +138,59 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     protected function validateConfiguration() {
         $ret = true;
 
-        $output = $this->output;
+        // Rsync (optional)
+        if (!empty($this->config['rsync'])) {
+            if (!$this->validateConfigurationRsync()) {
+                $ret = false;
+            }
+        }
 
-        // ##################
-        // Rsync (required)
-        // ##################
+        // MySQL (optional)
+        if (!empty($this->config['mysql'])) {
+            if (!$this->validateConfigurationMysql()) {
+                $ret = false;
+            }
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Validate configuration (rsync)
+     *
+     * @return boolean
+     */
+    protected function validateConfigurationRsync() {
+        $ret    = true;
 
         // Check if rsync target exists
         if (!$this->getRsyncPathFromConfig()) {
-            $output->writeln('<error>No rsync path configuration found</error>');
+            $this->output->writeln('<error>No rsync path configuration found</error>');
             $ret = false;
         } else {
-            $output->writeln('<comment>Using rsync path "' . $this->getRsyncPathFromConfig()  . '"</comment>');
+            $this->output->writeln('<comment>Using rsync path "' . $this->getRsyncPathFromConfig() . '"</comment>');
         }
 
         // Check if there are any rsync directories
         if (empty($this->config['rsync']['directory'])) {
-            $output->writeln('<comment>No rsync directory configuration found, filesync disabled</comment>');
+            $this->output->writeln('<comment>No rsync directory configuration found, filesync disabled</comment>');
         }
 
-        // ##################
-        // MySQL (optional)
-        // ##################
+        return $ret;
+    }
 
-        if (!empty($this->config['mysql'])) {
+    /**
+     * Validate configuration (mysql)
+     *
+     * @return boolean
+     */
+    protected function validateConfigurationMysql() {
+        $ret    = true;
 
-            // Check if one database is configured
-            if (empty($this->config['mysql']['database'])) {
-                $output->writeln('<error>No mysql database configuration found</error>');
-                $ret = false;
-            }
-
+        // Check if one database is configured
+        if (empty($this->config['mysql']['database'])) {
+            $this->output->writeln('<error>No mysql database configuration found</error>');
+            $ret = false;
         }
 
         return $ret;
