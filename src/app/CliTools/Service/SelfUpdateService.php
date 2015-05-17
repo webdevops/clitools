@@ -120,6 +120,17 @@ class SelfUpdateService {
     }
 
     /**
+     * Enable update from old server
+     *
+     * @return $this
+     */
+    public function enableUpdateFallback() {
+        $this->updateUrl     = $this->application->getConfigValue('config', 'update_fallback_url', null);
+        $this->updateVersion = 'fallback';
+        return $this;
+    }
+
+    /**
      * Check if super user rights are required
      *
      * @return boolean
@@ -140,14 +151,14 @@ class SelfUpdateService {
      * @param boolean $force Force update
      */
     public function update($force = false) {
-        if ($this->githubReleaseUrl !== null) {
 
-        }
-
-        if (!empty($this->githubReleaseUrl)) {
-            $this->fetchLatestReleaseFromGithub();
-        } else {
-            throw new \RuntimeException('GitHub Release URL not set');
+        // Only ask for github if update url is not set
+        if (!$this->updateUrl) {
+            if (!empty($this->githubReleaseUrl)) {
+                $this->fetchLatestReleaseFromGithub();
+            } else {
+                throw new \RuntimeException('GitHub Release URL not set');
+            }
         }
 
         if ($this->checkIfUpdateNeeded($force)) {

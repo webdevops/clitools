@@ -46,6 +46,12 @@ class SelfUpdateCommand extends \CliTools\Console\Command\AbstractCommand {
                 null,
                 InputOption::VALUE_NONE,
                 'Allow update to beta releases'
+            )
+            ->addOption(
+                'fallback',
+                null,
+                InputOption::VALUE_NONE,
+                'Fallback to old update url'
             );
     }
 
@@ -64,6 +70,10 @@ class SelfUpdateCommand extends \CliTools\Console\Command\AbstractCommand {
 
         if ($input->getOption('beta')) {
             $updateService->enablePreVersions();
+        }
+
+        if ($input->getOption('fallback')) {
+            $updateService->enableUpdateFallback();
         }
 
         // Check if we need root rights
