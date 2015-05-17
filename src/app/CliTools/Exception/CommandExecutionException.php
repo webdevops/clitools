@@ -20,7 +20,6 @@ namespace CliTools\Exception;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
 use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
 
 class CommandExecutionException extends \RuntimeException {

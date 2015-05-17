@@ -25,8 +25,8 @@ class FilterUtility {
     /**
      * Filter mysql table list by filter
      *
-     * @param array $tables List of tables
-     * @param array $filter List of filters
+     * @param array $tables  List of tables
+     * @param array $filters List of filters
      *
      * @return array
      */
@@ -49,7 +49,7 @@ class FilterUtility {
      * Filter mysql table list by filter
      *
      * @param array       $tables   List of tables
-     * @param array       $filter   List of filters
+     * @param array       $filters  List of filters
      * @param string|null $database Database
      *
      * @return array
