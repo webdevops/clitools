@@ -40,6 +40,12 @@ class SelfUpdateCommand extends \CliTools\Console\Command\AbstractCommand {
                 'f',
                 InputOption::VALUE_NONE,
                 'Force update'
+            )
+            ->addOption(
+                'beta',
+                null,
+                InputOption::VALUE_NONE,
+                'Allow update to beta releases'
             );
     }
 
@@ -55,6 +61,10 @@ class SelfUpdateCommand extends \CliTools\Console\Command\AbstractCommand {
         $force = (bool)$input->getOption('force');
 
         $updateService = new SelfUpdateService($this->getApplication(), $output);
+
+        if ($input->getOption('beta')) {
+            $updateService->enablePreVersions();
+        }
 
         // Check if we need root rights
         if (!$this->getApplication()->isRunningAsRoot()

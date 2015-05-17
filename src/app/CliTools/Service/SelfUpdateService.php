@@ -23,6 +23,12 @@ use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
  */
 
 class SelfUpdateService {
+    /**
+     * Github repo url
+     *
+     * @var null|string
+     */
+    protected $githubRepo;
 
     /**
      * Update url
@@ -84,6 +90,13 @@ class SelfUpdateService {
     protected $application;
 
     /**
+     * If pre releases should be used
+     *
+     * @var bool
+     */
+    protected $updateAllowPreRelease = false;
+
+    /**
      * Constructor
      *
      * @param $app
@@ -94,6 +107,16 @@ class SelfUpdateService {
         $this->output      = $output;
 
         $this->collectInformations();
+    }
+
+    /**
+     * Enable prerelease versions (beta)
+     *
+     * @return $this
+     */
+    public function enablePreVersions() {
+        $this->updateAllowPreRelease = true;
+        return $this;
     }
 
     /**
@@ -117,7 +140,9 @@ class SelfUpdateService {
      * @param boolean $force Force update
      */
     public function update($force = false) {
-        $this->githubReleaseUrl = $this->application->getConfigValue('config', 'self_update_github', null);
+        if ($this->githubReleaseUrl !== null) {
+
+        }
 
         if (!empty($this->githubReleaseUrl)) {
             $this->fetchLatestReleaseFromGithub();
@@ -224,8 +249,14 @@ class SelfUpdateService {
         if (!empty($releaseList)) {
             foreach ($releaseList as $release) {
                 // Check release
-                if (!empty($release['draft']) || !empty($release['prerelease'])) {
+                if (!empty($release['draft'])) {
                     // no valid release
+                    continue;
+                }
+
+                // Check for pre release
+                if (!$this->updateAllowPreRelease && !empty($release['prerelease'])) {
+                    // no pre release allowed
                     continue;
                 }
 
@@ -305,6 +336,12 @@ class SelfUpdateService {
         $this->cliToolsCommandPerms['perms'] = fileperms($this->cliToolsCommandPath);
         $this->cliToolsCommandPerms['owner'] = (int)fileowner($this->cliToolsCommandPath);
         $this->cliToolsCommandPerms['group'] = (int)filegroup($this->cliToolsCommandPath);
+
+        // ##################
+        // Set github defaults
+        // ##################
+        $this->githubRepo       =  $this->application->getConfigValue('config', 'github_repo', null);
+        $this->githubReleaseUrl = 'https://api.github.com/repos/' . $this->githubRepo . '/releases';
     }
 
     /**
