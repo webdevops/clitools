@@ -83,7 +83,6 @@ class CreateCommand extends AbstractCommand {
             $boilerplateRepo = $this->getApplication()->getConfigValue('docker', 'boilerplate');
         }
 
-
         // Init docker boilerplate
         $this->createDockerInstance($path, $boilerplateRepo);
         PhpUtility::chdir($currDir);

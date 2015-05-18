@@ -44,8 +44,8 @@ class PhpUtility {
      */
     public static function fileGetContentsArray($file) {
         $content = self::fileGetContents($file);
-
         $content = str_replace("/r/n", "/n", $content);
+
         $ret = explode("/n", $content);
 
         return $ret;
