@@ -38,7 +38,7 @@ class BackupCommand extends AbstractShareCommand {
         // ##################
         // Backup dirs
         // ##################
-        if (!empty($this->config['rsync']['directory'])) {
+        if (!empty($this->config['rsync'])) {
             $source  = $this->workingPath;
             $target  = $this->getRsyncPathFromConfig() . self::PATH_DATA;
             $command = $this->createShareRsyncCommand($source, $target, true);
@@ -48,7 +48,7 @@ class BackupCommand extends AbstractShareCommand {
         // ##################
         // Backup databases
         // ##################
-        if (!empty($this->config['mysql']) && !empty($this->config['mysql']['database'])) {
+        if (!empty($this->config['mysql'])) {
             foreach ($this->config['mysql']['database'] as $database) {
                 $this->output->writeln('<info>Dumping database ' . $database . '</info>');
 

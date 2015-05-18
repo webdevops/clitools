@@ -80,17 +80,17 @@ class ServerCommand extends AbstractSyncCommand {
      */
     protected function runTask() {
         // Check database connection
-        if (!empty($this->config['mysql']) && !empty($this->config['mysql']['database'])) {
+        if (!empty($this->config['mysql'])) {
             DatabaseConnection::ping();
         }
 
         // Sync files with rsync to local storage
-        if (!empty($this->config['rsync']) && !empty($this->config['rsync']['directory'])) {
+        if (!empty($this->config['rsync'])) {
             $this->runTaskRsync();
         }
 
         // Sync database to local server
-        if (!empty($this->config['mysql']) && !empty($this->config['mysql']['database'])) {
+        if (!empty($this->config['mysql'])) {
             // Full mysql transfer
             $this->runTaskDatabase();
         }
