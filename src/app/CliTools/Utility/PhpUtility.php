@@ -37,6 +37,21 @@ class PhpUtility {
     }
 
     /**
+     * Get content of file (array)
+     *
+     * @param  string $file Filename
+     * @return array
+     */
+    public static function fileGetContentsArray($file) {
+        $content = self::fileGetContents($file);
+
+        $content = str_replace("/r/n", "/n", $content);
+        $ret = explode("/n", $content);
+
+        return $ret;
+    }
+
+    /**
      * Get content of file
      *
      * @param string $file    Filename
