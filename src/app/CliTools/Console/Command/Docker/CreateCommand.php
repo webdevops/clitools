@@ -53,6 +53,12 @@ class CreateCommand extends AbstractCommand {
                 'c',
                 InputOption::VALUE_REQUIRED,
                 'Code repository'
+            )
+            ->addOption(
+                'make',
+                'm',
+                InputOption::VALUE_REQUIRED,
+                'Makefile command'
             );
     }
 
@@ -65,6 +71,8 @@ class CreateCommand extends AbstractCommand {
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
+        $currDir = getcwd();
+
         $path = $input->getArgument('path');
 
         if ($this->input->getOption('docker')) {
@@ -75,15 +83,33 @@ class CreateCommand extends AbstractCommand {
             $boilerplateRepo = $this->getApplication()->getConfigValue('docker', 'boilerplate');
         }
 
+
         // Init docker boilerplate
         $this->createDockerInstance($path, $boilerplateRepo);
+        PhpUtility::chdir($currDir);
 
         // Init code
         if ($this->input->getOption('code')) {
             $this->initCode($path, $input->getOption('code'));
+            PhpUtility::chdir($currDir);
+
+            // detect document root
+            $this->initDocumentRoot($path);
+            PhpUtility::chdir($currDir);
+
+            // Run makefile
+            if ($this->input->getOption('make')) {
+                try {
+                    $this->runMakefile($path, $input->getOption('make'));
+                    PhpUtility::chdir($currDir);
+                } catch (\Exception $e) {
+                    $output->writeln('<error>Make command failed: ' . $e->getMessage() . '</error>');
+                }
+            }
         }
 
         // Start docker
+        PhpUtility::chdir($currDir);
         $this->startDockerInstance($path);
 
         return 0;
@@ -121,13 +147,73 @@ class CreateCommand extends AbstractCommand {
 
             // Remove code directory
             $command = new CommandBuilder('rmdir');
-            $command->addArgumentSeparator()
+            $command
+                ->addArgumentSeparator()
                 ->addArgument($path)
                 ->executeInteractive();
         }
 
         $command = new CommandBuilder('git','clone --branch=master --recursive %s %s', array($repo, $path));
         $command->executeInteractive();
+    }
+
+
+    /**
+     * Create docker instance from git repository
+     *
+     * @param string $path Path
+     */
+    protected function initDocumentRoot($path) {
+        $codePath      = $path . '/code';
+        $dockerEnvFile = $path . '/docker-env.yml';
+
+        $documentRoot = null;
+
+        // try to detect document root
+        if (is_dir($codePath . '/html')) {
+            $documentRoot = 'code/html';
+        } elseif (is_dir($codePath . '/htdocs')) {
+            $documentRoot = 'code/htdocs';
+        } elseif (is_dir($codePath . '/Web')) {
+            $documentRoot = 'code/Web';
+        } elseif (is_dir($codePath . '/web')) {
+            $documentRoot = 'code/web';
+        }
+
+        if ($documentRoot && is_file($dockerEnvFile) ) {
+            $dockerEnv = PhpUtility::fileGetContentsArray($dockerEnvFile);
+
+            unset($line);
+            foreach ($dockerEnv as &$line) {
+                $line = preg_replace('/^[\s]*DOCUMENT_ROOT[\s]*=code\/?[\s]*$/ms', 'DOCUMENT_ROOT=' . $documentRoot, $line);
+            }
+            unset($line);
+
+            $dockerEnv = implode("\n", $dockerEnv);
+
+            PhpUtility::filePutContents($dockerEnvFile, $dockerEnv);
+        }
+    }
+
+    /**
+     * Run make task
+     *
+     * @param string $path        Path of code
+     * @param string $makeCommand Makefile command
+     */
+    protected function runMakefile($path, $makeCommand) {
+        $path .= '/code';
+
+        $this->output->writeln('<comment>Running make with command "' . $makeCommand . '"</comment>');
+
+        PhpUtility::chdir($path);
+
+        // Remove code directory
+        $command = new CommandBuilder('make');
+        $command
+            ->addArgument($makeCommand)
+            ->executeInteractive();
+
     }
 
     /**

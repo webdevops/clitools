@@ -145,8 +145,9 @@ All log commands are using a grep-filter (specified as optional argument)
 |----------------------------|---------------------------------------------------------------------------|
 | ct docker:create           | Create new docker boilerplate in directory (first argument)               |
 |                            | __ct docker:create projectname__ -> Create new docker boilerplate instance in directory "projectname" |
-|                            | __ct docker:create projectname --code=git@github.com/foo/bar__ -> Create new docker boilerplate instance in directory "projectname" and custom code repository |
+|                            | __ct docker:create projectname --code=git@github.com/foo/bar__ -> Create new docker boilerplate instance in directory "projectname" and git code repository |
 |                            | __ct docker:create projectname --docker=git@github.com/foo/bar__ -> Create new docker boilerplate instance in directory "projectname" and custom docker boilerplate repository |
+|                            | __ct docker:create projectname --code=git@github.com/foo/bar --make=build__ -> Create new docker boilerplate instance in directory "projectname" and git code repository, will run automatic make (Makefile) task "build" after checkout |
 | ct docker:shell            | Jump into a shell inside a docker container (using predefined user defined with CLI_USER in docker env) |
 |                            | __ct docker:shell__ -> enter main container                               |
 |                            | __ct docker:shell mysql__ -> enter mysql container                        |
