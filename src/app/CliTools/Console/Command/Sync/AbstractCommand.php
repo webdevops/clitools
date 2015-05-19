@@ -146,10 +146,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         }
 
         // MySQL (optional)
-        if (!empty($this->config['mysql'])) {
+        if (!empty($this->config['mysql']) && !empty($this->config['mysql']['database'])) {
             if (!$this->validateConfigurationMysql()) {
                 $ret = false;
             }
+        } else {
+            // No mysql conf set
+            unset($this->config['mysql']);
         }
 
         return $ret;
