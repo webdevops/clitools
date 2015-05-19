@@ -132,7 +132,7 @@ class ServerCommand extends AbstractSyncCommand {
             $localDatabase   = trim($localDatabase);
             $foreignDatabase = trim($foreignDatabase);
 
-            $dumpFile = $this->tempDir . '/' . $localDatabase . '.sql.bz2';
+            $dumpFile = $this->tempDir . '/' . $localDatabase . '.sql.dump';
 
             // ##########
             // Dump from server
@@ -227,8 +227,21 @@ class ServerCommand extends AbstractSyncCommand {
             $command->addArgumentRaw($this->config['mysqldump']['option']);
         }
 
-        // Add pipe compressor (bzip2 compressed transfer via ssh)
-        $command->addPipeCommand( new CommandBuilder('bzip2', '--compress --stdout') );
+
+        if (!empty($this->config['mysql']['compression'])) {
+            switch($this->config['mysql']['compression']) {
+                case 'bzip2':
+                    // Add pipe compressor (bzip2 compressed transfer via ssh)
+                    $command->addPipeCommand( new CommandBuilder('bzip2', '--compress --stdout') );
+                    break;
+
+                case 'gzip':
+                    // Add pipe compressor (gzip compressed transfer via ssh)
+                    $command->addPipeCommand( new CommandBuilder('gzip', '--stdout') );
+                    break;
+            }
+        }
+
 
         if ($database !== null) {
             $command->addArgument($database);

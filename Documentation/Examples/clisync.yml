@@ -11,6 +11,9 @@ server:
         # MySQL filter for typo3 (eg. no caching tables)
       filter: typo3
 
+        # Transfer compression (none if empty, bzip2 or gzip)
+      compression: bzip2
+
         # specific mysqldump settings
       mysqldump:
         option: "--opt --single-transaction"
