@@ -99,6 +99,7 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
                 break;
 
             case 'application/gzip':
+            case 'application/x-gzip':
                 $output->writeln('<comment>Using GZIP uncompression</comment>');
                 $commandFile->setCommand('gzcat');
                 break;
