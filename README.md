@@ -208,7 +208,10 @@ All log commands are using a grep-filter (specified as optional argument)
 | ct sync:init               | Create example clisync.yml in current working directory                   |
 | ct sync:backup             | Search for clisync.yml in tree and start backup to shared server          |
 | ct sync:restore            | Search for clisync.yml in tree and start restore from shared server       |
-
+| ct sync:server             | Search for clisync.yml in tree and start server synchronization (eg. from live or preview to local development instance  |
+|                            | __ct sync:server production__ -> Use "production" configuration and start sync |
+|                            | __ct sync:server preview --rsync__ -> Use "preview" configuration and start only rsync |
+|                            | __ct sync:server staging --mysql__ -> Use "staging" configuration and start only mysql sync |
 
 ### PHP commands
 
