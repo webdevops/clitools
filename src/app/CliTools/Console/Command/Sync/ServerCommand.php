@@ -26,6 +26,7 @@ use CliTools\Console\Shell\CommandBuilder\RemoteCommandBuilder;
 use CliTools\Console\Shell\CommandBuilder\OutputCombineCommandBuilder;
 use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
 use CliTools\Database\DatabaseConnection;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
 class ServerCommand extends AbstractSyncCommand {
@@ -47,6 +48,18 @@ class ServerCommand extends AbstractSyncCommand {
                 'context',
                 InputArgument::REQUIRED,
                 'Configuration name for server'
+            )
+            ->addOption(
+                'mysql',
+                null,
+                InputOption::VALUE_NONE,
+                'Run only mysql'
+            )
+            ->addOption(
+                'rsync',
+                null,
+                InputOption::VALUE_NONE,
+                'Run only rsync'
             );
     }
 
@@ -65,13 +78,32 @@ class ServerCommand extends AbstractSyncCommand {
         // Use server specific configuration
         $this->output->writeln('<info>Syncing from "' . $this->contextName . '" server');
 
+        // ##################
         // Jump into section
+        // ##################
         if ($this->config->exists('_')) {
             // Merge global config with specific config
             $this->config->setData(array_replace_recursive($this->config->getArray('_'), $this->config->getArray($this->contextName)));
         } else {
             $this->config->setData($this->config->getArray($this->contextName));
         }
+
+        // ##################
+        // Option specific runners
+        // ##################
+
+        if ($this->input->getOption('mysql') || $this->input->getOption('rsync')) {
+            // Clear mysql config if mysql isn't active
+            if (!$this->input->getOption('mysql')) {
+                $this->config->clear('mysql');
+            }
+
+            // Clear rsync config if rsync isn't active
+            if (!$this->input->getOption('rsync')) {
+                $this->config->clear('rsync');
+            }
+        }
+
     }
 
     /**
