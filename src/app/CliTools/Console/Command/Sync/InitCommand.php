@@ -83,6 +83,8 @@ server:
     rsync:
         # server and source directory (server host or name - see .ssh/config)
       path: "live-server:/var/www/website/htdocs"
+        # set target as sub directroy (will be appended to working directory)
+      #target: "html/"
 
         # directory list/patterns
       directory:
@@ -109,6 +111,8 @@ share:
   rsync:
       # source/target directory or server via ssh (eg. backup-server:/backup/projectname)
     path: "/tmp/foo/"
+      # set target as sub directroy (will be appended to working directory
+    #target: "html/"
 
       # List of directories for backup
     directory:
@@ -145,6 +149,17 @@ task:
 ';
 
         PhpUtility::filePutContents($cliSyncFilePath, $content);
+
+        // Start editor with file (if $EDITOR is set)
+        $editorCmd = getenv('EDITOR');
+        if (!empty($editorCmd)) {
+            $editor = new \CliTools\Console\Shell\CommandBuilder\CommandBuilder();
+            $editor
+                ->parse($editorCmd)
+                ->addArgument($cliSyncFilePath)
+                ->executeInteractive();
+        }
+
 
         $this->output->writeln('<info>Successfully created ' . AbstractCommand::CONFIG_FILE . ' </info>');
     }
