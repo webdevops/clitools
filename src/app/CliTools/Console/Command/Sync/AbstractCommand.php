@@ -71,6 +71,36 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     protected $taskConf = array();
 
     /**
+     * Initializes the command just after the input has been validated.
+     *
+     * This is mainly useful when a lot of commands extends one main command
+     * where some things need to be initialized based on the input arguments and options.
+     *
+     * @param InputInterface  $input  An InputInterface instance
+     * @param OutputInterface $output An OutputInterface instance
+     * @throws \RuntimeException
+     */
+    protected function initialize(InputInterface $input, OutputInterface $output) {
+        parent::initialize($input, $output);
+
+
+        // Find configuration file
+        $this->workingPath = UnixUtility::findFileInDirectortyTree(self::CONFIG_FILE);
+        if (empty($this->workingPath)) {
+            throw new \RuntimeException('<error>No ' . self::CONFIG_FILE . ' found in tree</error>');
+        }
+        $output->writeln('<comment>Found ' . self::CONFIG_FILE . ' directory: ' . $this->workingPath . '</comment>');
+
+        // Read configuration
+        $this->readConfiguration();
+
+        // Validate configuration
+        if (!$this->validateConfiguration()) {
+            throw new \RuntimeException('<error>Configuration could not be validated</error>');
+        }
+    }
+
+    /**
      * Execute command
      *
      * @param  InputInterface  $input  Input instance
@@ -80,21 +110,6 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @throws \Exception
      */
     public function execute(InputInterface $input, OutputInterface $output) {
-        $this->workingPath = UnixUtility::findFileInDirectortyTree(self::CONFIG_FILE);
-
-        if (empty($this->workingPath)) {
-            $this->output->writeln('<error>No ' . self::CONFIG_FILE . ' found in tree</error>');
-            return 1;
-        }
-
-        $this->output->writeln('<comment>Found ' . self::CONFIG_FILE . ' directory: ' . $this->workingPath . '</comment>');
-
-        $this->readConfiguration();
-
-        if (!$this->validateConfiguration()) {
-            $this->output->writeln('<error>Configuration could not be validated</error>');
-            exit(1);
-        }
         $this->startup();
 
         try {
