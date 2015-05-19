@@ -44,14 +44,12 @@ abstract class AbstractSyncCommand extends \CliTools\Console\Command\Sync\Abstra
         // SSH (optional)
         // ##################
 
-        if (!empty($this->config['ssh'])) {
-
+        if ($this->config->exists('ssh')) {
             // Check if one database is configured
-            if (empty($this->config['ssh']['hostname'])) {
+            if (!$this->config->exists('ssh.hostname')) {
                 $output->writeln('<error>No ssh hostname configuration found</error>');
                 $ret = false;
             }
-
         }
 
         return $ret;

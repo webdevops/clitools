@@ -65,13 +65,12 @@ class ServerCommand extends AbstractSyncCommand {
         // Use server specific configuration
         $this->output->writeln('<info>Syncing from "' . $this->contextName . '" server');
 
-        $fullConfig = $this->config;
-
-        if (!empty($fullConfig['_'])) {
+        // Jump into section
+        if ($this->config->exists('_')) {
             // Merge global config with specific config
-            $this->config = array_replace_recursive($fullConfig['_'], $this->config[$this->contextName]);
+            $this->config->setData(array_replace_recursive($this->config->getArray('_'), $this->config->getArray($this->contextName)));
         } else {
-            $this->config = $this->config[$this->contextName];
+            $this->config->setData($this->config->getArray($this->contextName));
         }
     }
 
@@ -80,18 +79,19 @@ class ServerCommand extends AbstractSyncCommand {
      */
     protected function runTask() {
         // Check database connection
-        if (!empty($this->config['mysql'])) {
+        if ($this->config->exists('mysql')) {
             DatabaseConnection::ping();
         }
 
         // Sync files with rsync to local storage
-        if (!empty($this->config['rsync'])) {
+        if ($this->config->exists('rsync')) {
+            $this->output->writeln('<info> ---- Starting FILE sync ---- </info>');
             $this->runTaskRsync();
         }
 
         // Sync database to local server
-        if (!empty($this->config['mysql'])) {
-            // Full mysql transfer
+        if ($this->config->exists('mysql')) {
+            $this->output->writeln('<info> ---- Starting MYSQL sync ---- </info>');
             $this->runTaskDatabase();
         }
     }
@@ -116,9 +116,7 @@ class ServerCommand extends AbstractSyncCommand {
         // ##################
         // Sync databases
         // ##################
-        $mysqlConf = $this->config['mysql'];
-
-        foreach ($mysqlConf['database'] as $databaseConf) {
+        foreach ($this->config->getArray('mysql.database') as $databaseConf) {
             if (strpos($databaseConf, ':') !== false) {
                 // local and foreign database in one string
                 list($localDatabase, $foreignDatabase) = explode(':', $databaseConf, 2);
@@ -175,18 +173,18 @@ class ServerCommand extends AbstractSyncCommand {
             ->addArgument('-N');
 
         // Add username
-        if (!empty($this->config['mysql']['username'])) {
-            $command->addArgumentTemplate('-u%s', $this->config['mysql']['username']);
+        if ($this->config->exists('mysql.username')) {
+            $command->addArgumentTemplate('-u%s', $this->config->get('mysql.username'));
         }
 
         // Add password
-        if (!empty($this->config['mysql']['password'])) {
-            $command->addArgumentTemplate('-p%s', $this->config['mysql']['password']);
+        if ($this->config->exists('mysql.password')) {
+            $command->addArgumentTemplate('-p%s', $this->config->get('mysql.password'));
         }
 
         // Add hostname
-        if (!empty($this->config['mysql']['hostname'])) {
-            $command->addArgumentTemplate('-h%s', $this->config['mysql']['hostname']);
+        if ($this->config->exists('mysql.hostname')) {
+            $command->addArgumentTemplate('-h%s', $this->config->get('mysql.hostname'));
         }
 
         if ($database !== null) {
@@ -206,40 +204,37 @@ class ServerCommand extends AbstractSyncCommand {
     protected function createMySqlDumpCommand($database = null) {
         $command = new RemoteCommandBuilder('mysqldump');
 
-
         // Add username
-        if (!empty($this->config['mysql']['username'])) {
-            $command->addArgumentTemplate('-u%s', $this->config['mysql']['username']);
+        if ($this->config->exists('mysql.username')) {
+            $command->addArgumentTemplate('-u%s', $this->config->get('mysql.username'));
         }
 
         // Add password
-        if (!empty($this->config['mysql']['password'])) {
-            $command->addArgumentTemplate('-p%s', $this->config['mysql']['password']);
+        if ($this->config->exists('mysql.password')) {
+            $command->addArgumentTemplate('-p%s', $this->config->get('mysql.password'));
         }
 
         // Add hostname
-        if (!empty($this->config['mysql']['hostname'])) {
-            $command->addArgumentTemplate('-h%s', $this->config['mysql']['hostname']);
+        if ($this->config->exists('mysql.hostname')) {
+            $command->addArgumentTemplate('-h%s', $this->config->get('mysql.hostname'));
         }
 
         // Add custom options
-        if (!empty($this->config['mysqldump']['option'])) {
-            $command->addArgumentRaw($this->config['mysqldump']['option']);
+        if ($this->config->exists('mysqldump.option')) {
+            $command->addArgumentRaw($this->config->get('mysqldump.option'));
         }
 
+        // Transfer compression
+        switch($this->config->get('mysql.compression')) {
+            case 'bzip2':
+                // Add pipe compressor (bzip2 compressed transfer via ssh)
+                $command->addPipeCommand( new CommandBuilder('bzip2', '--compress --stdout') );
+                break;
 
-        if (!empty($this->config['mysql']['compression'])) {
-            switch($this->config['mysql']['compression']) {
-                case 'bzip2':
-                    // Add pipe compressor (bzip2 compressed transfer via ssh)
-                    $command->addPipeCommand( new CommandBuilder('bzip2', '--compress --stdout') );
-                    break;
-
-                case 'gzip':
-                    // Add pipe compressor (gzip compressed transfer via ssh)
-                    $command->addPipeCommand( new CommandBuilder('gzip', '--stdout') );
-                    break;
-            }
+            case 'gzip':
+                // Add pipe compressor (gzip compressed transfer via ssh)
+                $command->addPipeCommand( new CommandBuilder('gzip', '--stdout') );
+                break;
         }
 
 
@@ -258,9 +253,9 @@ class ServerCommand extends AbstractSyncCommand {
      */
     protected function wrapCommand(CommandBuilderInterface $command) {
         // Wrap in ssh if needed
-        if (!empty($this->config['ssh']['hostname'])) {
+        if ($this->config->exists('ssh.hostname')) {
             $sshCommand = new CommandBuilder('ssh', '-o BatchMode=yes');
-            $sshCommand->addArgument($this->config['ssh']['hostname'])
+            $sshCommand->addArgument($this->config->get('ssh.hostname'))
                 ->append($command, true);
 
             $command = $sshCommand;
@@ -281,13 +276,13 @@ class ServerCommand extends AbstractSyncCommand {
      */
     protected function createRsyncCommand($source, $target, array $filelist = null, array $exclude = null) {
         // Add file list (external file with --files-from option)
-        if (!$filelist && !empty($this->config['rsync']['directory'])) {
-            $filelist = $this->config['rsync']['directory'];
+        if (!$filelist && $this->config->exists('rsync.directory')) {
+            $filelist = $this->config->get('rsync.directory');
         }
 
         // Add exclude (external file with --exclude-from option)
-        if (!$exclude && !empty($this->config['rsync']['exclude'])) {
-            $exclude = $this->config['rsync']['exclude'];
+        if (!$exclude && $this->config->exists('rsync.exclude')) {
+            $exclude = $this->config->exists('rsync.exclude');
         }
 
         return parent::createRsyncCommand($source, $target, $filelist, $exclude);

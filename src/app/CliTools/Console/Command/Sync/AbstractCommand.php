@@ -24,6 +24,7 @@ use CliTools\Utility\PhpUtility;
 use CliTools\Utility\UnixUtility;
 use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
 use CliTools\Console\Shell\CommandBuilder\SelfCommandBuilder;
+use CliTools\Reader\ConfigReader;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
@@ -58,14 +59,14 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Sync configuration
      *
-     * @var array
+     * @var ConfigReaderService
      */
     protected $config = array();
 
     /**
      * Task configuration
      *
-     * @var array
+     * @var ConfigReaderService
      */
     protected $taskConf = array();
 
@@ -89,7 +90,9 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $this->output->writeln('<comment>Found ' . self::CONFIG_FILE . ' directory: ' . $this->workingPath . '</comment>');
 
         $this->readConfiguration();
+
         if (!$this->validateConfiguration()) {
+            $this->output->writeln('<error>Configuration could not be validated</error>');
             exit(1);
         }
         $this->startup();
@@ -109,6 +112,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * Read and validate configuration
      */
     protected function readConfiguration() {
+        $this->config   = new ConfigReader();
+        $this->taskConf = new ConfigReader();
 
         if (empty($this->confArea)) {
             throw new \RuntimeException('Config area not set, cannot continue');
@@ -119,12 +124,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         // store task specific configuration
         if (!empty($conf['task'])) {
-            $this->taskConf = $conf['task'];
+            $this->taskConf->setData($conf['task']);
         }
 
         // Switch to area configuration
         if (!empty($conf)) {
-            $this->config = $conf[$this->confArea];
+            $this->config->setData($conf[$this->confArea]);
         } else {
             throw new \RuntimeException('Could not parse "' . $confFile . '"');
         }
@@ -139,20 +144,20 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $ret = true;
 
         // Rsync (optional)
-        if (!empty($this->config['rsync'])) {
+        if ($this->config->exists('rsync')) {
             if (!$this->validateConfigurationRsync()) {
                 $ret = false;
             }
         }
 
         // MySQL (optional)
-        if (!empty($this->config['mysql']) && !empty($this->config['mysql']['database'])) {
+        if ($this->config->exists('mysql.database')) {
             if (!$this->validateConfigurationMysql()) {
                 $ret = false;
             }
         } else {
-            // No mysql conf set
-            unset($this->config['mysql']);
+            // Clear mysql if any options set
+            $this->config->clear('mysql');
         }
 
         return $ret;
@@ -175,7 +180,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         }
 
         // Check if there are any rsync directories
-        if (empty($this->config['rsync']['directory'])) {
+        if (!$this->config->exists('rsync.directory')) {
             $this->output->writeln('<comment>No rsync directory configuration found, filesync disabled</comment>');
         }
 
@@ -188,10 +193,10 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @return boolean
      */
     protected function validateConfigurationMysql() {
-        $ret    = true;
+        $ret = true;
 
         // Check if one database is configured
-        if (empty($this->config['mysql']['database'])) {
+        if (!$this->config->exists('mysql.database')) {
             $this->output->writeln('<error>No mysql database configuration found</error>');
             $ret = false;
         }
@@ -234,11 +239,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * Run finalize tasks
      */
     protected function runFinalizeTasks() {
-        foreach ($this->taskConf['finalize'] as $task) {
-            $command = new CommandBuilder();
-            $command
-                ->parse($task)
-                ->executeInteractive();
+        if ($this->taskConf->exists('finalize')) {
+            $this->output->writeln('<info> ---- Starting FINALIZE TASKS ---- </info>');
+
+            foreach ($this->taskConf->getArray('finalize') as $task) {
+                $command = new CommandBuilder();
+                $command->parse($task)->executeInteractive();
+            }
         }
     }
 
@@ -253,7 +260,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @return CommandBuilder
      */
     protected function createRsyncCommand($source, $target, array $filelist = null, array $exclude = null) {
-        $this->output->writeln('<info>Rsync from ' . $source . ' to ' . $target . '</info>');
+        $this->output->writeln('<comment>Rsync from ' . $source . ' to ' . $target . '</comment>');
 
         $command = new CommandBuilder('rsync', '-rlptD --delete-after --progress -h');
 
@@ -285,12 +292,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function getRsyncPathFromConfig() {
         $ret = false;
-        if (!empty($this->config['rsync']['path'])) {
+        if ($this->config->exists('rsync.path')) {
             // Use path from rsync
-            $ret = $this->config['rsync']['path'];
-        } elseif(!empty($this->config['ssh']['hostname']) && !empty($this->config['ssh']['path'])) {
+            $ret = $this->config->get('rsync.path');
+        } elseif($this->config->exists('ssh.hostname') && $this->config->exists('ssh.path')) {
             // Build path from ssh configuration
-            $ret = $this->config['ssh']['hostname'] . ':' . $this->config['ssh']['path'];
+            $ret = $this->config->get('ssh.hostname') . ':' . $this->config->get('ssh.path');
         }
 
         return $ret;
@@ -308,8 +315,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         // remove right /
         $ret = rtrim($this->workingPath, '/');
 
-        if (!empty($this->config['rsync']['target'])) {
-            $ret .= '/' . $this->config['rsync']['target'];
+        if ($this->config->exists('rsync.target')) {
+            $ret .= '/' . $this->config->get('rsync.target');
         }
 
         return $ret;

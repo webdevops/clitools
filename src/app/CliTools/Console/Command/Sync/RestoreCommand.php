@@ -38,7 +38,7 @@ class RestoreCommand extends AbstractShareCommand {
         // ##################
         // Restore dirs
         // ##################
-        if (!empty($this->config['rsync'])) {
+        if ($this->config->exists('rsync')) {
             $source  = $this->getRsyncPathFromConfig() . self::PATH_DUMP;
             $target  = $this->getRsyncWorkingPath();
             $command = $this->createShareRsyncCommand($source, $target, true);

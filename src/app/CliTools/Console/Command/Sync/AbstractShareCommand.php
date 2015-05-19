@@ -57,14 +57,14 @@ abstract class AbstractShareCommand extends \CliTools\Console\Command\Sync\Abstr
     protected function createShareRsyncCommand($source, $target, $useExcludeInclude = false) {
         // File list
         $filelist = null;
-        if ($useExcludeInclude && !empty($this->config['rsync']['directory'])) {
-            $filelist = $this->config['rsync']['directory'];
+        if ($useExcludeInclude && $this->config->exists('rsync.directory')) {
+            $filelist = $this->config->get('rsync.directory');
         }
 
         // Exclude list
         $exclude  = null;
-        if ($useExcludeInclude && !empty($this->config['rsync']['exclude'])) {
-            $exclude = $this->config['rsync']['exclude'];
+        if ($useExcludeInclude && $this->config->exists('rsync.exclude')) {
+            $exclude = $this->config->get('rsync.exclude');
         }
 
         return $this->createRsyncCommand($source, $target, $filelist, $exclude);
