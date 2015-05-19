@@ -39,7 +39,7 @@ class BackupCommand extends AbstractShareCommand {
         // Backup dirs
         // ##################
         if (!empty($this->config['rsync'])) {
-            $source  = $this->workingPath;
+            $source  = $this->getRsyncWorkingPath();
             $target  = $this->getRsyncPathFromConfig() . self::PATH_DATA;
             $command = $this->createShareRsyncCommand($source, $target, true);
             $command->executeInteractive();

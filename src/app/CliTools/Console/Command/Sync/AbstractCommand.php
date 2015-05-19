@@ -293,6 +293,25 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         return $ret;
     }
 
+
+    /**
+     * Get rsync working path (with target if set in config)
+     *
+     * @return boolean|string
+     */
+    protected function getRsyncWorkingPath() {
+        $ret = $this->workingPath;
+
+        // remove right /
+        $ret = rtrim($this->workingPath, '/');
+
+        if (!empty($this->config['rsync']['target'])) {
+            $ret .= '/' . $this->config['rsync']['target'];
+        }
+
+        return $ret;
+    }
+
     /**
      * Add file (pattern) list to rsync command
      *

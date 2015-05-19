@@ -492,7 +492,7 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
         $ret = array();
 
         if (!$this->isExecuteable()) {
-            throw new \RuntimeException('Command "' . $this->getCommand() . '" is not executable or available');
+            throw new \RuntimeException('Command "' . $this->getCommand() . '" is not executable or available, please install it');
         }
 
         // Add command

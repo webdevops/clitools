@@ -103,7 +103,7 @@ class ServerCommand extends AbstractSyncCommand {
         // Restore dirs
         // ##################
         $source = $this->getRsyncPathFromConfig();
-        $target = $this->workingPath;
+        $target = $this->getRsyncWorkingPath();
         $command = $this->createRsyncCommand($source, $target);
 
         $command->executeInteractive();

@@ -27,6 +27,8 @@ server:
     rsync:
         # server and source directory (server host or name - see .ssh/config)
       path: "live-server:/var/www/website/htdocs"
+        # set target as sub directroy (will be appended to working directory)
+      #target: "html/"
 
         # directory list/patterns
       directory:
@@ -53,6 +55,8 @@ share:
   rsync:
       # source/target directory or server via ssh (eg. backup-server:/backup/projectname)
     path: "/tmp/foo/"
+      # set target as sub directroy (will be appended to working directory)
+    #target: "html/"
 
       # List of directories for backup
     directory:
