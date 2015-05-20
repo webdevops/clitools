@@ -139,7 +139,7 @@ abstract class AbstractCommand extends Command {
             } catch (\Exception $e) {
                 // do not display exception here because it's a child process
             }
-            exit(0);
+            throw new \CliTools\Exception\StopException(0);
         } else {
             // running as root
         }

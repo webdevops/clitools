@@ -60,7 +60,7 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
         if (!is_dir($debugLogDir)) {
             if (!mkdir($debugLogDir, 0777, true)) {
                 $output->writeln('<error>Could not create "' . $debugLogDir . '" directory</error>');
-                exit(1);
+                throw new \CliTools\Exception\StopException(1);
             }
         }
 
