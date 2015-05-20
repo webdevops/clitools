@@ -21,6 +21,7 @@ namespace CliTools\Console\Command\Sync;
  */
 
 use CliTools\Utility\PhpUtility;
+use CliTools\Console\Shell\CommandBuilder\EditorCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -154,15 +155,14 @@ task:
         PhpUtility::filePutContents($cliSyncFilePath, $content);
 
         // Start editor with file (if $EDITOR is set)
-        $editorCmd = getenv('EDITOR');
-        if (!empty($editorCmd)) {
-            $editor = new \CliTools\Console\Shell\CommandBuilder\CommandBuilder();
+        try {
+            $editor = new EditorCommandBuilder();
             $editor
-                ->parse($editorCmd)
                 ->addArgument($cliSyncFilePath)
                 ->executeInteractive();
+        } catch (\Exception $e) {
+            $this->output->writeln('<error>' . $e->getMessage() . '</error>');
         }
-
 
         $this->output->writeln('<info>Successfully created ' . AbstractCommand::CONFIG_FILE . ' </info>');
     }
