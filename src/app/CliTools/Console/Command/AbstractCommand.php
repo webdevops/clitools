@@ -30,6 +30,13 @@ use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
 abstract class AbstractCommand extends Command {
 
     /**
+     * Message list (will be shown at the end)
+     *
+     * @var array
+     */
+    protected $finishMessageList = array();
+
+    /**
      * Input
      *
      * @var InputInterface
@@ -58,6 +65,40 @@ abstract class AbstractCommand extends Command {
 
         ConsoleUtility::initialize($input, $output);
     }
+
+    /**
+     * Runs the command.
+     *
+     * The code to execute is either defined directly with the
+     * setCode() method or by overriding the execute() method
+     * in a sub-class.
+     *
+     * @param InputInterface  $input  An InputInterface instance
+     * @param OutputInterface $output An OutputInterface instance
+     *
+     * @return int The command exit code
+     *
+     * @throws \Exception
+     *
+     * @see setCode()
+     * @see execute()
+     *
+     * @api
+     */
+    public function run(InputInterface $input, OutputInterface $output) {
+
+        try {
+            $ret = parent::run($input, $output);
+        } catch (\Exception $e) {
+            $this->showFinishMessages();
+            throw $e;
+        }
+
+        $this->showFinishMessages();
+
+        return $ret;
+    }
+
 
     /**
      * Get full parameter list
@@ -141,5 +182,24 @@ abstract class AbstractCommand extends Command {
         $command->executeInteractive();
 
         return 0;
+    }
+
+    /**
+     * Add message to finish list
+     *
+     * @param string $message Message
+     */
+    protected function addFinishMessage($message) {
+        $this->output->writeln($message);
+        $this->messageList[] = $message;
+    }
+
+    /**
+     * Show all finish messages
+     */
+    protected function showFinishMessages() {
+        foreach ($this->finishMessageList as $message) {
+            $this->output->writeln($message);
+        }
     }
 }
