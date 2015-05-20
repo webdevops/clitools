@@ -160,6 +160,9 @@ class Application extends \Symfony\Component\Console\Application {
             } else {
                 $ret = parent::doRun($input, $output);
             }
+        } catch(\CliTools\Exception\StopException $e) {
+            $this->callTearDown();
+            $ret = (int)$e->getMessage();
         } catch (\Exception $e) {
             $this->callTearDown();
             throw $e;
@@ -320,5 +323,15 @@ class Application extends \Symfony\Component\Console\Application {
             $this->settingsService = new SettingsService();
         }
         return $this->settingsService;
+    }
+
+    /**
+     * Set process title
+     *
+     * @param string $title Title
+     */
+    public function setProcessTitle($title) {
+        // DECSLPP.
+        echo "\033]0;" . 'ct: ' . $title . "\033\\";
     }
 }
