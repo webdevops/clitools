@@ -22,6 +22,7 @@ namespace CliTools\Console\Command\Sync;
 
 use CliTools\Utility\PhpUtility;
 use CliTools\Utility\UnixUtility;
+use CliTools\Utility\ConsoleUtility;
 use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
 use CliTools\Console\Shell\CommandBuilder\SelfCommandBuilder;
 use CliTools\Reader\ConfigReader;
@@ -227,6 +228,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $this->clearTempDir();
         PhpUtility::mkdir($this->tempDir, 0777, true);
         PhpUtility::mkdir($this->tempDir . '/mysql/', 0777, true);
+
+        $this->checkIfDockerExists();
     }
 
     /**
@@ -249,6 +252,28 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         }
     }
 
+    /**
+     * Check if docker exists
+     *
+     * @throws \CliTools\Exception\StopException
+     */
+    protected function checkIfDockerExists() {
+        $dockerPath = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
+
+        if (!empty($dockerPath)) {
+            $this->output->writeln('<info>Running docker containers:</info>');
+
+            // Docker instance found
+            $docker = new CommandBuilder('docker', 'ps');
+            $docker->executeInteractive();
+
+            $answer = ConsoleUtility::questionYesNo('Are these running containers the right one?', 'no');
+
+            if (!$answer) {
+                throw new \CliTools\Exception\StopException(1);
+            }
+        }
+    }
 
     /**
      * Run finalize tasks
