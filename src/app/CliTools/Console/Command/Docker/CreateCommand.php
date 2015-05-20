@@ -20,9 +20,10 @@ namespace CliTools\Console\Command\Docker;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Utility\PhpUtility;
 use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
 use CliTools\Console\Shell\CommandBuilder\SelfCommandBuilder;
-use CliTools\Utility\PhpUtility;
+use CliTools\Console\Shell\CommandBuilder\EditorCommandBuilder;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
@@ -96,13 +97,17 @@ class CreateCommand extends AbstractCommand {
             $this->initDocumentRoot($path);
             PhpUtility::chdir($currDir);
 
+            // Start interactive editor
+            $this->startInteractiveEditor($path . '/docker-compose.yml');
+            $this->startInteractiveEditor($path . '/docker-env.yml');
+
             // Run makefile
             if ($this->input->getOption('make')) {
                 try {
                     $this->runMakefile($path, $input->getOption('make'));
                     PhpUtility::chdir($currDir);
                 } catch (\Exception $e) {
-                    $output->writeln('<error>Make command failed: ' . $e->getMessage() . '</error>');
+                    $this->addFinishMessage('<error>Make command failed: ' . $e->getMessage() . '</error>');
                 }
             }
         }
@@ -112,6 +117,29 @@ class CreateCommand extends AbstractCommand {
         $this->startDockerInstance($path);
 
         return 0;
+    }
+
+    /**
+     * Start interactive editor
+     *
+     * @param string $path Path to file
+     */
+    protected function startInteractiveEditor($path) {
+        if (file_exists($path)) {
+            // Start editor with file (if $EDITOR is set)
+            try {
+                $editor = new EditorCommandBuilder();
+
+                $this->output->writeln('<comment>Starting interactive EDITOR for file ' .$path . '</comment>');
+                sleep(1);
+
+                $editor
+                    ->addArgument($path)
+                    ->executeInteractive();
+            } catch (\Exception $e) {
+                $this->addFinishMessage('<error>' . $e->getMessage() . '</error>');
+            }
+        }
     }
 
     /**
@@ -204,7 +232,7 @@ class CreateCommand extends AbstractCommand {
         $path .= '/code';
 
         $this->output->writeln('<comment>Running make with command "' . $makeCommand . '"</comment>');
-
+        try {
         PhpUtility::chdir($path);
 
         // Remove code directory
@@ -212,7 +240,9 @@ class CreateCommand extends AbstractCommand {
         $command
             ->addArgument($makeCommand)
             ->executeInteractive();
-
+        } catch (\Exception $e) {
+            $this->addFinishMessage('<error>Make command failed: ' . $e->getMessage() . '</error>');
+        }
     }
 
     /**
@@ -229,4 +259,5 @@ class CreateCommand extends AbstractCommand {
         $command->addArgument('docker:up');
         $command->executeInteractive();
     }
+
 }
