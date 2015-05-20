@@ -20,6 +20,8 @@ namespace CliTools\Utility;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -107,5 +109,33 @@ abstract class ConsoleUtility {
 
             self::$output->writeln($line);
         }
+    }
+
+    /**
+     * Ask question with yes/no detection
+     *
+     * @param string $question  Question
+     * @param string $default   Default
+     *
+     * @return bool
+     */
+    public static function questionYesNo($message, $default) {
+        $ret = false;
+
+        while (1) {
+            $question = new Question('<question> >>> ' . $message . '</question> [yes/no] ', $default);
+            $questionDialog = new QuestionHelper();
+            $answer = $questionDialog->ask(self::$input, self::$output, $question);
+
+            if (stripos($answer, 'n') === 0) {
+                $ret = false;
+                break;
+            } elseif (stripos($answer, 'y') === 0) {
+                $ret = true;
+                break;
+            }
+        }
+
+        return $ret;
     }
 }
