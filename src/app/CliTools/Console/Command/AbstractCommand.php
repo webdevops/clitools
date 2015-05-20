@@ -89,12 +89,11 @@ abstract class AbstractCommand extends Command {
 
         try {
             $ret = parent::run($input, $output);
+            $this->showFinishMessages();
         } catch (\Exception $e) {
             $this->showFinishMessages();
             throw $e;
         }
-
-        $this->showFinishMessages();
 
         return $ret;
     }
@@ -191,15 +190,23 @@ abstract class AbstractCommand extends Command {
      */
     protected function addFinishMessage($message) {
         $this->output->writeln($message);
-        $this->messageList[] = $message;
+        $this->finishMessageList[] = $message;
     }
 
     /**
      * Show all finish messages
      */
     protected function showFinishMessages() {
-        foreach ($this->finishMessageList as $message) {
-            $this->output->writeln($message);
+
+        if (!empty($this->finishMessageList)) {
+            $this->output->writeln('');
+            $this->output->writeln('Replay finish message log:');
+
+            foreach ($this->finishMessageList as $message) {
+                $this->output->writeln('  - ' . $message);
+            }
         }
+
+        $this->finishMessageList = array();
     }
 }
