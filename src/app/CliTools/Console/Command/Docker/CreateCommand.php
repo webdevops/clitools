@@ -130,6 +130,8 @@ class CreateCommand extends AbstractCommand {
             try {
                 $editor = new EditorCommandBuilder();
 
+                $this->getApplication()->setProcessTitle('Edit ' . basename($path));
+
                 $this->output->writeln('<comment>Starting interactive EDITOR for file ' .$path . '</comment>');
                 sleep(1);
 
@@ -149,6 +151,8 @@ class CreateCommand extends AbstractCommand {
      * @param string $repo Repository
      */
     protected function createDockerInstance($path, $repo) {
+        $this->getApplication()->setProcessTitle('Cloning docker');
+
         $this->output->writeln('<comment>Create new docker boilerplate in "' . $path . '"</comment>');
 
         $command = new CommandBuilder('git','clone --branch=master --recursive %s %s', array($repo, $path));
@@ -162,6 +166,8 @@ class CreateCommand extends AbstractCommand {
      * @param string $repo Repository
      */
     protected function initCode($path, $repo) {
+        $this->getApplication()->setProcessTitle('Cloning code');
+
         $path .= '/code';
 
         $this->output->writeln('<comment>Initialize new code instance in "' . $path . '"</comment>');
@@ -229,6 +235,8 @@ class CreateCommand extends AbstractCommand {
      * @param string $makeCommand Makefile command
      */
     protected function runMakefile($path, $makeCommand) {
+        $this->getApplication()->setProcessTitle('Run make');
+
         $path .= '/code';
 
         $this->output->writeln('<comment>Running make with command "' . $makeCommand . '"</comment>');
@@ -251,6 +259,8 @@ class CreateCommand extends AbstractCommand {
      * @param string $path Path
      */
     protected function startDockerInstance($path) {
+        $this->getApplication()->setProcessTitle('Start docker');
+
         $this->output->writeln('<comment>Building docker containers "' . $path . '"</comment>');
 
         PhpUtility::chdir($path);
