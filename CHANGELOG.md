@@ -13,6 +13,7 @@ CliTools Changelog
 - Added `typo3:domain --list` for only list the domains of one or all databases
 - Added `typo3:domain --remove=domain/pattern` for domain cleanup (eg. vagrant share)
 - Added `typo3:domain --duplication=suffix` for domain duplication
+- Added `vagrant:share` with automatic domain setting for TYPO3 projects (ALPHA! not finished!)
 - Refactored some classes
 - Fixed some issues
 - Added gzip compression for PHAR
