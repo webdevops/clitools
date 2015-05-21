@@ -217,15 +217,12 @@ class Executor {
             }
 
             do {
-                usleep(50 * 1000);
                 $status = proc_get_status($process);
-
-                if (!empty($opts['runningCallback']) && is_callable($opts['runningCallback'])) {
+                if (!empty($status) && !empty($opts['runningCallback']) && is_callable($opts['runningCallback'])) {
                     $opts['runningCallback']($process, $status);
                 }
-
-            } while (is_array($status) && $status['running'] === true);
-
+                usleep(100 * 1000);
+            } while (!empty($status) && is_array($status) && $status['running'] === true);
             $this->returnCode = $status['exitcode'];
 
             $this->runFinishers();
@@ -296,7 +293,9 @@ class Executor {
      */
     public function runFinishers() {
         foreach ($this->finishers as $call) {
-            $call($this);
+            if (is_callable($call)) {
+                $call($this);
+            }
         }
     }
 }
