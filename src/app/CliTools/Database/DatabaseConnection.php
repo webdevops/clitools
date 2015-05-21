@@ -192,6 +192,29 @@ class DatabaseConnection {
         return $ret;
     }
 
+
+    /**
+     * Generate and execute INSERT query
+     *
+     * @param  string $table  Table name
+     * @param  array  $values Values
+     *
+     * @return int
+     * @throws \PDOException
+     */
+    public static function insert($table, $values) {
+        $fieldList = array_keys($values);
+
+        $valueList = array();
+        foreach ($values as $value) {
+            $valueList[] = self::quote($value);
+        }
+
+        $query = 'INSERT INTO %s (%s) VALUES (%s)';
+        $query = sprintf($query, $table, implode(',',$fieldList), implode(',',$valueList));
+        self::exec($query);
+    }
+
     /**
      * Quote
      *
