@@ -552,10 +552,11 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     /**
      * Execute command
      *
+     * @param array $opts Option array
      * @return Executor
      */
-    public function executeInteractive() {
-        return $this->getExecutor()->execInteractive();
+    public function executeInteractive(array $opts = null) {
+        return $this->getExecutor()->execInteractive($opts);
     }
 
     /**

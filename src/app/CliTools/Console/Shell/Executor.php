@@ -193,10 +193,11 @@ class Executor {
     /**
      * Execute interactive
      *
+     * @param array $opts Option array
      * @return $this
      * @throws \Exception
      */
-    public function execInteractive() {
+    public function execInteractive(array $opts = null) {
         $this->checkCommand();
 
         ConsoleUtility::verboseWriteln('EXEC::INTERACTIVE', $this->command->build());
@@ -211,9 +212,18 @@ class Executor {
 
         if (is_resource($process)) {
 
+            if (!empty($opts['startupCallback']) && is_callable($opts['startupCallback'])) {
+                $opts['startupCallback']($process);
+            }
+
             do {
                 usleep(50 * 1000);
                 $status = proc_get_status($process);
+
+                if (!empty($opts['runningCallback']) && is_callable($opts['runningCallback'])) {
+                    $opts['runningCallback']($process, $status);
+                }
+
             } while (is_array($status) && $status['running'] === true);
 
             $this->returnCode = $status['exitcode'];
