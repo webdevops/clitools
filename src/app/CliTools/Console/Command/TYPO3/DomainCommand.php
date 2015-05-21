@@ -21,6 +21,7 @@ namespace CliTools\Console\Command\TYPO3;
  */
 
 use CliTools\Database\DatabaseConnection;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -38,9 +39,26 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
                 'db',
                 InputArgument::OPTIONAL,
                 'Database name'
+            )
+            ->addOption(
+                'list',
+                null,
+                InputOption::VALUE_NONE,
+                'List only databases'
+            )
+            ->addOption(
+                'remove',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Remove domain (with wildcard support)'
+            )
+            ->addOption(
+                'duplicate',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Add duplication domains (will duplicate all domains in system, eg. for vagrant share)'
             );
     }
-
     /**
      * Execute command
      *
@@ -74,17 +92,91 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
                 $isTypo3Database = DatabaseConnection::getOne($query);
 
                 if ($isTypo3Database) {
-                    $this->setupDevelopmentDomainsForDatabase($dbName);
+                    $this->runTaskForDomain($dbName);
                 }
             }
         } else {
             // ##############
             // One databases
             // ##############
-            $this->setupDevelopmentDomainsForDatabase($dbName);
+            $this->runTaskForDomain($dbName);
         }
+    }
 
-        return 0;
+    /**
+     * Run tasks for one domain
+     */
+    protected function runTaskForDomain($dbName) {
+        DatabaseConnection::switchDatabase($dbName);
+
+        if ($this->input->getOption('list')) {
+            // Show domain list (and skip all other tasks)
+            $this->showDomainList($dbName);
+        } else {
+            // Remove domains (eg. for cleanup)
+            if ($this->input->getOption('remove')) {
+                $this->removeDomains($this->input->getOption('remove'));
+            }
+
+            // Set development domains
+            $this->manipulateDomains($dbName);
+
+            // Add sharing domains
+            if ($this->input->getOption('duplicate')) {
+                $this->addDuplicateDomains($this->input->getOption('duplicate'));
+            }
+
+            // Show domain list
+            $this->showDomainList($dbName);
+        }
+    }
+
+    /**
+     * Remove domains
+     */
+    protected function removeDomains($pattern) {
+        $pattern = str_replace('*', '%', $pattern);
+
+        $query = 'DELETE FROM sys_domain WHERE domainName LIKE %s';
+        $query = sprintf($query, DatabaseConnection::quote($pattern));
+        DatabaseConnection::exec($query);
+    }
+
+
+    /**
+     * Add share domains (eg. for vagrantshare)
+     *
+     * @param string $suffix Domain suffix
+     */
+    protected function addDuplicateDomains($suffix) {
+
+        $query = 'SELECT * FROM sys_domain';
+        $domainList = DatabaseConnection::getAll($query);
+
+        foreach ($domainList as $domain) {
+            unset($domain['uid']);
+
+            $domain['domainName'] .= '.' . ltrim($suffix, '.');
+
+            DatabaseConnection::insert('sys_domain', $domain);
+        }
+    }
+
+    /**
+     * Show list of domains
+     *
+     * @param string $dbName Domain name
+     */
+    protected function showDomainList($dbName) {
+        $query = 'SELECT domainName FROM sys_domain ORDER BY domainName ASC';
+        $domainList = DatabaseConnection::getCol($query);
+
+        $this->output->writeln('<info>Domain list of "' . $dbName . '":</info>');
+
+        foreach ($domainList as $domain) {
+            $this->output->writeln('    <info>' . $domain . '</info>');
+        }
+        $this->output->writeln('');
     }
 
     /**
@@ -94,7 +186,7 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return void
      */
-    protected function setupDevelopmentDomainsForDatabase($database) {
+    protected function manipulateDomains($database) {
 
         $domain = '.' . $this->getApplication()->getConfigValue('config', 'domain_dev');
         $domainLength = strlen($domain);
@@ -107,23 +199,6 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
                          SET domainName = CONCAT(domainName, ' . DatabaseConnection::quote($domain) . ')
                        WHERE RIGHT(domainName, ' . $domainLength . ') <> ' . DatabaseConnection::quote($domain);
             DatabaseConnection::exec($query);
-
-            // ##################
-            // Show all domains
-            // ##################
-            $query = 'SELECT domainName
-                        FROM ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.sys_domain
-                       WHERE hidden = 0';
-            $domainList = DatabaseConnection::getCol($query);
-
-            $this->output->writeln('<info>Domain list of "' . $database . '":</info>');
-
-            foreach ($domainList as $domain) {
-                $this->output->writeln('    <info>' . $domain . '</info>');
-            }
-            $this->output->writeln('');
-        } else {
-            $this->output->writeln('<info>Table "sys_domain" doesn\'t exists in database "' . $database . '"');
         }
     }
 }

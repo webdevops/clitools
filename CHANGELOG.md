@@ -10,6 +10,9 @@ CliTools Changelog
 - Added `sync:server` for syncing any configured server to your local development system (reads clisync.yml)
 - Added `sync:backup` for backup to a shared server (reads clisync.yml)
 - Added `sync:restore` for restore from a shared server (reads clisync.yml)
+- Added `typo3:domain --list` for only list the domains of one or all databases
+- Added `typo3:domain --remove=domain/pattern` for domain cleanup (eg. vagrant share)
+- Added `typo3:domain --duplication=suffix` for domain duplication
 - Refactored some classes
 - Fixed some issues
 - Added gzip compression for PHAR
