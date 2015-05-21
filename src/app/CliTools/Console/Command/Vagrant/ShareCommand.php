@@ -66,7 +66,7 @@ class ShareCommand extends \CliTools\Console\Command\AbstractCommand {
                             $typo3Domain = new SelfCommandBuilder();
                             $typo3Domain
                                 ->addArgument('typo3:domain')
-                                ->addArgument('--remove=*.vagrantshare.com')
+                                ->addArgumentTemplate('--remove=%s', '*.vagrantshare.com')
                                 ->addArgumentTemplate('--duplicate=%s', $domainName . '.vagrantshare.com')
                                 ->execute();
 
@@ -75,8 +75,16 @@ class ShareCommand extends \CliTools\Console\Command\AbstractCommand {
                     }
                 }
             }
-
         };
+
+        $cleanupCallback = function() {
+            $typo3Domain = new SelfCommandBuilder();
+            $typo3Domain
+                ->addArgument('typo3:domain')
+                ->addArgumentTemplate('--remove=%s', '*.vagrantshare.com')
+                ->execute();
+        };
+        $this->getApplication()->registerTearDown($cleanupCallback);
 
         $opts = array(
             'runningCallback' => $runningCallback,
