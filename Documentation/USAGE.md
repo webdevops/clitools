@@ -10,7 +10,9 @@ server installations. Currently filesync (rsync) and database fetching is suppor
 First you need to create a `clisync.yml` in your project directory, the CliTools will provide your an example
 of this file by using following command:
 
-	ct sync:init
+```bash
+ct sync:init
+```
 
 If you need special SSH settings (ports, compression, identify...) please use your `~/.ssh/config` file 
 to such settings.
@@ -26,25 +28,27 @@ In the `clisync.yml` you can specify multiple servers.
 
 Now you can sync your `production` server to your local installation:
 
-	# Full sync (files and database)
-	ct sync:server production
+```bash
+# Full sync (files and database)
+ct sync:server production
 
-	# Only MySQL
-	ct sync:server production --mysql
+# Only MySQL
+ct sync:server production --mysql
 
-	# Only Files
-	ct sync:server production --rsync
+# Only Files
+ct sync:server production --rsync
+```
 
 ## Project sharing  (ct sync:backup and ct sync:restore)
 
 The sharing can be used to share files (assets) and databases between developers.
 Please use a common development/storage server with ssh access for each developer for this feature.
 
-
+```bash
 	# Make backup of current state and transfer to share server
 	ct sync:backup
 
 	# Restore to state from the share server
 	ct sync:restore
-
+```
 
