@@ -2,8 +2,6 @@
 
 namespace CliTools\Reader;
 
-use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
-
 /*
  * CliTools Command
  * Copyright (C) 2015 Markus Blaschke <markus@familie-blaschke.net>
