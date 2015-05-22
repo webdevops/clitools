@@ -45,10 +45,10 @@ The sharing can be used to share files (assets) and databases between developers
 Please use a common development/storage server with ssh access for each developer for this feature.
 
 ```bash
-	# Make backup of current state and transfer to share server
-	ct sync:backup
+# Make backup of current state and transfer to share server
+ct sync:backup
 
-	# Restore to state from the share server
-	ct sync:restore
+# Restore to state from the share server
+ct sync:restore
 ```
 
