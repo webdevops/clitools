@@ -33,7 +33,7 @@ Now you can sync your `production` server to your local installation:
 	ct sync:server production --mysql
 
 	# Only Files
-	ct sync:server production --files
+	ct sync:server production --rsync
 
 ## Project sharing  (ct sync:backup and ct sync:restore)
 
