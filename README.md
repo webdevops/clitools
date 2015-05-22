@@ -14,9 +14,9 @@ CliTools is a terminal utility for some handy convierence tasks based on Symfony
 
 ## Table of contents
 
-- [Installation and requirements](/documentation/INSTALL.md)
-- [Usage](/documentation/USAGE.md)
-- [Command overview](/documentation/COMMANDS.md)
+- [Installation and requirements](/Documentation/INSTALL.md)
+- [Usage](/Documentation/USAGE.md)
+- [Command overview](/Documentation/COMMANDS.md)
 
 Documentation is still WIP :)
 
