@@ -1,6 +1,6 @@
 [<-- Back to main section](../README.md)
 
-# Usage of `docker`
+# Usage of `ct docker:...`
 
 ## Docker creation
 
@@ -46,7 +46,7 @@ ct docker:compose stop
 ct docker:compose ps
 ```
 
-Hint: Use `dcc` as alias for `ct docker:compose` for easy docker-compose usage
+Hint: You can use `alias dcc='ct docker:compose'` for this.
 
 ## Docker shell access
 

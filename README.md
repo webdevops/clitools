@@ -10,7 +10,7 @@
 
 ## Introduction
 
-CliTools is a terminal utility for some handy convierence tasks based on Symfony Components (Console).
+CliTools is a terminal utility for some handy convierence tasks and is based on Symfony Components (Console).
 
 ## Table of contents
 
@@ -19,6 +19,7 @@ CliTools is a terminal utility for some handy convierence tasks based on Symfony
 - [Usage `ct sync:...` comands](/Documentation/USAGE-SYNC.md)
 - [Usage `ct mysql:...` comands](/Documentation/USAGE-MYSQL.md)
 - [Usage `ct typo3:...` comands](/Documentation/USAGE-TYPO3.md)
+- [Usage `ct php:...` comands](/Documentation/USAGE-PHP.md)
 - [Command overview](/Documentation/COMMANDS.md)
 
 Documentation is still WIP :)
