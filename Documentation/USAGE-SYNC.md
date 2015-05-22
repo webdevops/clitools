@@ -1,8 +1,8 @@
 [<-- Back to main section](../README.md)
 
-# Usage
+# Usage SYNC
 
-## SYNC: Project synchronatizon
+## Init and configuration of `sync`
 
 With the `sync` commands you can update your local development installation to the current state of your
 server installations. Currently filesync (rsync) and database fetching is supported.
@@ -19,7 +19,7 @@ to such settings.
 
 You can commit this clisync.yml into your project so other developers can use the sync feature, too.
 
-### Synchronisation with servers (ct sync:server)
+## Synchronisation with servers (ct sync:server)
 
 The synchronisation with your servers is one way only, it just syncs your server installation to your 
 local installation (CliTools are no deployment tools!).
