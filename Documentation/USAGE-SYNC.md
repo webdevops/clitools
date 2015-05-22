@@ -1,6 +1,6 @@
 [<-- Back to main section](../README.md)
 
-# Usage SYNC
+# Usage `ct sync:...`
 
 ## Init and configuration of `sync`
 
