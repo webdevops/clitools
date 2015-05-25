@@ -211,18 +211,26 @@ class Executor {
         $process = proc_open($this->command->build(), $descriptorSpec, $pipes);
 
         if (is_resource($process)) {
-
             if (!empty($opts['startupCallback']) && is_callable($opts['startupCallback'])) {
                 $opts['startupCallback']($process);
             }
 
             do {
-                $status = proc_get_status($process);
-                if (!empty($status) && !empty($opts['runningCallback']) && is_callable($opts['runningCallback'])) {
-                    $opts['runningCallback']($process, $status);
+                if (is_resource($process)) {
+                    $status = proc_get_status($process);
+                    if (!empty($status) && !empty($opts['runningCallback']) && is_callable($opts['runningCallback'])) {
+                        $opts['runningCallback']($process, $status);
+                    }
+                } else {
+                    break;
                 }
                 usleep(100 * 1000);
             } while (!empty($status) && is_array($status) && $status['running'] === true);
+
+            if (is_resource($process)) {
+                proc_close($process);
+            }
+
             $this->returnCode = $status['exitcode'];
 
             $this->runFinishers();
