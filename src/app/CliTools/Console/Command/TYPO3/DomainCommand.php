@@ -149,6 +149,7 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
      * @param string $suffix Domain suffix
      */
     protected function addDuplicateDomains($suffix) {
+        $devDomain = '.' . $this->getApplication()->getConfigValue('config', 'domain_dev');
 
         $query = 'SELECT * FROM sys_domain';
         $domainList = DatabaseConnection::getAll($query);
@@ -156,7 +157,15 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
         foreach ($domainList as $domain) {
             unset($domain['uid']);
 
-            $domain['domainName'] .= '.' . ltrim($suffix, '.');
+            $domainName = $domain['domainName'];
+
+            // remove development suffix
+            $domainName = preg_replace('/' . preg_quote($devDomain). '$/', '', $domainName);
+
+            // add share domain
+            $domainName .= '.' . ltrim($suffix, '.');
+
+            $domain['domainName'] = $domainName;
 
             DatabaseConnection::insert('sys_domain', $domain);
         }
@@ -187,17 +196,16 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
      * @return void
      */
     protected function manipulateDomains($database) {
-
-        $domain = '.' . $this->getApplication()->getConfigValue('config', 'domain_dev');
-        $domainLength = strlen($domain);
+        $devDomain    = '.' . $this->getApplication()->getConfigValue('config', 'domain_dev');
+        $domainLength = strlen($devDomain);
 
         if (DatabaseConnection::tableExists($database, 'sys_domain')) {
             // ##################
             // Fix domains
             // ##################
             $query = 'UPDATE ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.sys_domain
-                         SET domainName = CONCAT(domainName, ' . DatabaseConnection::quote($domain) . ')
-                       WHERE RIGHT(domainName, ' . $domainLength . ') <> ' . DatabaseConnection::quote($domain);
+                         SET domainName = CONCAT(domainName, ' . DatabaseConnection::quote($devDomain) . ')
+                       WHERE RIGHT(domainName, ' . $domainLength . ') <> ' . DatabaseConnection::quote($devDomain);
             DatabaseConnection::exec($query);
         }
     }
