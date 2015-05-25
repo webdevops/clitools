@@ -179,8 +179,10 @@ class Application extends \Symfony\Component\Console\Application {
     protected function initializePosixTrap() {
         declare(ticks = 1);
 
-        $signalHandler = function ($signal) {
-            $this->callTearDown();
+        $me = $this;
+
+        $signalHandler = function ($signal) use($me) {
+            $me->callTearDown();
 
             // Prevent terminal messup
             echo "\n";
