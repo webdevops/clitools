@@ -23,6 +23,8 @@ namespace CliTools\Console\Command\Vagrant;
 use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
 use CliTools\Console\Shell\CommandBuilder\SelfCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ShareCommand extends \CliTools\Console\Command\AbstractCommand {
@@ -33,7 +35,54 @@ class ShareCommand extends \CliTools\Console\Command\AbstractCommand {
     protected function configure() {
         $this
             ->setName('vagrant:share')
-            ->setDescription('Start share for vagrant');
+            ->setDescription('Start share for vagrant')
+            ->addArgument(
+                'name',
+                InputArgument::OPTIONAL,
+                'Specific name for the share'
+            )
+            ->addOption(
+                'http',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Local HTTP port to forward to'
+            )
+            ->addOption(
+                'https',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Local HTTPS port to forward to'
+            )
+            ->addOption(
+                'name',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Specific name for the share'
+            )
+            ->addOption(
+                'ssh',
+                null,
+                InputOption::VALUE_NONE,
+                'Allow \'vagrant connect --ssh\' access'
+            )
+            ->addOption(
+                'ssh-no-password',
+                null,
+                InputOption::VALUE_NONE,
+                'Key won\'t be encrypted with --ssh'
+            )
+            ->addOption(
+                'ssh-port',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Specific port for SSH when using --ssh'
+            )
+            ->addOption(
+                '--ssh-once',
+                null,
+                InputOption::VALUE_NONE,
+                'Allow \'vagrant connect --ssh\' only one time'
+            );
     }
 
     /**
@@ -91,9 +140,48 @@ class ShareCommand extends \CliTools\Console\Command\AbstractCommand {
         );
 
         $vagrant = new CommandBuilder('vagrant', 'share');
-        $vagrant
-            ->addArgumentRaw('--http 80')
-            ->addArgumentRaw('--https 443')
-            ->executeInteractive($opts);
+
+        // Share name
+        if ($input->getOption('name')) {
+            $vagrant->addArgumentTemplate('--name %s', $input->getOption('name'));
+        } elseif ($input->getArgument('name')) {
+            $vagrant->addArgumentTemplate('--name %s', $input->getArgument('name'));
+        }
+
+
+        // HTTP port
+        if ($input->getOption('http')) {
+            $vagrant->addArgumentTemplate('--http %s', $input->getOption('http'));
+        } else {
+            $vagrant->addArgumentTemplate('--http %s', 80);
+        }
+
+        // HTTPS port
+        if ($input->getOption('https')) {
+            $vagrant->addArgumentTemplate('--http %s', $input->getOption('https'));
+        } else {
+            $vagrant->addArgumentTemplate('--https %s', 443);
+        }
+
+
+        // SSH stuff
+        if ($input->getOption('ssh')) {
+            $vagrant->addArgument('--ssh');
+        }
+
+        if ($input->getOption('ssh-no-password')) {
+            $vagrant->addArgument('--ssh-no-password');
+        }
+
+        if ($input->getOption('ssh-port')) {
+            $vagrant->addArgumentTemplate('--ssh-port %s', $input->getOption('ssh-port'));
+        }
+
+        if ($input->getOption('ssh-once')) {
+            $vagrant->addArgument('--ssh-once');
+        }
+
+
+        $vagrant->executeInteractive($opts);
     }
 }
