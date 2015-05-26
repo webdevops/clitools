@@ -279,7 +279,7 @@ abstract class UnixUtility {
             foreach ($fileList as $file) {
                 if (file_exists($path . '/' . $file)) {
                     // File found
-                    $ret = $path;
+                    $ret = $path . '/' . $file;
                     break;
                 }
             }
