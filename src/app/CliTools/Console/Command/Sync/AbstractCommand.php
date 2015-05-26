@@ -51,6 +51,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     protected $workingPath;
 
     /**
+     * Project configuration file path
+     *
+     * @var string|boolean|null
+     */
+    protected $confFilePath;
+
+    /**
      * Temporary storage dir
      *
      * @var string|null
@@ -84,12 +91,20 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     protected function initialize(InputInterface $input, OutputInterface $output) {
         parent::initialize($input, $output);
 
+        $confFileList = array(
+            self::CONFIG_FILE,
+            '.' . self::CONFIG_FILE,
+        );
+
 
         // Find configuration file
-        $this->workingPath = UnixUtility::findFileInDirectortyTree(self::CONFIG_FILE);
-        if (empty($this->workingPath)) {
+        $this->confFilePath = UnixUtility::findFileInDirectortyTree($confFileList);
+        if (empty($this->confFilePath)) {
             throw new \RuntimeException('<error>No ' . self::CONFIG_FILE . ' found in tree</error>');
         }
+
+        $this->workingPath = dirname($this->confFilePath);
+
         $output->writeln('<comment>Found ' . self::CONFIG_FILE . ' directory: ' . $this->workingPath . '</comment>');
 
         // Read configuration
@@ -135,8 +150,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             throw new \RuntimeException('Config area not set, cannot continue');
         }
 
-        $confFile = $this->workingPath . '/' . self::CONFIG_FILE;
-        $conf = Yaml::parse(PhpUtility::fileGetContents($confFile));
+        if (!file_exists($this->confFilePath)) {
+            throw new \RuntimeException('Config file "' . $this->confFilePath . '" not found');
+        }
+
+        $conf = Yaml::parse(PhpUtility::fileGetContents($this->confFilePath));
 
         // store task specific configuration
         if (!empty($conf['task'])) {
@@ -147,7 +165,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         if (!empty($conf)) {
             $this->config->setData($conf[$this->confArea]);
         } else {
-            throw new \RuntimeException('Could not parse "' . $confFile . '"');
+            throw new \RuntimeException('Could not parse "' . $this->confFilePath . '"');
         }
     }
 
