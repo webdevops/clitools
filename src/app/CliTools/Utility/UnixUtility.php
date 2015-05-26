@@ -49,13 +49,13 @@ abstract class UnixUtility {
     /**
      * Get CPU Count
      *
-     * @return string
+     * @return integer
      */
     public static function cpuCount() {
         $command = new CommandBuilder('nproc');
         $ret = $command->execute()->getOutputString();
 
-        $ret = trim($ret);
+        $ret = (int)trim($ret);
 
         return $ret;
     }
@@ -63,7 +63,7 @@ abstract class UnixUtility {
     /**
      * Get Memory Count
      *
-     * @return string
+     * @return integer
      */
     public static function memorySize() {
         $command = new CommandBuilder('cat', '/proc/meminfo');
@@ -112,7 +112,7 @@ abstract class UnixUtility {
     /**
      * Get mount info list
      *
-     * @return string
+     * @return array
      */
     public static function mountInfoList() {
         $command = new CommandBuilder('df', '-a --type=ext3 --type=ext4 --type vmhgfs --type vboxsf --portability');
@@ -205,12 +205,12 @@ abstract class UnixUtility {
      * @param  string $message Message
      */
     public static function sendWallMessage($message) {
-        $commandWall = new CommandBuilder('wall');
-        $commandWall->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_NULL);
+        $wall = new CommandBuilder('wall');
+        $wall->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_NULL);
 
         $command = new CommandBuilder('echo');
         $command->addArgument($message)
-                ->addPipeCommand($commandWall);
+                ->addPipeCommand($wall);
         $command->execute();
     }
 
@@ -260,12 +260,14 @@ abstract class UnixUtility {
     /**
      * Search directory upwards for a file
      *
-     * @param string $file Filename
-     * @param string $path Path
+     * @param string|array $file Filename
+     * @param string       $path Path
      * @return boolean|string
      */
     public static function findFileInDirectortyTree($file, $path = null) {
         $ret = false;
+
+        $fileList = (array)$file;
 
         // Set path to current path (if not specified)
         if ($path === null) {
@@ -274,14 +276,19 @@ abstract class UnixUtility {
 
         if (!empty($path) && $path !== '/') {
             // Check if file exists in path
-            if (file_exists($path . '/' . $file)) {
-                // File found
-                $ret = $path;
-            } else {
+            foreach ($fileList as $file) {
+                if (file_exists($path . '/' . $file)) {
+                    // File found
+                    $ret = $path;
+                    break;
+                }
+            }
+
+            if ($ret === false) {
                 // go up in directory
                 $path .= '/../';
                 $path = realpath($path);
-                $ret  = self::findFileInDirectortyTree($file, $path);
+                $ret  = self::findFileInDirectortyTree($fileList, $path);
             }
         }
 
