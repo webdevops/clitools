@@ -10,21 +10,21 @@
 
 ## Introduction
 
-CliTools is a terminal utility for some handy convierence tasks and is based on Symfony Components (Console).
+CliTools is a terminal utility for faster development. It should make some daily task very easy.
+
+CliTools is based on Symfony Components (Console).
 
 ## Table of contents
 
 - [Installation and requirements](/Documentation/INSTALL.md)
 - [Usage `ct docker:...` commands](/Documentation/USAGE-DOCKER.md)
-- [Usage `ct sync:...` comands](/Documentation/USAGE-SYNC.md)
-- [Usage `ct mysql:...` comands](/Documentation/USAGE-MYSQL.md)
-- [Usage `ct typo3:...` comands](/Documentation/USAGE-TYPO3.md)
-- [Usage `ct php:...` comands](/Documentation/USAGE-PHP.md)
+- [Usage `ct sync:...` commands](/Documentation/USAGE-SYNC.md)
+- [Usage `ct mysql:...` commands](/Documentation/USAGE-MYSQL.md)
+- [Usage `ct typo3:...` commands](/Documentation/USAGE-TYPO3.md)
+- [Usage `ct php:...` commands](/Documentation/USAGE-PHP.md)
 - [Command overview](/Documentation/COMMANDS.md)
-
-Documentation is still WIP :)
-
 
 ## Credits
 
-Thanks to my colleagues at [cron IT GmbH](http://www.cron.eu/) and Ingo Pfennigstorf for testing and some usefull ideas.
+Thanks to my colleagues at [cron IT GmbH](http://www.cron.eu/), [Ingo Pfennigstorf](https://twitter.com/krautsock)
+and [Florian Tatzel](https://twitter.com/panadeedu) for testing and some usefull ideas.
