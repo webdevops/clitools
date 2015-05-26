@@ -49,9 +49,10 @@ class ComposerCommand extends \CliTools\Console\Command\AbstractCommand implemen
         $composerCmd = $this->getApplication()->getConfigValue('bin', 'composer');
 
         $paramList = $this->getFullParameterList();
-        $path = UnixUtility::findFileInDirectortyTree('composer.json');
+        $composerJsonPath = UnixUtility::findFileInDirectortyTree('composer.json');
 
-        if (!empty($path)) {
+        if (!empty($composerJsonPath)) {
+            $path = dirname($composerJsonPath);
             $this->output->writeln('<comment>Found composer.json directory: ' . $path . '</comment>');
 
             // Switch to directory of docker-compose.yml

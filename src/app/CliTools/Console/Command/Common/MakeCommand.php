@@ -50,6 +50,7 @@ class MakeCommand extends \CliTools\Console\Command\AbstractCommand implements \
         $path = UnixUtility::findFileInDirectortyTree('Makefile');
 
         if (!empty($path)) {
+            $path = dirname($path);
             $this->output->writeln('<comment>Found Makefile directory: ' . $path . '</comment>');
 
             // Switch to directory of docker-compose.yml

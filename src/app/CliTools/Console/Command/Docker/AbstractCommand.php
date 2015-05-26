@@ -40,8 +40,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function getDockerPath() {
         if ($this->dockerPath === null) {
-            $this->dockerPath = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
-            $this->output->writeln('<comment>Found docker directory: ' . $this->dockerPath . '</comment>');
+            $composePath = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
+
+            if (!empty($composePath)) {
+                $this->dockerPath = dirname($this->dockerPath);
+                $this->output->writeln('<comment>Found docker directory: ' . $this->dockerPath . '</comment>');
+            }
         }
 
         return $this->dockerPath;
@@ -148,6 +152,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $path = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
 
         if (!empty($path)) {
+            $path = dirname($path);
             $this->output->writeln('<comment>Found docker directory: ' . $path . '</comment>');
 
             // Switch to directory of docker-compose.yml

@@ -45,8 +45,12 @@ class UpCommand extends AbstractCommand {
      */
     public function execute(InputInterface $input, OutputInterface $output) {
 
-        $dockerPath = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
+        $dockerPath     = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
         $lastDockerPath = $this->getApplication()->getSettingsService()->get('docker.up.last');
+
+        if (!empty($dockerPath)) {
+            $dockerPath = dirname($dockerPath);
+        }
 
         // Stop last docker instance
         if ($dockerPath && $lastDockerPath) {
