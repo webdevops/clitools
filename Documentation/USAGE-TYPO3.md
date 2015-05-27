@@ -33,6 +33,9 @@ ct typo3:domain
 # Add a .vm at the and of all domains in typo3 database
 ct typo3:domain typo3
 
+# ... and also add config.baseURL to SetupTS
+ct typo3:domain typo3 --baseurl
+
 # Add a .vm at the and of all domains and remove all *.vagrantshare.com domains (used by vagrant:share)
 ct typo3:domain --remove='*.vagrantshare.com'
 

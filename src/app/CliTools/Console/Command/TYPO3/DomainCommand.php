@@ -41,6 +41,12 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
                 'Database name'
             )
             ->addOption(
+                'baseurl',
+                null,
+                InputOption::VALUE_NONE,
+                'Also set config.baseURL setting'
+            )
+            ->addOption(
                 'list',
                 null,
                 InputOption::VALUE_NONE,
@@ -59,6 +65,7 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
                 'Add duplication domains (will duplicate all domains in system, eg. for vagrant share)'
             );
     }
+
     /**
      * Execute command
      *
@@ -119,7 +126,12 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
             }
 
             // Set development domains
-            $this->manipulateDomains($dbName);
+            $this->manipulateDomains();
+
+            // Add sharing domains
+            if ($this->input->getOption('baseurl')) {
+                $this->updateBaseUrlConfig();
+            }
 
             // Add sharing domains
             if ($this->input->getOption('duplicate')) {
@@ -142,6 +154,41 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
         DatabaseConnection::exec($query);
     }
 
+    /**
+     * Update baseURL config
+     */
+    protected function updateBaseUrlConfig() {
+        $query = 'SELECT st.uid as template_id,
+                         st.config as template_config,
+                         (SELECT sd.domainName
+                            FROM sys_domain sd
+                           WHERE sd.pid = st.pid
+                        ORDER BY sd.forced DESC,
+                                 sd.sorting ASC
+                           LIMIT 1) as domain_name
+                    FROM sys_template st
+                   WHERE st.root = 1
+                     AND st.deleted  = 0
+                  HAVING domain_name IS NOT NULL';
+        $templateIdList = DatabaseConnection::getAll($query);
+
+        foreach ($templateIdList as $row) {
+            $templateId   = $row['template_id'];
+            $domainName   = $row['domain_name'];
+            $templateConf = $row['template_config'];
+
+            // Remove old baseURL entries (no duplciates)
+            $templateConf = preg_replace('/^config.baseURL = .*$/m', '', $templateConf);
+            $templateConf = trim($templateConf);
+
+            // Add new baseURL
+            $templateConf .= "\n" . 'config.baseURL = http://' . $domainName .'/';
+
+            $query = 'UPDATE sys_template SET config = %s WHERE uid = %s';
+            $query = sprintf($query, DatabaseConnection::quote($templateConf), (int)$templateId);
+            DatabaseConnection::exec($query);
+        }
+    }
 
     /**
      * Add share domains (eg. for vagrantshare)
@@ -191,22 +238,18 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
     /**
      * Set development domains for TYPO3 database
      *
-     * @param  string $database Database
-     *
      * @return void
      */
-    protected function manipulateDomains($database) {
+    protected function manipulateDomains() {
         $devDomain    = '.' . $this->getApplication()->getConfigValue('config', 'domain_dev');
         $domainLength = strlen($devDomain);
 
-        if (DatabaseConnection::tableExists($database, 'sys_domain')) {
-            // ##################
-            // Fix domains
-            // ##################
-            $query = 'UPDATE ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.sys_domain
-                         SET domainName = CONCAT(domainName, ' . DatabaseConnection::quote($devDomain) . ')
-                       WHERE RIGHT(domainName, ' . $domainLength . ') <> ' . DatabaseConnection::quote($devDomain);
-            DatabaseConnection::exec($query);
-        }
+        // ##################
+        // Fix domains
+        // ##################
+        $query = 'UPDATE sys_domain
+                     SET domainName = CONCAT(domainName, ' . DatabaseConnection::quote($devDomain) . ')
+                   WHERE RIGHT(domainName, ' . $domainLength . ') <> ' . DatabaseConnection::quote($devDomain);
+        DatabaseConnection::exec($query);
     }
 }

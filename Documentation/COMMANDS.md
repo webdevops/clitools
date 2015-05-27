@@ -135,6 +135,7 @@ All log commands are using a grep-filter (specified as optional argument)
 |                            | __ct typo3:cleanup__                                                      |
 |                            | __ct typo3:cleanup typo3__                                                |
 | ct typo3:domain            | Add default suffix to all domains (default: .vm)                          |
+|                            | __ct typo3:domain --baseurl__  Also update config.baseURL in SetupTS      |
 |                            | __ct typo3:domain --list__ Print list of domains and exit                 |
 |                            | __ct typo3:domain --remove='*.vagrantshare.com'__  Remove all *.vagrantshare.com domains (used by vagrant:share command) |
 |                            | __ct typo3:domain --duplicate='foobar.vagrantshare.com'__  Duplicates all domains and add suffix 'foobar.vagrantshare.com' (used by vagrant:share command) |
