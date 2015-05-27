@@ -97,10 +97,6 @@ class CreateCommand extends AbstractCommand {
             $this->initDocumentRoot($path);
             PhpUtility::chdir($currDir);
 
-            // Start interactive editor
-            $this->startInteractiveEditor($path . '/docker-compose.yml');
-            $this->startInteractiveEditor($path . '/docker-env.yml');
-
             // Run makefile
             if ($this->input->getOption('make')) {
                 try {
@@ -111,6 +107,10 @@ class CreateCommand extends AbstractCommand {
                 }
             }
         }
+
+        // Start interactive editor
+        $this->startInteractiveEditor($path . '/docker-compose.yml');
+        $this->startInteractiveEditor($path . '/docker-env.yml');
 
         // Start docker
         PhpUtility::chdir($currDir);
