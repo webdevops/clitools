@@ -285,7 +285,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $docker = new CommandBuilder('docker', 'ps');
             $docker->executeInteractive();
 
-            $answer = ConsoleUtility::questionYesNo('Are these running containers the right one?', 'no');
+            $answer = ConsoleUtility::questionYesNo('Are these running containers the right ones?', 'no');
 
             if (!$answer) {
                 throw new \CliTools\Exception\StopException(1);
