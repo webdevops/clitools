@@ -87,46 +87,48 @@ class ServerCommand extends AbstractSyncCommand {
         } else {
             $this->config->setData($this->config->getArray($this->contextName));
         }
-
-        // ##################
-        // Option specific runners
-        // ##################
-
-        if ($this->input->getOption('mysql') || $this->input->getOption('rsync')) {
-            // Clear mysql config if mysql isn't active
-            if (!$this->input->getOption('mysql')) {
-                $this->config->clear('mysql');
-            }
-
-            // Clear rsync config if rsync isn't active
-            if (!$this->input->getOption('rsync')) {
-                $this->config->clear('rsync');
-            }
-        }
-
     }
 
     /**
      * Backup task
      */
     protected function runTask() {
+        // ##################
+        // Option specific runners
+        // ##################
+        $runRsync = true;
+        $runMysql = true;
+
+        if ($this->input->getOption('mysql') || $this->input->getOption('rsync')) {
+            // don't run rsync if not specifiecd
+            $runRsync = $this->input->getOption('rsync');
+
+            // don't run mysql if not specifiecd
+            $runMysql = $this->input->getOption('mysql');
+        }
+
+        // ##################
+        // Run tasks
+        // ##################
+
         // Check database connection
-        if ($this->config->exists('mysql')) {
+        if ($runMysql && $this->config->exists('mysql')) {
             DatabaseConnection::ping();
         }
 
         // Sync files with rsync to local storage
-        if ($this->config->exists('rsync')) {
+        if ($runRsync && $this->config->exists('rsync')) {
             $this->output->writeln('<info> ---- Starting FILE sync ---- </info>');
             $this->runTaskRsync();
         }
 
         // Sync database to local server
-        if ($this->config->exists('mysql')) {
+        if ($runMysql && $this->config->exists('mysql')) {
             $this->output->writeln('<info> ---- Starting MYSQL sync ---- </info>');
             $this->runTaskDatabase();
         }
     }
+
     /**
      * Sync files with rsync
      */
