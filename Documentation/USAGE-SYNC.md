@@ -48,7 +48,20 @@ Please use a common development/storage server with ssh access for each develope
 # Make backup of current state and transfer to share server
 ct sync:backup
 
+# ... only MySQL
+ct sync:backup --mysql
+
+# ... only files
+ct sync:backup --rsync
+
 # Restore to state from the share server
 ct sync:restore
+
+# ... only MySQL
+ct sync:restore --mysql
+
+# ... only files
+ct sync:restore --rsync
+
 ```
 
