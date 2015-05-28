@@ -20,6 +20,8 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use Symfony\Component\Console\Input\InputOption;
+
 class BackupCommand extends AbstractShareCommand {
 
     /**
@@ -28,7 +30,19 @@ class BackupCommand extends AbstractShareCommand {
     protected function configure() {
         $this
             ->setName('sync:backup')
-            ->setDescription('Backup project files');
+            ->setDescription('Backup project files')
+            ->addOption(
+                'mysql',
+                null,
+                InputOption::VALUE_NONE,
+                'Run only mysql'
+            )
+            ->addOption(
+                'rsync',
+                null,
+                InputOption::VALUE_NONE,
+                'Run only rsync'
+            );
     }
 
     /**
@@ -36,40 +50,68 @@ class BackupCommand extends AbstractShareCommand {
      */
     protected function runTask() {
         // ##################
+        // Option specific runners
+        // ##################
+        $runRsync = true;
+        $runMysql = true;
+
+        if ($this->input->getOption('mysql') || $this->input->getOption('rsync')) {
+            // don't run rsync if not specifiecd
+            $runRsync = $this->input->getOption('rsync');
+
+            // don't run mysql if not specifiecd
+            $runMysql = $this->input->getOption('mysql');
+        }
+
+
+        // ##################
         // Backup dirs
         // ##################
-        if ($this->config->exists('rsync.directory')) {
-            $source  = $this->getRsyncWorkingPath();
-            $target  = $this->getRsyncPathFromConfig() . self::PATH_DATA;
-            $command = $this->createShareRsyncCommand($source, $target, true);
-            $command->executeInteractive();
+        if ($runRsync && $this->config->exists('rsync.directory')) {
+            $this->runTaskRsync();
         }
 
         // ##################
         // Backup databases
         // ##################
-        if ($this->config->exists('mysql.database')) {
-            foreach ($this->config->getArray('mysql.database') as $database) {
-                $this->output->writeln('<info>Dumping database ' . $database . '</info>');
-
-                // dump database
-                $dumpFile = $this->tempDir . '/mysql/' . $database . '.sql.bz2';
-
-                $dumpFilter = $this->config->get('mysql.filter');
-
-                $this->createMysqlBackupCommand($database, $dumpFile, $dumpFilter)
-                    ->executeInteractive();
-            }
-
-            // ##################
-            // Backup mysql dump
-            // ##################
-            $source = $this->tempDir;
-            $target = $this->getRsyncPathFromConfig() . self::PATH_DUMP;
-            $command = $this->createShareRsyncCommand($source, $target, false);
-            $command->executeInteractive();
+        if ($runMysql && $this->config->exists('mysql.database')) {
+            $this->runTaskMysql();
         }
-
     }
 
+    /**
+     * Sync files with rsync
+     */
+    protected function runTaskRsync() {
+        $source  = $this->getRsyncWorkingPath();
+        $target  = $this->getRsyncPathFromConfig() . self::PATH_DATA;
+        $command = $this->createShareRsyncCommand($source, $target, true);
+        $command->executeInteractive();
+    }
+
+
+    /**
+     * Sync files with mysql
+     */
+    protected function runTaskMysql() {
+        foreach ($this->config->getArray('mysql.database') as $database) {
+            $this->output->writeln('<info>Dumping database ' . $database . '</info>');
+
+            // dump database
+            $dumpFile = $this->tempDir . '/mysql/' . $database . '.sql.bz2';
+
+            $dumpFilter = $this->config->get('mysql.filter');
+
+            $this->createMysqlBackupCommand($database, $dumpFile, $dumpFilter)
+                 ->executeInteractive();
+        }
+
+        // ##################
+        // Backup mysql dump
+        // ##################
+        $source = $this->tempDir;
+        $target = $this->getRsyncPathFromConfig() . self::PATH_DUMP;
+        $command = $this->createShareRsyncCommand($source, $target, false);
+        $command->executeInteractive();
+    }
 }
