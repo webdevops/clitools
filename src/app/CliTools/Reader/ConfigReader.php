@@ -52,23 +52,41 @@ class ConfigReader implements \ArrayAccess {
     /**
      * Get value from specific node (dotted array notation)
      *
-     * @param string $path Path to node (eg. foo.bar.baz)
+     * @param string|null $path Path to node (eg. foo.bar.baz)
      * @return mixed|null
      */
-    public function get($path) {
+    public function get($path = null) {
         return $this->getNode($path);
     }
 
     /**
      * Get array value from specific node (dotted array notation)
      *
-     * @param string $path Path to node (eg. foo.bar.baz)
+     * @param string|null $path Path to node (eg. foo.bar.baz)
      * @return array|null
      */
-    public function getArray($path) {
+    public function getArray($path = null) {
         $ret = $this->getNode($path);
 
         if (!is_array($ret)) {
+            $ret = array();
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Get list of keys from specific node (dotted array notation)
+     *
+     * @param string|null $path Path to node (eg. foo.bar.baz)
+     * @return array|null
+     */
+    public function getList($path = null) {
+        $ret = $this->getNode($path);
+
+        if (is_array($ret)) {
+            $ret = array_keys($ret);
+        } else {
             $ret = array();
         }
 
@@ -89,9 +107,9 @@ class ConfigReader implements \ArrayAccess {
     /**
      * Clear value at specific node (dotted array notation)
      *
-     * @param string $path  Path to node (eg. foo.bar.baz)
+     * @param null|string $path  Path to node (eg. foo.bar.baz)
      */
-    public function clear($path) {
+    public function clear($path = null) {
         $node =& $this->getNode($path);
         $node = null;
     }
@@ -99,30 +117,32 @@ class ConfigReader implements \ArrayAccess {
     /**
      * Check if specific node exists
      *
-     * @param string $path Path to node (eg. foo.bar.baz)
+     * @param null|string $path Path to node (eg. foo.bar.baz)
      * @return bool
      */
-    public function exists($path) {
+    public function exists($path = null) {
         return ($this->getNode($path) !== null);
     }
 
     /**
      * Get node by reference
      *
-     * @param string $path Path to node (eg. foo.bar.baz)
+     * @param string|null $path Path to node (eg. foo.bar.baz)
      * @return mixed|null
      */
     protected function &getNode($path) {
-        $pathList = explode('.',$path);
         $data = &$this->data;
 
-        foreach ($pathList as $node) {
-            if (isset($data[$node])) {
-                $data = &$data[$node];
-            } else {
-                unset($data);
-                $data = null;
-                break;
+        if ($path !== null) {
+            $pathList = explode('.', $path);
+            foreach ($pathList as $node) {
+                if (isset($data[$node])) {
+                    $data = &$data[$node];
+                } else {
+                    unset($data);
+                    $data = null;
+                    break;
+                }
             }
         }
 
