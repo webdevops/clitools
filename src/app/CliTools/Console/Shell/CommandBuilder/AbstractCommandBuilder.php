@@ -388,7 +388,7 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
 
         // Set arguments (second values)
         if (!empty($parsedCmd[1])) {
-            $this->setArgumentList(array($parsedCmd[1]), false);
+            $this->addArgumentRaw($parsedCmd[1]);
         }
         return $this;
     }
