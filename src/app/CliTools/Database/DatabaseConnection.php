@@ -77,6 +77,15 @@ class DatabaseConnection {
     }
 
     /**
+     * Get Db DSN
+     *
+     * @return string
+     */
+    public static function getDsn() {
+        return self::$dbDsn;
+    }
+
+    /**
      * Get Db Username
      *
      * @return string
