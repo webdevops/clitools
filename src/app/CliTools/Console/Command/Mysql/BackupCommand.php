@@ -29,12 +29,14 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
+class BackupCommand extends AbstractCommand {
 
     /**
      * Configure command
      */
     protected function configure() {
+        parent::configure();
+
         $this
             ->setName('mysql:backup')
             ->setDescription('Backup database')
@@ -108,6 +110,15 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
         }
 
         $command = new CommandBuilder('mysqldump','--user=%s %s --single-transaction', array(DatabaseConnection::getDbUsername(), $database));
+
+        // Set server connection details
+        if ($input->getOption('host')) {
+            $command->addArgumentTemplate('-h %s', $input->getOption('host'));
+        }
+
+        if ($input->getOption('port')) {
+            $command->addArgumentTemplate('-P %s', $input->getOption('port'));
+        }
 
         if (!empty($filter)) {
             $command = $this->addFilterArguments($command, $database, $filter);

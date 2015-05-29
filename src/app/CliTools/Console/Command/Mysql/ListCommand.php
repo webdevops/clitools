@@ -28,12 +28,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ListCommand extends \CliTools\Console\Command\AbstractCommand {
+class ListCommand extends AbstractCommand {
 
     /**
      * Configure command
      */
     protected function configure() {
+        parent::configure();
+
         $this
             ->setName('mysql:list')
             ->setDescription('List all databases')

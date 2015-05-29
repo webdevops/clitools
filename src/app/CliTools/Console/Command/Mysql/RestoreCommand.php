@@ -27,12 +27,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
 
-class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
+class RestoreCommand extends AbstractCommand {
 
     /**
      * Configure command
      */
     protected function configure() {
+        parent::configure();
+
         $this
             ->setName('mysql:restore')
             ->setDescription('Restore database')
@@ -87,6 +89,15 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
 
 
         $commandMysql = new CommandBuilder('mysql','--user=%s %s --one-database', array(DatabaseConnection::getDbUsername(), $database));
+
+        // Set server connection details
+        if ($input->getOption('host')) {
+            $commandMysql->addArgumentTemplate('-h %s', $input->getOption('host'));
+        }
+
+        if ($input->getOption('port')) {
+            $commandMysql->addArgumentTemplate('-P %s', $input->getOption('port'));
+        }
 
         $commandFile = new CommandBuilder();
         $commandFile->addArgument($dumpFile);

@@ -24,7 +24,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
 
-class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
+class RestartCommand extends AbstractCommand {
 
     /**
      * Configure command

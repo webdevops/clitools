@@ -45,6 +45,12 @@ class SniffCommand extends AbstractCommand {
                 null,
                 InputOption::VALUE_NONE,
                 'Show full output (if supported by protocol)'
+            )
+            ->addOption(
+                'filter',
+                null,
+                InputOption::VALUE_NONE,
+                'Additonal filter'
             );
     }
 
@@ -199,6 +205,8 @@ class SniffCommand extends AbstractCommand {
         switch ($command->getCommand()) {
             case 'tshark':
                 $command->addArgumentTemplate('-i %s', $dockerInterface);
+
+
                 break;
 
             case 'tcpdump':

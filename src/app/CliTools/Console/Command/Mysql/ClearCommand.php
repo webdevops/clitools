@@ -25,12 +25,14 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ClearCommand extends \CliTools\Console\Command\AbstractCommand {
+class ClearCommand extends AbstractCommand {
 
     /**
      * Configure command
      */
     protected function configure() {
+        parent::configure();
+
         $this
             ->setName('mysql:clear')
             ->setAliases(array('mysql:create'))
