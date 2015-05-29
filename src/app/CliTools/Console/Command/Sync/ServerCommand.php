@@ -29,6 +29,7 @@ use CliTools\Database\DatabaseConnection;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
+
 class ServerCommand extends AbstractSyncCommand {
 
     /**
@@ -46,7 +47,7 @@ class ServerCommand extends AbstractSyncCommand {
             ->setDescription('Sync files and database from server')
             ->addArgument(
                 'context',
-                InputArgument::REQUIRED,
+                InputArgument::OPTIONAL,
                 'Configuration name for server'
             )
             ->addOption(
@@ -69,7 +70,7 @@ class ServerCommand extends AbstractSyncCommand {
     protected function readConfiguration() {
         parent::readConfiguration();
 
-        $this->contextName = $this->input->getArgument('context');
+        $this->contextName = $this->getServerContext();
 
         if (empty($this->contextName) || $this->contextName === '_' || empty($this->config[$this->contextName])) {
             throw new \RuntimeException('No valid configuration found for context "' . $this->contextName . '"');

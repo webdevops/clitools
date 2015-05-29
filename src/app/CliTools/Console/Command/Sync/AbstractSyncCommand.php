@@ -20,6 +20,9 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use Symfony\Component\Console\Helper\QuestionHelper;
+use Symfony\Component\Console\Question\ChoiceQuestion;
+
 abstract class AbstractSyncCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
     
     /**
@@ -50,6 +53,36 @@ abstract class AbstractSyncCommand extends \CliTools\Console\Command\Sync\Abstra
                 $output->writeln('<error>No ssh hostname configuration found</error>');
                 $ret = false;
             }
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Get server context from user
+     */
+    protected function getServerContext() {
+        $ret = null;
+
+        if (!$this->input->getArgument('context')) {
+            // ########################
+            // Ask user for server context
+            // ########################
+
+            $serverList = $this->config->getList();
+            $serverList = array_diff($serverList, array('_'));
+
+            if (empty($serverList)) {
+                throw new \RuntimeException('No valid servers found in configuration');
+            }
+
+            $question = new ChoiceQuestion('Please choose process for tracing', $serverList);
+
+            $questionDialog = new QuestionHelper();
+
+            $ret = $questionDialog->ask($this->input, $this->output, $question);
+        } else {
+            $ret = $this->input->getArgument('context');
         }
 
         return $ret;
