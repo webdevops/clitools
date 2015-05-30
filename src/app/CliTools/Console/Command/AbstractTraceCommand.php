@@ -104,7 +104,6 @@ abstract class AbstractTraceCommand extends AbstractCommand {
             }
         }
 
-
         if (!empty($pid)) {
             switch ($pid) {
                 case 'all':
@@ -157,7 +156,7 @@ abstract class AbstractTraceCommand extends AbstractCommand {
         $currentPid = posix_getpid();
 
         $processList = array(
-            'all processes' => 'all',
+            'all' => 'all processes',
         );
 
         $command = new CommandBuilder('ps');
@@ -183,8 +182,8 @@ abstract class AbstractTraceCommand extends AbstractCommand {
                 continue;
             }
 
-            $pidList[]         = (int)$pid;
-            $processList[$cmd] = (int)$pid;
+            $pidList[]              = (int)$pid;
+            $processList[(int)$pid] = $cmd;
         }
 
         return array($pidList, $processList);
