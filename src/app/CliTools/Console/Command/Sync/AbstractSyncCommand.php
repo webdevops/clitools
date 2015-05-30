@@ -76,7 +76,9 @@ abstract class AbstractSyncCommand extends \CliTools\Console\Command\Sync\Abstra
                 throw new \RuntimeException('No valid servers found in configuration');
             }
 
-            $question = new ChoiceQuestion('Please choose process for tracing', $serverList);
+            $questionList = array_combine(array_values($serverList), array_values($serverList) );
+            $question = new ChoiceQuestion('Please choose process for tracing', $questionList);
+            $question->setMaxAttempts(1);
 
             $questionDialog = new QuestionHelper();
 

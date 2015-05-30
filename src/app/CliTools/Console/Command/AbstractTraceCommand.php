@@ -97,7 +97,8 @@ abstract class AbstractTraceCommand extends AbstractCommand {
                 $pid = 'all';
             } else {
                 $question = new ChoiceQuestion('Please choose process for tracing', $processList);
-
+                $question->setMaxAttempts(1);
+                
                 $questionDialog = new QuestionHelper();
 
                 $pid = $questionDialog->ask($input, $output, $question);
