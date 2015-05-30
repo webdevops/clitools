@@ -26,5 +26,8 @@ CliTools is based on Symfony Components (Console).
 
 ## Credits
 
-Thanks to my colleagues at [cron IT GmbH](http://www.cron.eu/), [Ingo Pfennigstorf](https://twitter.com/krautsock)
-and [Florian Tatzel](https://twitter.com/panadeedu) for testing and some usefull ideas.
+Thanks for support, ideas and issues ...
+- [Ingo Pfennigstorf](https://twitter.com/krautsock)
+- [Florian Tatzel](https://twitter.com/PanadeEdu)
+- my (old) colleagues at [Lightwerk GmbH](http://www.lightwerk.de/)
+- my colleagues at [cron IT GmbH](http://www.cron.eu/)
