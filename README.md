@@ -31,3 +31,5 @@ Thanks for support, ideas and issues ...
 - [Florian Tatzel](https://twitter.com/PanadeEdu)
 - my (old) colleagues at [Lightwerk GmbH](http://www.lightwerk.de/)
 - my colleagues at [cron IT GmbH](http://www.cron.eu/)
+
+Did I forget anyone? Send me a tweet or create pull request!
