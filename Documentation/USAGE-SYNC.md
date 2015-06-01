@@ -65,3 +65,26 @@ ct sync:restore --rsync
 
 ```
 
+## Advanced ssh options
+
+If you need some advaned ssh options (eg. other ports) use your `~/.ssh/config` configuration file:
+
+    Host project-server
+        Hostname project-server.example.com
+        Port     12345
+        User     root
+
+If you have a proxy server you can configure it like this:
+
+    Host ssh-proxy
+        Hostname ssh-proxy.example.com
+        User foo
+
+    Host project-server
+        Hostname project-server.example.com
+        Port     12345
+        User     root
+        ProxyCommand ssh ssh-proxy -W %h:%p
+
+
+Now you can use `project-server` as ssh-hostname and your settings will automatically used from your `~/.ssh/config`.
