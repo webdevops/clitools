@@ -43,7 +43,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $composePath = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
 
             if (!empty($composePath)) {
-                $this->dockerPath = dirname($this->dockerPath);
+                $this->dockerPath = dirname($composePath);
                 $this->output->writeln('<comment>Found docker directory: ' . $this->dockerPath . '</comment>');
             }
         }
