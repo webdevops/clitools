@@ -105,24 +105,24 @@ class RestoreCommand extends AbstractCommand {
 
         switch ($dumpFileType) {
             case 'application/x-bzip2':
-                $output->writeln('<comment>Using BZIP2 uncompression</comment>');
+                $output->writeln('<comment>Using BZIP2 decompression</comment>');
                 $commandFile->setCommand('bzcat');
                 break;
 
             case 'application/gzip':
             case 'application/x-gzip':
-                $output->writeln('<comment>Using GZIP uncompression</comment>');
+                $output->writeln('<comment>Using GZIP decompression</comment>');
                 $commandFile->setCommand('gzcat');
                 break;
 
             case 'application/x-lzma':
             case 'application/x-xz':
-            $output->writeln('<comment>Using LZMA uncompression</comment>');
+            $output->writeln('<comment>Using LZMA decompression</comment>');
                 $commandFile->setCommand('xzcat');
                 break;
 
             default:
-                $output->writeln('<comment>Using plaintext (no uncompression)</comment>');
+                $output->writeln('<comment>Using plaintext (no decompression)</comment>');
                 $commandFile->setCommand('cat');
                 break;
         }
