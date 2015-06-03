@@ -96,12 +96,17 @@ abstract class AbstractTraceCommand extends AbstractCommand {
             if ($input->getOption('all')) {
                 $pid = 'all';
             } else {
-                $question = new ChoiceQuestion('Please choose process for tracing', $processList);
-                $question->setMaxAttempts(1);
-                
-                $questionDialog = new QuestionHelper();
+                try {
+                    $question = new ChoiceQuestion('Please choose process for tracing', $processList);
+                    $question->setMaxAttempts(1);
 
-                $pid = $questionDialog->ask($input, $output, $question);
+                    $questionDialog = new QuestionHelper();
+
+                    $pid = $questionDialog->ask($input, $output, $question);
+                } catch(\InvalidArgumentException $e) {
+                    // Invalid value, just stop here
+                    throw new \CliTools\Exception\StopException(1);
+                }
             }
         }
 
