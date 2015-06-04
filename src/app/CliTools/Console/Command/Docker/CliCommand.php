@@ -59,7 +59,7 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
                 $cliUser   = $this->getDockerEnv($container, 'CLI_USER');
 
                 if (empty($cliScript)) {
-                    $output->writeln('<error>Docker container "' . $container . '" doesn\'t have environment variable "CLI_SCRIPT"</error>');
+                    $output->writeln('<p-error>Docker container "' . $container . '" doesn\'t have environment variable "CLI_SCRIPT"</p-error>');
                     return 1;
                 }
 
@@ -89,7 +89,7 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
                 break;
 
             default:
-                $output->writeln('<error>CliMethod "' . $cliMethod .'" not defined</error>');
+                $output->writeln('<p-error>CliMethod "' . $cliMethod .'" not defined</p-error>');
                 $ret = 1;
                 break;
         }

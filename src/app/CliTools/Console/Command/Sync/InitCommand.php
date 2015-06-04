@@ -49,7 +49,7 @@ class InitCommand extends \CliTools\Console\Command\AbstractCommand {
         $cliSyncFilePath = getcwd() . '/' . AbstractCommand::CONFIG_FILE;
 
         if (file_exists($cliSyncFilePath)) {
-            $this->output->writeln('<error>Configuration file ' . AbstractCommand::CONFIG_FILE . ' already exists</error>');
+            $this->output->writeln('<p-error>Configuration file ' . AbstractCommand::CONFIG_FILE . ' already exists</p-error>');
             return 1;
         }
 
@@ -161,7 +161,7 @@ task:
                 ->addArgument($cliSyncFilePath)
                 ->executeInteractive();
         } catch (\Exception $e) {
-            $this->output->writeln('<error>' . $e->getMessage() . '</error>');
+            $this->output->writeln('<p-error>' . $e->getMessage() . '</p-error>');
         }
 
         $this->output->writeln('<info>Successfully created ' . AbstractCommand::CONFIG_FILE . ' </info>');

@@ -100,7 +100,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         // Find configuration file
         $this->confFilePath = UnixUtility::findFileInDirectortyTree($confFileList);
         if (empty($this->confFilePath)) {
-            throw new \RuntimeException('<error>No ' . self::CONFIG_FILE . ' found in tree</error>');
+            throw new \RuntimeException('<p-error>No ' . self::CONFIG_FILE . ' found in tree</p-error>');
         }
 
         $this->workingPath = dirname($this->confFilePath);
@@ -112,7 +112,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         // Validate configuration
         if (!$this->validateConfiguration()) {
-            throw new \RuntimeException('<error>Configuration could not be validated</error>');
+            throw new \RuntimeException('<p-error>Configuration could not be validated</p-error>');
         }
     }
 
@@ -207,7 +207,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         // Check if rsync target exists
         if (!$this->getRsyncPathFromConfig()) {
-            $this->output->writeln('<error>No rsync path configuration found</error>');
+            $this->output->writeln('<p-error>No rsync path configuration found</p-error>');
             $ret = false;
         } else {
             $this->output->writeln('<comment>Using rsync path "' . $this->getRsyncPathFromConfig() . '"</comment>');
@@ -231,7 +231,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         // Check if one database is configured
         if (!$this->config->exists('mysql.database')) {
-            $this->output->writeln('<error>No mysql database configuration found</error>');
+            $this->output->writeln('<p-error>No mysql database configuration found</p-error>');
             $ret = false;
         }
 

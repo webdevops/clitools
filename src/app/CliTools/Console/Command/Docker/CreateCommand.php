@@ -84,15 +84,20 @@ class CreateCommand extends AbstractCommand {
             $boilerplateRepo = $this->getApplication()->getConfigValue('docker', 'boilerplate');
         }
 
+        $output->writeln('<h2>Creating new docker boilerplate instance in "' . $path . '"</h2>');
+
         // Init docker boilerplate
         $this->createDockerInstance($path, $boilerplateRepo);
         PhpUtility::chdir($currDir);
 
         // Init code
         if ($this->input->getOption('code')) {
+
+            $output->writeln('<h2>Init code repository</h2>');
             $this->initCode($path, $input->getOption('code'));
             PhpUtility::chdir($currDir);
 
+            $output->writeln('<h2>Init document root</h2>');
             // detect document root
             $this->initDocumentRoot($path);
             PhpUtility::chdir($currDir);
@@ -100,10 +105,11 @@ class CreateCommand extends AbstractCommand {
             // Run makefile
             if ($this->input->getOption('make')) {
                 try {
+                    $output->writeln('<h2>Run Makefile</h2>');
                     $this->runMakefile($path, $input->getOption('make'));
                     PhpUtility::chdir($currDir);
                 } catch (\Exception $e) {
-                    $this->addFinishMessage('<error>Make command failed: ' . $e->getMessage() . '</error>');
+                    $this->addFinishMessage('<p-error>Make command failed: ' . $e->getMessage() . '</p-error>');
                 }
             }
         }
@@ -113,6 +119,7 @@ class CreateCommand extends AbstractCommand {
         $this->startInteractiveEditor($path . '/docker-env.yml');
 
         // Start docker
+        $output->writeln('<h2>Build and start docker containers</h2>');
         PhpUtility::chdir($currDir);
         $this->startDockerInstance($path);
 
@@ -132,14 +139,14 @@ class CreateCommand extends AbstractCommand {
 
                 $this->getApplication()->setProcessTitle('Edit ' . basename($path));
 
-                $this->output->writeln('<comment>Starting interactive EDITOR for file ' .$path . '</comment>');
+                $this->output->writeln('<h2>Starting interactive EDITOR for file ' .$path . '</h2>');
                 sleep(1);
 
                 $editor
                     ->addArgument($path)
                     ->executeInteractive();
             } catch (\Exception $e) {
-                $this->addFinishMessage('<error>' . $e->getMessage() . '</error>');
+                $this->addFinishMessage('<p-error>' . $e->getMessage() . '</p-error>');
             }
         }
     }
@@ -152,8 +159,6 @@ class CreateCommand extends AbstractCommand {
      */
     protected function createDockerInstance($path, $repo) {
         $this->getApplication()->setProcessTitle('Cloning docker');
-
-        $this->output->writeln('<comment>Create new docker boilerplate in "' . $path . '"</comment>');
 
         $command = new CommandBuilder('git','clone --branch=master --recursive %s %s', array($repo, $path));
         $command->executeInteractive();
@@ -249,7 +254,7 @@ class CreateCommand extends AbstractCommand {
             ->addArgument($makeCommand)
             ->executeInteractive();
         } catch (\Exception $e) {
-            $this->addFinishMessage('<error>Make command failed: ' . $e->getMessage() . '</error>');
+            $this->addFinishMessage('<p-error>Make command failed: ' . $e->getMessage() . '</p-error>');
         }
     }
 

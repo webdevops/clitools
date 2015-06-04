@@ -65,6 +65,14 @@ class ServerCommand extends AbstractSyncCommand {
     }
 
     /**
+     * Startup task
+     */
+    protected function startup() {
+        $this->output->writeln('<h2>Starting server synchronization</h2>');
+        parent::startup();
+    }
+
+    /**
      * Read and validate configuration
      */
     protected function readConfiguration() {
@@ -77,7 +85,7 @@ class ServerCommand extends AbstractSyncCommand {
         }
 
         // Use server specific configuration
-        $this->output->writeln('<info>Syncing from "' . $this->contextName . '" server');
+        $this->output->writeln('<p>Syncing from "' . $this->contextName . '" server</p>');
 
         // ##################
         // Jump into section
@@ -119,13 +127,13 @@ class ServerCommand extends AbstractSyncCommand {
 
         // Sync files with rsync to local storage
         if ($runRsync && $this->config->exists('rsync')) {
-            $this->output->writeln('<info> ---- Starting FILE sync ---- </info>');
+            $this->output->writeln('<h1>Starting FILE sync</h1>');
             $this->runTaskRsync();
         }
 
         // Sync database to local server
         if ($runMysql && $this->config->exists('mysql')) {
-            $this->output->writeln('<info> ---- Starting MYSQL sync ---- </info>');
+            $this->output->writeln('<h1>Starting MYSQL sync</h1>');
             $this->runTaskDatabase();
         }
     }
@@ -170,7 +178,7 @@ class ServerCommand extends AbstractSyncCommand {
             // ##########
             // Dump from server
             // ##########
-            $this->output->writeln('<info>Fetching foreign database "' . $foreignDatabase . '"</info>');
+            $this->output->writeln('<p>Fetching foreign database "' . $foreignDatabase . '"</p>');
 
             $mysqldump = $this->createMySqlDumpCommand($foreignDatabase);
 
@@ -186,7 +194,7 @@ class ServerCommand extends AbstractSyncCommand {
             // ##########
             // Restore local
             // ##########
-            $this->output->writeln('<info>Restoring database "' . $localDatabase . '"</info>');
+            $this->output->writeln('<p>Restoring database "' . $localDatabase . '"</p>');
 
             $this->createMysqlRestoreCommand($localDatabase, $dumpFile)->executeInteractive();
         }
@@ -342,7 +350,7 @@ class ServerCommand extends AbstractSyncCommand {
             throw new \RuntimeException('MySQL dump filters "' . $filter . '" not available"');
         }
 
-        $this->output->writeln('<comment>Using filter "' . $filter . '"</comment>');
+        $this->output->writeln('<p>Using filter "' . $filter . '"</p>');
 
         // Get table list (from cloned mysqldump command)
         $tableListDumper = $this->createMySqlCommand($database);

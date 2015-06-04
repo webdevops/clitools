@@ -56,6 +56,8 @@ class PhpCommand extends \CliTools\Console\Command\AbstractCommand {
             $grep = $input->getArgument('grep');
         }
 
+        $output->writeln('<h2>Starting php log tail</h2>');
+
         // Show log
         $logList = array(
             '/var/log/php-fpm/dev.error.log',

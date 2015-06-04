@@ -46,6 +46,14 @@ class BackupCommand extends AbstractShareCommand {
     }
 
     /**
+     * Startup task
+     */
+    protected function startup() {
+        $this->output->writeln('<h2>Starting share backup</h2>');
+        parent::startup();
+    }
+
+    /**
      * Backup task
      */
     protected function runTask() {

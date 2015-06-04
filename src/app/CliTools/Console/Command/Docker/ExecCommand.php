@@ -54,7 +54,7 @@ class ExecCommand extends AbstractCommand implements \CliTools\Console\Filter\An
 
             $ret = $this->executeDockerExec($container, $command);
         } else {
-            $output->writeln('<error>No command/parameter specified</error>');
+            $output->writeln('<p-error>No command/parameter specified</p-error>');
             $ret = 1;
         }
 

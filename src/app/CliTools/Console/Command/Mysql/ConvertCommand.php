@@ -102,7 +102,7 @@ class ConvertCommand extends AbstractCommand {
 
         if (!$stdout) {
             // Execute
-            $output->writeln('<info>Converting database ' . $database . '</info>');
+            $output->writeln('<h2>Converting database ' . $database . '</h2>');
             DatabaseConnection::exec($query);
         } else {
             // Show only
@@ -126,7 +126,7 @@ class ConvertCommand extends AbstractCommand {
 
             if (!$stdout) {
                 // Execute
-                $output->writeln('<info>Converting table ' . $table . '</info>');
+                $output->writeln('<p>Converting table ' . $table . '</p>');
                 DatabaseConnection::exec($query);
             } else {
                 // Show only

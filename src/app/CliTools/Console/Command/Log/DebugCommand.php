@@ -56,6 +56,7 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
             $grep = $input->getArgument('grep');
         }
 
+        $output->writeln('<h2>Starting debug log tail</h2>');
 
         // Show log
         $logList = array(

@@ -90,6 +90,8 @@ abstract class AbstractTraceCommand extends AbstractCommand {
         $command->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_ALL_STDOUT);
 
 
+        $output->writeln('<h2>Starting process stracing</h2>');
+
         if (empty($pid)) {
             list($pidList, $processList) = $this->buildProcessList();
 

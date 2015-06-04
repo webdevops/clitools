@@ -72,10 +72,12 @@ class BackupCommand extends AbstractCommand {
         $filter   = $input->getOption('filter');
 
         if (!DatabaseConnection::databaseExists($database)) {
-            $output->writeln('<error>Database "' . $database . '" does not exists</error>');
+            $output->writeln('<p-error>Database "' . $database . '" does not exists</p-error>');
 
             return 1;
         }
+
+        $output->writeln('<h2>Dumping database "' . $database . '" into file "' . $dumpFile . '"</h2>');
 
         $fileExt = pathinfo($dumpFile, PATHINFO_EXTENSION);
 
@@ -89,20 +91,20 @@ class BackupCommand extends AbstractCommand {
             case 'bz':
             case 'bz2':
             case 'bzip2':
-                $output->writeln('<comment>Using BZIP2 compression</comment>');
+                $output->writeln('<p>Using BZIP2 compression</p>');
                 $commandCompressor = new CommandBuilder('bzip2');
                 break;
 
             case 'gz':
             case 'gzip':
-                $output->writeln('<comment>Using GZIP compression</comment>');
+                $output->writeln('<p>Using GZIP compression</p>');
                 $commandCompressor = new CommandBuilder('gzip');
                 break;
 
             case 'lzma':
             case 'lz':
             case 'xz':
-                $output->writeln('<comment>Using LZMA compression</comment>');
+                $output->writeln('<p>Using LZMA compression</p>');
                 $commandCompressor = new CommandBuilder('xz');
                 $commandCompressor->addArgument('--compress')
                     ->addArgument('--stdout');
@@ -128,13 +130,13 @@ class BackupCommand extends AbstractCommand {
             $command->addPipeCommand($commandCompressor);
             $commandCompressor->setOutputRedirectToFile($dumpFile);
         } else {
-            $output->writeln('<comment>Using no compression</comment>');
+            $output->writeln('<p>Using no compression</p>');
             $command->setOutputRedirectToFile($dumpFile);
         }
 
         $command->executeInteractive();
 
-        $output->writeln('<info>Database "' . $database . '" stored to "' . $dumpFile . '"</info>');
+        $output->writeln('<h2>Database "' . $database . '" stored to "' . $dumpFile . '"</h2>');
     }
 
     /**

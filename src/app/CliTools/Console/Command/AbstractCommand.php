@@ -163,11 +163,13 @@ abstract class AbstractCommand extends Command {
         // check if logfiles are accessable
         foreach ($logList as $log) {
             if (!is_readable($log)) {
-                $output->writeln('<error>Can\'t read ' . $log . '</error>');
+                $output->writeln('<p-error>Can\'t read ' . $log . '</p-error>');
 
                 return 1;
             }
         }
+
+        $output->writeln('<p>Reading logfile with multitail</p>');
 
         $command = new CommandBuilder('multitail', '--follow-all');
 

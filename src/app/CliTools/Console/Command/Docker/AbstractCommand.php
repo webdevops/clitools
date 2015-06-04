@@ -63,12 +63,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $ret = null;
 
         if (empty($containerName)) {
-            $this->output->writeln('<error>No container specified</error>');
+            $this->output->writeln('<p-error>No container specified</p-error>');
             return false;
         }
 
         if (empty($envName)) {
-            $this->output->writeln('<error>No environment name specified</error>');
+            $this->output->writeln('<p-error>No environment name specified</p-error>');
             return false;
         }
 
@@ -107,12 +107,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function executeDockerExec($containerName, CommandBuilderInterface $command) {
         if (empty($containerName)) {
-            $this->output->writeln('<error>No container specified</error>');
+            $this->output->writeln('<p-error>No container specified</p-error>');
             return 1;
         }
 
         if (!$command->isExecuteable()) {
-            $this->output->writeln('<error>No command specified or not executeable</error>');
+            $this->output->writeln('<p-error>No command specified or not executeable</p-error>');
             return 1;
         }
 
@@ -132,7 +132,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $dockerCommand->append($command, false);
             $dockerCommand->executeInteractive();
         } else {
-            $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
+            $this->output->writeln('<p-error>No docker-compose.yml found in tree</p-error>');
 
             return 1;
         }
@@ -161,7 +161,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $command->setCommand('docker-compose');
             $command->executeInteractive();
         } else {
-            $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
+            $this->output->writeln('<p-error>No docker-compose.yml found in tree</p-error>');
 
             return 1;
         }
@@ -191,7 +191,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $dockerCommand->append($command, false);
             $dockerCommand->executeInteractive();
         } else {
-            $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
+            $this->output->writeln('<p-error>No docker-compose.yml found in tree</p-error>');
 
             return 1;
         }

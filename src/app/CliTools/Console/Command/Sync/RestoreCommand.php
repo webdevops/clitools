@@ -46,6 +46,14 @@ class RestoreCommand extends AbstractShareCommand {
     }
 
     /**
+     * Startup task
+     */
+    protected function startup() {
+        $this->output->writeln('<h2>Starting share restore</h2>');
+        parent::startup();
+    }
+
+    /**
      * Restore task
      */
     protected function runTask() {
@@ -109,7 +117,7 @@ class RestoreCommand extends AbstractShareCommand {
             list($database) = explode('.', $item->getFilename(), 2);
 
             if (!empty($database)) {
-                $this->output->writeln('<info>Restoring database ' . $database . '</info>');
+                $this->output->writeln('<h1>Restoring database ' . $database . '</h1>');
 
                 $this->createMysqlRestoreCommand($database, $item->getPathname())->executeInteractive();
             }

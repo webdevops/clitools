@@ -63,27 +63,28 @@ class RestoreCommand extends AbstractCommand {
         $dumpFile = $input->getArgument('file');
 
         if (!is_file($dumpFile) || !is_readable($dumpFile)) {
-            $output->writeln('<error>File is not readable</error>');
+            $output->writeln('<p-error>File is not readable</p-error>');
 
             return 1;
         }
 
         $dumpFileType = PhpUtility::getMimeType($dumpFile);
 
+        $output->writeln('<h2>Restoring dump "' . $dumpFile . '" into database "' . $database . '"</h2>');
+
         if (DatabaseConnection::databaseExists($database)) {
             // Dropping
-            $output->writeln('<info>Dropping Database "' . $database . '"...</info>');
+            $output->writeln('<p>Dropping database</p>');
             $query = 'DROP DATABASE IF EXISTS ' . DatabaseConnection::sanitizeSqlDatabase($database);
             DatabaseConnection::exec($query);
         }
 
         // Creating
-        $output->writeln('<info>Creating Database "' . $database . '"...</info>');
+        $output->writeln('<p>Creating database</p>');
         $query = 'CREATE DATABASE ' . DatabaseConnection::sanitizeSqlDatabase($database);
         DatabaseConnection::exec($query);
 
         // Inserting
-        $output->writeln('<info>Restoring dump into Database "' . $database . '"...</info>');
         putenv('USER=' . DatabaseConnection::getDbUsername());
         putenv('MYSQL_PWD=' . DatabaseConnection::getDbPassword());
 
@@ -105,31 +106,32 @@ class RestoreCommand extends AbstractCommand {
 
         switch ($dumpFileType) {
             case 'application/x-bzip2':
-                $output->writeln('<comment>Using BZIP2 decompression</comment>');
+                $output->writeln('<p>Using BZIP2 decompression</p>');
                 $commandFile->setCommand('bzcat');
                 break;
 
             case 'application/gzip':
             case 'application/x-gzip':
-                $output->writeln('<comment>Using GZIP decompression</comment>');
+                $output->writeln('<p>Using GZIP decompression</p>');
                 $commandFile->setCommand('gzcat');
                 break;
 
             case 'application/x-lzma':
             case 'application/x-xz':
-            $output->writeln('<comment>Using LZMA decompression</comment>');
+            $output->writeln('<p>Using LZMA decompression</p>');
                 $commandFile->setCommand('xzcat');
                 break;
 
             default:
-                $output->writeln('<comment>Using plaintext (no decompression)</comment>');
+                $output->writeln('<p>Using plaintext (no decompression)</p>');
                 $commandFile->setCommand('cat');
                 break;
         }
 
+        $output->writeln('<p>Reading dump</p>');
         $commandFile->executeInteractive();
 
-        $output->writeln('<info>Database "' . $database . '" restored</info>');
+        $output->writeln('<h2>Database "' . $database . '" restored</h2>');
 
         return 0;
     }

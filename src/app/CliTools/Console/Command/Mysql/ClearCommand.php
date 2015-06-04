@@ -55,17 +55,19 @@ class ClearCommand extends AbstractCommand {
     public function execute(InputInterface $input, OutputInterface $output) {
         $database = $input->getArgument('db');
 
+        $output->writeln('<h2>Clearing database "' . $database . '"</h2>');
+
         if (DatabaseConnection::databaseExists($database)) {
-            $output->writeln('<comment>Dropping Database "' . $database . '"...</comment>');
+            $output->writeln('<p>Dropping database</p>');
             $query = 'DROP DATABASE ' . DatabaseConnection::sanitizeSqlDatabase($database);
             DatabaseConnection::exec($query);
         }
 
-        $output->writeln('<comment>Creating Database "' . $database . '"...</comment>');
+        $output->writeln('<p>Creating database</p>');
         $query = 'CREATE DATABASE ' . DatabaseConnection::sanitizeSqlDatabase($database);
         DatabaseConnection::exec($query);
 
-        $output->writeln('<info>Database "' . $database . '" dropped and recreated</info>');
+        $output->writeln('<h2>Database "' . $database . '" recreated</h2>');
 
         return 0;
     }

@@ -74,7 +74,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $user     = null;
         $password = null;
 
-        if ($this->input->getOption('host')) {
+        if ($this->input->hasOption('host') && $this->input->getOption('host')) {
             $host = $this->input->getOption('host');
             $port = 3306;
 
@@ -85,11 +85,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $dsn = 'mysql:host=' . urlencode($host) . ';port=' . (int)$port;
         }
 
-        if ($this->input->getOption('user')) {
+        if ($this->input->hasOption('user') && $this->input->getOption('user')) {
             $user = $this->input->getOption('user');
         }
 
-        if ($this->input->getOption('password')) {
+        if ($this->input->hasOption('password') && $this->input->getOption('password')) {
             $password = $this->input->getOption('password');
         }
 

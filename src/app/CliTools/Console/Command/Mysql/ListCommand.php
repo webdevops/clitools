@@ -222,7 +222,7 @@ class ListCommand extends AbstractCommand {
 
             $table->render();
         } else {
-            $output->writeln('<comment>No databases found</comment>');
+            $output->writeln('<p-error>No databases found</p-error>');
         }
 
         return 0;

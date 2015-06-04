@@ -52,6 +52,8 @@ class UpCommand extends AbstractCommand {
             $dockerPath = dirname($dockerPath);
         }
 
+        $output->writeln('<h2>Starting docker containers</h2>');
+
         // Stop last docker instance
         if ($dockerPath && $lastDockerPath) {
             // Only stop if instance is another one
@@ -61,6 +63,7 @@ class UpCommand extends AbstractCommand {
         }
 
         // Start current docker containers
+        $this->output->writeln('<p>Start docker containers in "' . $dockerPath . '"</p>');
         $command = new CommandBuilder(null, 'up -d');
         $ret = $this->executeDockerCompose($command);
 
@@ -81,7 +84,7 @@ class UpCommand extends AbstractCommand {
         $currentPath = getcwd();
 
         try {
-            $this->output->writeln('<info>Trying to stop last running docker container in "' . $path . '"</info>');
+            $this->output->writeln('<p>Trying to stop last running docker container in "' . $path . '"</p>');
 
             // Jump into last docker dir
             \CliTools\Utility\PhpUtility::chdir($path);
