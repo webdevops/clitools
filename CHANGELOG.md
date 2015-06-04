@@ -15,6 +15,7 @@ CliTools Changelog
 - Added `typo3:domain --duplication=suffix` for domain duplication
 - Added `typo3:domain --baseurl` for setting config.baseURL in SetupTS
 - Added `vagrant:share` with automatic domain setting for TYPO3 projects (ALPHA! not finished!)
+- TTY banner now will be reloaded (SIGHUB is send to getty tty1)
 - Added docker detection for sync features
 - Updated to Symfony 2.7
 - Refactored some classes
