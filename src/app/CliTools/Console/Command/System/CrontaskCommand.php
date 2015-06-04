@@ -74,6 +74,8 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
 
         file_put_contents('/etc/issue', $outputIssue);
         file_put_contents('/etc/motd', $output);
+
+        UnixUtility::reloadTtyBanner('tty1');
     }
 
     /**

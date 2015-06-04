@@ -294,4 +294,35 @@ abstract class UnixUtility {
 
         return $ret;
     }
+
+    /**
+     * Reload tty
+     */
+    public static function reloadTtyBanner($ttyName) {
+        // Check if we can reload tty
+        try {
+            $who = new CommandBuilder('who');
+            $who->addPipeCommand( new CommandBuilder('grep', '%s', array($ttyName)));
+            $who->execute();
+
+            // if there is no exception -> there is a logged in user
+        } catch (\Exception $e) {
+            // if there is an exception -> there is NO logged in user
+
+            try {
+                $ps = new CommandBuilder('ps', 'h -o pid,comm,args -C getty');
+                $ps->addPipeCommand( new CommandBuilder('grep', '%s', array($ttyName)));
+                $output = $ps->execute()->getOutput();
+
+                if (!empty($output)) {
+                    $outputLine      = trim(reset($output));
+                    $outputLineParts = preg_split('/[\s]+/', $outputLine);
+                    list($pid, $cmd) = $outputLineParts;
+
+                    posix_kill($pid, SIGHUP);
+                }
+
+            }  catch (\Exception $e) {}
+        }
+    }
 }

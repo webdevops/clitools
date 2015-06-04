@@ -20,6 +20,7 @@ namespace CliTools\Console\Command\System;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Utility\UnixUtility;
 use CliTools\Database\DatabaseConnection;
 use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
 use CliTools\Console\Shell\CommandBuilder\SelfCommandBuilder;
@@ -65,6 +66,8 @@ class StartupCommand extends \CliTools\Console\Command\AbstractCommand implement
 
         file_put_contents('/etc/issue', $outputIssue);
         file_put_contents('/etc/motd', $output);
+
+        UnixUtility::reloadTtyBanner('tty1');
     }
 
     /**
