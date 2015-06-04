@@ -22,6 +22,7 @@ namespace CliTools\Console;
 
 use CliTools\Database\DatabaseConnection;
 use CliTools\Service\SettingsService;
+use CliTools\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -171,6 +172,34 @@ class Application extends \Symfony\Component\Console\Application {
         $this->callTearDown();
 
         return $ret;
+    }
+
+
+    /**
+     * Configures the input and output instances based on the user arguments and options.
+     *
+     * @param InputInterface  $input  An InputInterface instance
+     * @param OutputInterface $output An OutputInterface instance
+     */
+    protected function configureIO(InputInterface $input, OutputInterface $output) {
+        parent::configureIO($input, $output);
+
+        $style = new OutputFormatterStyle();
+        $style->setApplication($this);
+        $style->setWrap('-', '-');
+        $output->getFormatter()->setStyle('h1', $style);
+
+        $style = new OutputFormatterStyle();
+        $style->setPaddingOutside(' ===> ');
+        $output->getFormatter()->setStyle('h2', $style);
+
+        $style = new OutputFormatterStyle();
+        $style->setPaddingOutside('   -  ');
+        $output->getFormatter()->setStyle('p', $style);
+
+        $style = new OutputFormatterStyle('white', 'red');
+        $style->setPadding(' [EE] ');
+        $output->getFormatter()->setStyle('p-error', $style);
     }
 
     /**
