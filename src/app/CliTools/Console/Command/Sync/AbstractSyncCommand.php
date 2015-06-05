@@ -32,7 +32,6 @@ abstract class AbstractSyncCommand extends \CliTools\Console\Command\Sync\Abstra
      */
     protected $confArea = 'server';
 
-
     /**
      * Validate configuration
      *
@@ -56,6 +55,32 @@ abstract class AbstractSyncCommand extends \CliTools\Console\Command\Sync\Abstra
         }
 
         return $ret;
+    }
+
+    /**
+     * Read and validate configuration
+     */
+    protected function readConfiguration() {
+        parent::readConfiguration();
+
+        $this->contextName = $this->getServerContext();
+
+        if (empty($this->contextName) || $this->contextName === '_' || empty($this->config[$this->contextName])) {
+            throw new \RuntimeException('No valid configuration found for context "' . $this->contextName . '"');
+        }
+
+        // Use server specific configuration
+        $this->output->writeln('<p>Syncing from "' . $this->contextName . '" server</p>');
+
+        // ##################
+        // Jump into section
+        // ##################
+        if ($this->config->exists('_')) {
+            // Merge global config with specific config
+            $this->config->setData(array_replace_recursive($this->config->getArray('_'), $this->config->getArray($this->contextName)));
+        } else {
+            $this->config->setData($this->config->getArray($this->contextName));
+        }
     }
 
     /**
