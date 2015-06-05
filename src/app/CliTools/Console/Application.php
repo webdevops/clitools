@@ -99,6 +99,7 @@ class Application extends \Symfony\Component\Console\Application {
      * Initialize
      */
     public function initialize() {
+        $this->initializeErrorHandler();
         $this->initializeChecks();
         $this->initializeConfiguration();
         $this->initializePosixTrap();
@@ -219,6 +220,27 @@ class Application extends \Symfony\Component\Console\Application {
 
         pcntl_signal(SIGTERM, $signalHandler);
         pcntl_signal(SIGINT, $signalHandler);
+    }
+
+    /**
+     * Init error handler
+     */
+    protected function initializeErrorHandler() {
+        $me = $this;
+
+        $errorHandler = function ($errno, $errstr, $errfile, $errline, $errcontext) use($me) {
+            $msg = array(
+                'Message: ' . $errstr,
+                'File: ' . $errfile,
+                'Line: ' . $errline,
+            );
+
+            $msg = implode("\n", $msg);
+
+            throw new \RuntimeException($msg, $errno);
+        };
+
+        set_error_handler($errorHandler);
     }
 
     /**
