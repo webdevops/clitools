@@ -67,14 +67,14 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Sync configuration
      *
-     * @var ConfigReaderService
+     * @var ConfigReader
      */
     protected $config = array();
 
     /**
      * Task configuration
      *
-     * @var ConfigReaderService
+     * @var ConfigReader
      */
     protected $taskConf = array();
 
