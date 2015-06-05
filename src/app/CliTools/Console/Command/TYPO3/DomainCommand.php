@@ -80,6 +80,8 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
         // ##################
         $dbName = $input->getArgument('db');
 
+        $output->writeln('<h2>Updating TYPO3 domain entries</h2>');
+
         // ##############
         // Loop through databases
         // ##############
@@ -227,10 +229,10 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
         $query = 'SELECT domainName FROM sys_domain ORDER BY domainName ASC';
         $domainList = DatabaseConnection::getCol($query);
 
-        $this->output->writeln('<info>Domain list of "' . $dbName . '":</info>');
+        $this->output->writeln('<p>Domain list of "' . $dbName . '":</p>');
 
         foreach ($domainList as $domain) {
-            $this->output->writeln('    <info>' . $domain . '</info>');
+            $this->output->writeln('<p>  ' . $domain . '</p>');
         }
         $this->output->writeln('');
     }

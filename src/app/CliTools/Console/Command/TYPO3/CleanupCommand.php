@@ -55,6 +55,8 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
         // ##################
         $dbName = $input->getArgument('db');
 
+        $output->writeln('<h2>Cleanup TYPO3 database</h2>');
+
         // ##############
         // Loop through databases
         // ##############
@@ -163,7 +165,7 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
             }
         }
 
-        $this->output->writeln('<info>Starting cleanup of database ' . $database . '...');
+        $this->output->writeln('<p>Starting cleanup of database "' . $database . '"</p>');
 
         DatabaseConnection::switchDatabase(DatabaseConnection::sanitizeSqlDatabase($database));
 
@@ -172,10 +174,10 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
             DatabaseConnection::exec($query);
 
             if ($this->output->isVerbose()) {
-                $this->output->writeln('<comment>  -> Truncating table ' . $table . '</comment>');
+                $this->output->writeln('<p>Truncating table ' . $table . '</p>');
             }
         }
 
-        $this->output->writeln('<info>  -> finished</info>');
+        $this->output->writeln('<p>finished</p>');
     }
 }

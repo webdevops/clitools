@@ -75,6 +75,8 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
         $username = $input->getArgument('user');
         $password = $input->getArgument('password');
 
+        $output->writeln('<h2>Injecting TYPO3 backend user</h2>');
+
         // Set default user if not specified
         if (empty($username)) {
             $username = 'dev';
@@ -82,18 +84,18 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
 
         // check username
         if (!preg_match('/^[-_a-zA-Z0-9\.]+$/', $username)) {
-            $output->writeln('<error>Invalid username</error>');
+            $output->writeln('<p-error>Invalid username</p-error>');
 
             return 1;
         }
 
-        $output->writeln('<comment>Using user: "' . htmlspecialchars($username) . '"</comment>');
+        $output->writeln('<p>Using user: "' . htmlspecialchars($username) . '"</p>');
 
         // Set default password if not specified
         if (empty($password)) {
             $password = 'dev';
         }
-        $output->writeln('<comment>Using pass: "' . htmlspecialchars($password) . '"</comment>');
+        $output->writeln('<p>Using pass: "' . htmlspecialchars($password) . '"</p>');
 
         // ##################
         // Salting
@@ -102,11 +104,11 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
         if ($input->getOption('plain')) {
             // Standard md5
             $password = Typo3Utility::generatePassword($password, Typo3Utility::PASSWORD_TYPE_MD5);
-            $this->output->writeln('<comment>Generating plain (non salted) md5 password</comment>');
+            $this->output->writeln('<p>Generating plain (non salted) md5 password</p>');
         } else {
             // Salted md5
             $password = Typo3Utility::generatePassword($password, Typo3Utility::PASSWORD_TYPE_MD5_SALTED);
-            $this->output->writeln('<comment>Generating salted md5 password</comment>');
+            $this->output->writeln('<p>Generating salted md5 password</p>');
         }
 
         // ##############
@@ -136,7 +138,7 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
             }
 
             if (!$dbFound) {
-                $output->writeln('<error>No valid TYPO3 database found</error>');
+                $output->writeln('<p-error>No valid TYPO3 database found</p-error>');
             }
         } else {
             // ##############
@@ -229,12 +231,12 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
             DatabaseConnection::exec($query);
 
             if ($beUserId) {
-                $this->output->writeln('<comment>User successfully updated to "' . $database . '"</comment>');
+                $this->output->writeln('<p>User successfully updated to "' . $database . '"</p>');
             } else {
-                $this->output->writeln('<info>User successfully added to "' . $database . '"</info>');
+                $this->output->writeln('<p>User successfully added to "' . $database . '"</p>');
             }
         } catch (\Exception $e) {
-            $this->output->writeln('<error>User adding failed</error>');
+            $this->output->writeln('<p-error>User adding failed</p-error>');
         }
     }
 }

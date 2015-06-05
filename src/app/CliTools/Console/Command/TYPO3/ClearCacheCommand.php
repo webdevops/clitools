@@ -57,6 +57,8 @@ class ClearCacheCommand extends \CliTools\Console\Command\AbstractCommand {
         $basePath = $this->getApplication()->getConfigValue('config', 'www_base_path', '/var/www/');
         $maxDepth = 3;
 
+        $output->writeln('<h2>Clear TYPO3 cache</h2>');
+
         if ($input->getArgument('path')) {
             $basePath = $input->getArgument('path');
         }
@@ -68,7 +70,7 @@ class ClearCacheCommand extends \CliTools\Console\Command\AbstractCommand {
 
             // Check if coreapi is installed
             if (!is_dir($dirPath . '/typo3conf/ext/coreapi/')) {
-                $output->writeln('<comment>EXT:coreapi is missing on ' . $dirPath . ', skipping</comment>');
+                $output->writeln('<p>EXT:coreapi is missing on ' . $dirPath . ', skipping</p>');
                 continue;
             }
 
@@ -78,14 +80,14 @@ class ClearCacheCommand extends \CliTools\Console\Command\AbstractCommand {
                 'cache:clearallcaches'
             );
 
-            $output->writeln('<info>Running clearcache command on ' . $dirPath . '</info>');
+            $output->writeln('<p>Running clearcache command on ' . $dirPath . '</p>');
             try {
 
                 $command = new CommandBuilder('php');
                 $command->setArgumentList($params)
                     ->executeInteractive();
             } catch (\Exception $e) {
-                $output->writeln('<error> Failed with exception: ' . $e->getMessage() . '</error>');
+                $output->writeln('<p-error> Failed with exception: ' . $e->getMessage() . '</p-error>');
             }
         }
 
