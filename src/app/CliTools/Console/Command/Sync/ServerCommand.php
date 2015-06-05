@@ -325,7 +325,7 @@ class ServerCommand extends AbstractSyncCommand {
 
         // Add exclude (external file with --exclude-from option)
         if (!$exclude && $this->config->exists('rsync.exclude')) {
-            $exclude = $this->config->exists('rsync.exclude');
+            $exclude = $this->config->get('rsync.exclude');
         }
 
         return parent::createRsyncCommand($source, $target, $filelist, $exclude);
