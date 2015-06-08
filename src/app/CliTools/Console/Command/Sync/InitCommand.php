@@ -86,7 +86,10 @@ server:
         option: "--opt --single-transaction"
 
     rsync:
-        # directory list/patterns
+        # set target as sub directroy (will be appended to working directory)
+      #target: "html/"
+
+        # directory list/patterns for synchronization
       directory:
         - "/fileadmin/"
         - "/uploads/"
@@ -108,8 +111,6 @@ server:
     rsync:
         # server and source directory (server host or name - see .ssh/config)
       path: "live-server:/var/www/website/htdocs"
-        # set target as sub directroy (will be appended to working directory)
-      #target: "html/"
 
     mysql:
         # mysql connection
