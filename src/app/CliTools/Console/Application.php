@@ -226,9 +226,7 @@ class Application extends \Symfony\Component\Console\Application {
      * Init error handler
      */
     protected function initializeErrorHandler() {
-        $me = $this;
-
-        $errorHandler = function ($errno, $errstr, $errfile, $errline, $errcontext) use($me) {
+        $errorHandler = function ($errno, $errstr, $errfile, $errline) {
             $msg = array(
                 'Message: ' . $errstr,
                 'File: ' . $errfile,
