@@ -68,7 +68,7 @@ server:
         # MySQL predefined filter for typo3 (eg. no caching tables)
       filter: typo3
 
-      # MySQL custom filter
+      # MySQL custom filter (preg_match)
       #filter:
       #  - "/^cachingframework_.*/i"
       #  - "/^cf_.*/i"
