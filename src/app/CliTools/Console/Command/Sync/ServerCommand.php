@@ -318,7 +318,12 @@ class ServerCommand extends AbstractSyncCommand {
         $command = $commandDump;
 
         // get filter
-        $filterList = $this->getApplication()->getConfigValue('mysql-backup-filter', $filter);
+        if (is_array($filter)) {
+            $filterList = (array)$filter;
+            $filter     = 'custom table filter';
+        } else {
+            $filterList = $this->getApplication()->getConfigValue('mysql-backup-filter', $filter);
+        }
 
         if (empty($filterList)) {
             throw new \RuntimeException('MySQL dump filters "' . $filter . '" not available"');

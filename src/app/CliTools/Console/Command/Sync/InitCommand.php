@@ -65,8 +65,18 @@ server:
    ##################
   _:
     mysql:
-        # MySQL filter for typo3 (eg. no caching tables)
+        # MySQL predefined filter for typo3 (eg. no caching tables)
       filter: typo3
+
+      # MySQL custom filter
+      #filter:
+      #  - "/^cachingframework_.*/i"
+      #  - "/^cf_.*/i"
+      #  - "/^cache_.*/i"
+      #  - "/^index_.*/i"
+      #  - "/^sys_log$/i"
+      #  - "/^sys_history$/i"
+      #  - "/^tx_extbase_cache.*/i"
 
         # Transfer compression (none if empty, bzip2 or gzip)
       compression: bzip2
@@ -74,6 +84,17 @@ server:
         # specific mysqldump settings
       mysqldump:
         option: "--opt --single-transaction"
+
+    rsync:
+        # directory list/patterns
+      directory:
+        - "/fileadmin/"
+        - "/uploads/"
+        - "/typo3conf/l10n/"
+
+        # directory exclude list/patterns
+      exclude:
+        - "/fileadmin/_processed_/**"
 
    ##################
    # Config "production"
@@ -89,12 +110,6 @@ server:
       path: "live-server:/var/www/website/htdocs"
         # set target as sub directroy (will be appended to working directory)
       #target: "html/"
-
-        # directory list/patterns
-      directory:
-        - "/fileadmin/"
-        - "/uploads/"
-        - "/typo3conf/l10n/"
 
     mysql:
         # mysql connection
@@ -147,9 +162,9 @@ task:
     # These commands will be executed after backup, restore and sync
   finalize:
       # create user "dev" with password "dev"
-    - \'ct typo3:beuser\'
+    - "ct typo3:beuser"
       # append toplevel-domain .vm to all domains
-    - \'ct typo3:domain\'
+    - "ct typo3:domain"
 ';
 
         PhpUtility::filePutContents($cliSyncFilePath, $content);
