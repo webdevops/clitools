@@ -20,7 +20,7 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use Symfony\Component\Console\Input\InputOption;
+use CliTools\Console\Shell\CommandBuilder\OutputCombineCommandBuilder;
 
 class BackupCommand extends AbstractShareCommand {
 
@@ -28,21 +28,11 @@ class BackupCommand extends AbstractShareCommand {
      * Configure command
      */
     protected function configure() {
+        parent::configure();
+
         $this
             ->setName('sync:backup')
-            ->setDescription('Backup project files')
-            ->addOption(
-                'mysql',
-                null,
-                InputOption::VALUE_NONE,
-                'Run only mysql'
-            )
-            ->addOption(
-                'rsync',
-                null,
-                InputOption::VALUE_NONE,
-                'Run only rsync'
-            );
+            ->setDescription('Backup files and database from share');
     }
 
     /**
@@ -56,7 +46,7 @@ class BackupCommand extends AbstractShareCommand {
     /**
      * Backup task
      */
-    protected function runTask() {
+    protected function runMain() {
         // ##################
         // Option specific runners
         // ##################
@@ -71,18 +61,17 @@ class BackupCommand extends AbstractShareCommand {
             $runMysql = $this->input->getOption('mysql');
         }
 
-
         // ##################
         // Backup dirs
         // ##################
-        if ($runRsync && $this->config->exists('rsync.directory')) {
+        if ($runRsync && $this->contextConfig->exists('rsync.directory')) {
             $this->runTaskRsync();
         }
 
         // ##################
         // Backup databases
         // ##################
-        if ($runMysql && $this->config->exists('mysql.database')) {
+        if ($runMysql && $this->contextConfig->exists('mysql.database')) {
             $this->runTaskMysql();
         }
     }
@@ -93,25 +82,52 @@ class BackupCommand extends AbstractShareCommand {
     protected function runTaskRsync() {
         $source  = $this->getRsyncWorkingPath();
         $target  = $this->getRsyncPathFromConfig() . self::PATH_DATA;
-        $command = $this->createShareRsyncCommand($source, $target, true);
+
+        $fileList = array();
+        if ($this->contextConfig->exists('rsync.directory')) {
+            $fileList = $this->contextConfig->get('rsync.directory');
+        }
+
+        $excludeList = array();
+        if ($this->contextConfig->exists('rsync.exclude')) {
+            $excludeList = $this->contextConfig->get('rsync.exclude');
+        }
+
+        $command = $this->createRsyncCommand($source, $target, $fileList, $excludeList);
         $command->executeInteractive();
     }
 
-
     /**
-     * Sync files with mysql
+     * Sync database
      */
     protected function runTaskMysql() {
-        foreach ($this->config->getArray('mysql.database') as $database) {
-            $this->output->writeln('<info>Dumping database ' . $database . '</info>');
+        // ##################
+        // Sync databases
+        // ##################
+        foreach ($this->contextConfig->getArray('mysql.database') as $database) {
+            // make sure we don't have any leading whitespaces
+            $database = trim($database);
 
             // dump database
-            $dumpFile = $this->tempDir . '/mysql/' . $database . '.sql.bz2';
+            $dumpFile = $this->tempDir . '/mysql/' . $database . '.dump';
 
-            $dumpFilter = $this->config->get('mysql.filter');
+            // ##########
+            // Dump from server
+            // ##########
+            $this->output->writeln('<p>Dumping database "' . $database . '"</p>');
 
-            $this->createMysqlBackupCommand($database, $dumpFile, $dumpFilter)
-                 ->executeInteractive();
+            $mysqldump = $this->createLocalMySqlDumpCommand($database);
+
+            if ($this->contextConfig->exists('mysql.filter')) {
+                $mysqldump = $this->addMysqlDumpFilterArguments($mysqldump, $database, false);
+            }
+
+            $command = new OutputCombineCommandBuilder();
+            $command->addCommandForCombinedOutput($mysqldump);
+
+            $command
+                ->setOutputRedirectToFile($dumpFile)
+                ->executeInteractive();
         }
 
         // ##################
@@ -119,7 +135,7 @@ class BackupCommand extends AbstractShareCommand {
         // ##################
         $source = $this->tempDir;
         $target = $this->getRsyncPathFromConfig() . self::PATH_DUMP;
-        $command = $this->createShareRsyncCommand($source, $target, false);
+        $command = $this->createRsyncCommand($source, $target);
         $command->executeInteractive();
     }
 }

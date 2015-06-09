@@ -28,21 +28,11 @@ class RestoreCommand extends AbstractShareCommand {
      * Configure command
      */
     protected function configure() {
+        parent::configure();
+
         $this
             ->setName('sync:restore')
-            ->setDescription('Restore project files')
-            ->addOption(
-                'mysql',
-                null,
-                InputOption::VALUE_NONE,
-                'Run only mysql'
-            )
-            ->addOption(
-                'rsync',
-                null,
-                InputOption::VALUE_NONE,
-                'Run only rsync'
-            );
+            ->setDescription('Restore files and database from share');
     }
 
     /**
@@ -56,7 +46,7 @@ class RestoreCommand extends AbstractShareCommand {
     /**
      * Restore task
      */
-    protected function runTask() {
+    protected function runMain() {
         // ##################
         // Option specific runners
         // ##################
@@ -71,11 +61,10 @@ class RestoreCommand extends AbstractShareCommand {
             $runMysql = $this->input->getOption('mysql');
         }
 
-
         // ##################
         // Restore dirs
         // ##################
-        if ($runRsync && $this->config->exists('rsync.directory')) {
+        if ($runRsync && $this->contextConfig->exists('rsync.directory')) {
             $this->runTaskRsync();
         }
 
@@ -91,12 +80,22 @@ class RestoreCommand extends AbstractShareCommand {
      * Sync files with rsync
      */
     protected function runTaskRsync() {
-        $source  = $this->getRsyncPathFromConfig() . self::PATH_DUMP;
+        $source  = $this->getRsyncPathFromConfig() . self::PATH_DATA;
         $target  = $this->getRsyncWorkingPath();
-        $command = $this->createShareRsyncCommand($source, $target, true);
+
+        $fileList = array();
+        if ($this->contextConfig->exists('rsync.directory')) {
+            $fileList = $this->contextConfig->get('rsync.directory');
+        }
+
+        $excludeList = array();
+        if ($this->contextConfig->exists('rsync.exclude')) {
+            $excludeList = $this->contextConfig->get('rsync.exclude');
+        }
+
+        $command = $this->createRsyncCommand($source, $target, $fileList, $excludeList);
         $command->executeInteractive();
     }
-
 
     /**
      * Sync files with mysql
@@ -104,7 +103,7 @@ class RestoreCommand extends AbstractShareCommand {
     protected function runTaskMysql() {
         $source  = $this->getRsyncPathFromConfig() . self::PATH_DUMP;
         $target  = $this->tempDir;
-        $command = $this->createShareRsyncCommand($source, $target, false);
+        $command = $this->createRsyncCommand($source, $target);
         $command->executeInteractive();
 
         $iterator = new \DirectoryIterator($this->tempDir . '/mysql');

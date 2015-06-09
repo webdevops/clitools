@@ -7,9 +7,10 @@ CliTools Changelog
 - Added `make` (auto search for Makefile in tree)
 - Added `php:composer` (auto search for composer.json in tree)
 - Added `mysql:convert` for automatic changing charset and collation of one database
-- Added `sync:server` for syncing any configured server to your local development system (reads clisync.yml)
-- Added `sync:backup` for backup to a shared server (reads clisync.yml)
-- Added `sync:restore` for restore from a shared server (reads clisync.yml)
+- Added `sync:server` for syncing any configured server to your local development system (reads clisync.yml or .clisync.yml)
+- Added `sync:backup` for backup to a shared server (reads clisync.yml or .clisync.yml)
+- Added `sync:restore` for restore from a shared server (reads clisync.yml or .clisync.yml)
+- Added `sync:deploy` for lightweight deployment to a foreign server (reads clisync.yml or .clisync.yml)
 - Added `typo3:domain --list` for only list the domains of one or all databases
 - Added `typo3:domain --remove=domain/pattern` for domain cleanup (eg. vagrant share)
 - Added `typo3:domain --duplication=suffix` for domain duplication

@@ -20,19 +20,7 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-abstract class AbstractShareCommand extends AbstractCommand {
-
-    const PATH_DUMP   = '/dump/';
-    const PATH_DATA   = '/data/';
-
-    /**
-     * Configure command
-     */
-    protected function configure() {
-        parent::configure();
-
-        $this->confArea = 'share';
-    }
+abstract class AbstractRemoteSyncCommand extends AbstractCommand {
 
     /**
      * Validate configuration
@@ -42,8 +30,19 @@ abstract class AbstractShareCommand extends AbstractCommand {
     protected function validateConfiguration() {
         $ret = parent::validateConfiguration();
 
-        // Rsync required for share
-        $ret = $ret && $this->validateConfigurationRsync();
+        $output = $this->output;
+
+        // ##################
+        // SSH (optional)
+        // ##################
+
+        if ($this->config->exists('ssh')) {
+            // Check if one database is configured
+            if (!$this->config->exists('ssh.hostname')) {
+                $output->writeln('<p-error>No ssh hostname configuration found</p-error>');
+                $ret = false;
+            }
+        }
 
         return $ret;
     }

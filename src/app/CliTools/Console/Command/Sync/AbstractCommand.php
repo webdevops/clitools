@@ -23,18 +23,26 @@ namespace CliTools\Console\Command\Sync;
 use CliTools\Utility\PhpUtility;
 use CliTools\Utility\UnixUtility;
 use CliTools\Utility\ConsoleUtility;
+use CliTools\Utility\FilterUtility;
 use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\RemoteCommandBuilder;
 use CliTools\Console\Shell\CommandBuilder\SelfCommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
+use CliTools\Console\Shell\CommandBuilder\OutputCombineCommandBuilder;
 use CliTools\Reader\ConfigReader;
+use CliTools\Database\DatabaseConnection;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Console\Helper\QuestionHelper;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 
 abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand {
 
     const CONFIG_FILE = 'clisync.yml';
-    const PATH_DUMP   = '/dump/';
-    const PATH_DATA   = '/data/';
+    const GLOBAL_KEY  = 'GLOBAL';
 
     /**
      * Config area
@@ -65,18 +73,49 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     protected $tempDir;
 
     /**
-     * Sync configuration
+     * Configuration
      *
      * @var ConfigReader
      */
     protected $config = array();
 
     /**
-     * Task configuration
+     * Context configuration
      *
      * @var ConfigReader
      */
-    protected $taskConf = array();
+    protected $contextConfig = array();
+
+    /**
+     * Configure command
+     */
+    protected function configure() {
+        $this
+            ->setDescription('Sync files and database from server')
+            ->addArgument(
+                'context',
+                InputArgument::OPTIONAL,
+                'Configuration name for server'
+            )
+            ->addOption(
+                'mysql',
+                null,
+                InputOption::VALUE_NONE,
+                'Run only mysql'
+            )
+            ->addOption(
+                'rsync',
+                null,
+                InputOption::VALUE_NONE,
+                'Run only rsync'
+            )
+            ->addOption(
+                'config',
+                null,
+                InputOption::VALUE_NONE,
+                'Show generated config'
+            );
+    }
 
     /**
      * Initializes the command just after the input has been validated.
@@ -91,29 +130,177 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     protected function initialize(InputInterface $input, OutputInterface $output) {
         parent::initialize($input, $output);
 
+        $this->initializeConfiguration();
+    }
+
+    /**
+     * Init configuration
+     */
+    protected function initializeConfiguration() {
+        // Search for configuration in path
+        $this->findConfigurationInPath();
+
+        // Read configuration
+        $this->readConfiguration();
+    }
+
+    /**
+     * Validate configuration
+     *
+     * @return boolean
+     */
+    protected function validateConfiguration() {
+        $ret = true;
+
+        // Rsync (optional)
+        if ($this->contextConfig->exists('rsync')) {
+            if (!$this->validateConfigurationRsync()) {
+                $ret = false;
+            }
+        }
+
+        // MySQL (optional)
+        if ($this->contextConfig->exists('mysql.database')) {
+            if (!$this->validateConfigurationMysql()) {
+                $ret = false;
+            }
+        } else {
+            // Clear mysql if any options set
+            $this->contextConfig->clear('mysql');
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Find configuration file in current path
+     */
+    protected function findConfigurationInPath() {
         $confFileList = array(
             self::CONFIG_FILE,
             '.' . self::CONFIG_FILE,
         );
 
-
         // Find configuration file
         $this->confFilePath = UnixUtility::findFileInDirectortyTree($confFileList);
         if (empty($this->confFilePath)) {
-            throw new \RuntimeException('<p-error>No ' . self::CONFIG_FILE . ' found in tree</p-error>');
+            $this->output->writeln('<p-error>No ' . self::CONFIG_FILE . ' found in tree</p-error>');
+            throw new \CliTools\Exception\StopException(1);
         }
 
         $this->workingPath = dirname($this->confFilePath);
 
-        $output->writeln('<comment>Found ' . self::CONFIG_FILE . ' directory: ' . $this->workingPath . '</comment>');
+        $this->output->writeln('<comment>Found ' . self::CONFIG_FILE . ' directory: ' . $this->workingPath . '</comment>');
+    }
 
-        // Read configuration
-        $this->readConfiguration();
+    /**
+     * Read and validate configuration
+     */
+    protected function readConfiguration() {
+        $this->config = new ConfigReader();
 
-        // Validate configuration
-        if (!$this->validateConfiguration()) {
-            throw new \RuntimeException('<p-error>Configuration could not be validated</p-error>');
+        if (empty($this->confArea)) {
+            throw new \RuntimeException('Config area not set, cannot continue');
         }
+
+        if (!file_exists($this->confFilePath)) {
+            throw new \RuntimeException('Config file "' . $this->confFilePath . '" not found');
+        }
+
+        $conf = Yaml::parse(PhpUtility::fileGetContents($this->confFilePath));
+
+        // Switch to area configuration
+        if (!empty($conf)) {
+            $this->config->setData($conf);
+        } else {
+            throw new \RuntimeException('Could not parse "' . $this->confFilePath . '"');
+        }
+    }
+
+    /**
+     * Get context list from current configuration
+     *
+     * @return array|null
+     */
+    protected function getContextListFromConfiguration() {
+        return $this->config->getArray($this->confArea);
+    }
+
+    /**
+     * Get command list from current configuration
+     *
+     * @param string $section Section name for commands (startup, final)
+     * @return array
+     */
+    protected function getCommandList($section) {
+        $ret = array();
+
+        if ($this->contextConfig->exists('command.' . $section)) {
+            $ret = $this->contextConfig->get('command.' . $section);
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Build context configuration
+     *
+     * @param $context
+     */
+    protected function buildContextConfiguration($context) {
+        $this->contextConfig = new ConfigReader();
+
+        // Fetch global conf
+        $globalConf = array();
+        if ($this->config->exists(self::GLOBAL_KEY)) {
+            $globalConf = $this->config->get(self::GLOBAL_KEY);
+        }
+
+        // Fetch area conf
+        $areaConf = $this->config->get($this->confArea);
+
+        // Fetch area global conf
+        $areaGlobalConf = array();
+        if ($this->config->exists($this->confArea . '.' . self::GLOBAL_KEY)) {
+            $areaGlobalConf = $this->config->get($this->confArea . '.' . self::GLOBAL_KEY);
+        }
+
+        // Fetch context conf
+        if (empty($areaConf[$context])) {
+            $this->output->writeln('<p-error>No context "' . $context . '" found</p-error>');
+            throw new \CliTools\Exception\StopException(1);
+        }
+        $contextConf = $areaConf[$context];
+
+
+        $arrayFilterRecursive = function($input, $callback) use (&$arrayFilterRecursive) {
+            $ret = array();
+            foreach ($input as $key => $value) {
+                if (is_array($value)) {
+                    $value = $arrayFilterRecursive($value, $callback);
+                } else {
+                    if (strlen($value)==0) {
+                        $value = null;
+                    }
+                }
+
+                if ($value !== null && $value !== false && $value !== true) {
+                    $ret[$key] = $value;
+                }
+            }
+
+            return $ret;
+        };
+
+        // Merge
+        $globalConf     = $arrayFilterRecursive( $globalConf, 'strlen' );
+        $areaGlobalConf = $arrayFilterRecursive( $areaGlobalConf, 'strlen' );
+        $contextConf    = $arrayFilterRecursive( $contextConf, 'strlen' );
+
+        $conf = array_replace_recursive($globalConf, $areaGlobalConf, $contextConf);
+
+        // Set configuration
+        $this->contextConfig->setData($conf);
     }
 
     /**
@@ -126,11 +313,23 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @throws \Exception
      */
     public function execute(InputInterface $input, OutputInterface $output) {
-        $this->startup();
-
         try {
-            $this->runTask();
-            $this->runFinalizeTasks();
+            // Get context selection
+            $this->initContext();
+
+            if ($this->input->getOption('config')) {
+                // only show configuration
+                $this->showContextConfig();
+            } else {
+                // Create temp directory and check environment
+                $this->startup();
+
+                // Run playbook
+                $this->runCommands('startup');
+                $this->runMain();
+                $this->runCommands('finalize');
+            }
+
         } catch (\Exception $e) {
             $this->cleanup();
             throw $e;
@@ -140,61 +339,109 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     }
 
     /**
-     * Read and validate configuration
+     * Init context
      */
-    protected function readConfiguration() {
-        $this->config   = new ConfigReader();
-        $this->taskConf = new ConfigReader();
+    protected function initContext() {
+        $context = $this->getContextFromUser();
+        $this->buildContextConfiguration($context);
 
-        if (empty($this->confArea)) {
-            throw new \RuntimeException('Config area not set, cannot continue');
-        }
-
-        if (!file_exists($this->confFilePath)) {
-            throw new \RuntimeException('Config file "' . $this->confFilePath . '" not found');
-        }
-
-        $conf = Yaml::parse(PhpUtility::fileGetContents($this->confFilePath));
-
-        // store task specific configuration
-        if (!empty($conf['task'])) {
-            $this->taskConf->setData($conf['task']);
-        }
-
-        // Switch to area configuration
-        if (!empty($conf)) {
-            $this->config->setData($conf[$this->confArea]);
-        } else {
-            throw new \RuntimeException('Could not parse "' . $this->confFilePath . '"');
+        // Validate configuration
+        if (!$this->validateConfiguration()) {
+            $this->output->writeln('<p-error>Configuration could not be validated</p-error>');
+            throw new \CliTools\Exception\StopException(1);
         }
     }
 
     /**
-     * Validate configuration
-     *
-     * @return boolean
+     * Get context from user
      */
-    protected function validateConfiguration() {
-        $ret = true;
+    protected function getContextFromUser() {
+        $ret = null;
 
-        // Rsync (optional)
-        if ($this->config->exists('rsync')) {
-            if (!$this->validateConfigurationRsync()) {
-                $ret = false;
+        if (!$this->input->getArgument('context')) {
+            // ########################
+            // Ask user for server context
+            // ########################
+
+            $serverList = $this->config->getList($this->confArea);
+            $serverList = array_diff($serverList, array(self::GLOBAL_KEY));
+
+            if (empty($serverList)) {
+                throw new \RuntimeException('No valid servers found in configuration');
             }
-        }
 
-        // MySQL (optional)
-        if ($this->config->exists('mysql.database')) {
-            if (!$this->validateConfigurationMysql()) {
-                $ret = false;
+            $serverOptionList = array();
+
+            foreach ($serverList as $context) {
+                $line = array();
+
+                // hostname
+                $optPath = $context . '.ssh.hostname';
+                if ($this->config->exists($optPath)) {
+                    $line[] = '<info>host:</info>' . $this->config->get($optPath);
+                }
+
+                // rsync path
+                $optPath = $context . '.rsync.path';
+                if ($this->config->exists($optPath)) {
+                    $line[] = '<info>rsync:</info>' . $this->config->get($optPath);
+                }
+
+                // mysql database list
+                $optPath = $context . '.mysql.database';
+                if ($this->config->exists($optPath)) {
+                    $dbList        = $this->config->getArray($optPath);
+                    $foreignDbList = array();
+
+                    foreach ($dbList as $databaseConf) {
+                        if (strpos($databaseConf, ':') !== false) {
+                            // local and foreign database in one string
+                            list($localDatabase, $foreignDatabase) = explode(':', $databaseConf, 2);
+                            $foreignDbList[] = $foreignDatabase;
+                        } else {
+                            // database equal
+                            $foreignDbList[] = $databaseConf;
+                        }
+                    }
+
+                    if (!empty($foreignDbList)) {
+                        $line[] .= '<info>mysql:</info>' . implode(', ', $foreignDbList);
+                    }
+                }
+
+                if (!empty($line)) {
+                    $line = implode(' ', $line);
+                } else {
+                    // fallback
+                    $line = $context;
+                }
+
+                $serverOptionList[$context] = $line;
+            }
+
+            try {
+                $question = new ChoiceQuestion('Please choose server context for synchronization', $serverOptionList);
+                $question->setMaxAttempts(1);
+
+                $questionDialog = new QuestionHelper();
+
+                $ret = $questionDialog->ask($this->input, $this->output, $question);
+            } catch(\InvalidArgumentException $e) {
+                // Invalid server context, just stop here
+                throw new \CliTools\Exception\StopException(1);
             }
         } else {
-            // Clear mysql if any options set
-            $this->config->clear('mysql');
+            $ret = $this->input->getArgument('context');
         }
 
         return $ret;
+    }
+
+    /**
+     * Show context configuration
+     */
+    protected function showContextConfig() {
+        print_r($this->contextConfig->get());
     }
 
     /**
@@ -214,7 +461,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         }
 
         // Check if there are any rsync directories
-        if (!$this->config->exists('rsync.directory')) {
+        if (!$this->contextConfig->exists('rsync.directory')) {
             $this->output->writeln('<comment>No rsync directory configuration found, filesync disabled</comment>');
         }
 
@@ -230,7 +477,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $ret = true;
 
         // Check if one database is configured
-        if (!$this->config->exists('mysql.database')) {
+        if (!$this->contextConfig->exists('mysql.database')) {
             $this->output->writeln('<p-error>No mysql database configuration found</p-error>');
             $ret = false;
         }
@@ -294,17 +541,69 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     }
 
     /**
-     * Run finalize tasks
+     * Run defined commands
      */
-    protected function runFinalizeTasks() {
-        if ($this->taskConf->exists('finalize')) {
-            $this->output->writeln('<info> ---- Starting FINALIZE TASKS ---- </info>');
+    protected function runCommands($area) {
+        $commandList = $this->getCommandList($area);
 
-            foreach ($this->taskConf->getArray('finalize') as $task) {
-                $command = new CommandBuilder();
-                $command->parse($task)->executeInteractive();
+        if (!empty($commandList)) {
+            $this->output->writeln('<info> ---- Starting ' . strtoupper($area) . ' commands ---- </info>');
+
+            foreach ($commandList as $commandRow) {
+
+                if (is_string($commandRow)) {
+                    // Simple, local task
+                    $command = new CommandBuilder();
+                    $command->parse($commandRow);
+                } elseif(is_array($commandRow)) {
+                    // Complex task
+                    $command = $this->buildComplexTask($commandRow);
+                }
+
+                if ($command) {
+                    $command->executeInteractive();
+                }
             }
         }
+    }
+
+    /**
+     * Build complex task
+     *
+     * @param array $task Task configuration
+     *
+     * @return CommandBuilder|CommandBuilderInterface
+     */
+    protected function buildComplexTask(array $task) {
+        if (empty($task['type'])) {
+            $task['type'] = 'local';
+        }
+
+        if (empty($task['command'])) {
+            throw new \RuntimeException('Task command is empty');
+        }
+
+        // Process task type
+        switch ($task['type']) {
+            case 'remote':
+                // Remote command
+                $command = new RemoteCommandBuilder();
+                $command->parse($task['command']);
+                $command = $this->wrapRemoteCommand($command);
+                break;
+
+            case 'local':
+                // Local command
+                $command = new CommandBuilder();
+                $command->parse($task['command']);
+                break;
+
+            default:
+                throw new \RuntimeException('Unknown task type');
+                break;
+        }
+
+        return $command;
     }
 
     /**
@@ -350,12 +649,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function getRsyncPathFromConfig() {
         $ret = false;
-        if ($this->config->exists('rsync.path')) {
+        if ($this->contextConfig->exists('rsync.path')) {
             // Use path from rsync
-            $ret = $this->config->get('rsync.path');
-        } elseif($this->config->exists('ssh.hostname') && $this->config->exists('ssh.path')) {
+            $ret = $this->contextConfig->get('rsync.path');
+        } elseif($this->contextConfig->exists('ssh.hostname') && $this->contextConfig->exists('ssh.path')) {
             // Build path from ssh configuration
-            $ret = $this->config->get('ssh.hostname') . ':' . $this->config->get('ssh.path');
+            $ret = $this->contextConfig->get('ssh.hostname') . ':' . $this->contextConfig->get('ssh.path');
         }
 
         return $ret;
@@ -373,8 +672,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         // remove right /
         $ret = rtrim($ret, '/');
 
-        if ($this->config->exists('rsync.workdir')) {
-            $ret .= '/' . $this->config->get('rsync.workdir');
+        if ($this->contextConfig->exists('rsync.workdir')) {
+            $ret .= '/' . $this->contextConfig->get('rsync.workdir');
         }
 
         return $ret;
@@ -448,6 +747,288 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         if ($filter !== null) {
             $command->addArgumentTemplate('--filter=%s', $filter);
+        }
+
+        return $command;
+    }
+
+    /**
+     * Wrap command with ssh if needed
+     *
+     * @param  CommandBuilderInterface $command
+     * @return CommandBuilderInterface
+     */
+    protected function wrapRemoteCommand(CommandBuilderInterface $command) {
+        // Wrap in ssh if needed
+        if ($this->contextConfig->exists('ssh.hostname')) {
+            $sshCommand = new CommandBuilder('ssh', '-o BatchMode=yes');
+            $sshCommand->addArgument($this->contextConfig->get('ssh.hostname'))
+                       ->append($command, true);
+
+            $command = $sshCommand;
+        }
+
+        return $command;
+    }
+
+    /**
+     * Create new mysql command
+     *
+     * @param null|string $database Database name
+     *
+     * @return RemoteCommandBuilder
+     */
+    protected function createRemoteMySqlCommand($database = null) {
+        $command = new RemoteCommandBuilder('mysql');
+        $command
+            // batch mode
+            ->addArgument('-B')
+            // skip column names
+            ->addArgument('-N');
+
+        // Add username
+        if ($this->contextConfig->exists('mysql.username')) {
+            $command->addArgumentTemplate('-u%s', $this->contextConfig->get('mysql.username'));
+        }
+
+        // Add password
+        if ($this->contextConfig->exists('mysql.password')) {
+            $command->addArgumentTemplate('-p%s', $this->contextConfig->get('mysql.password'));
+        }
+
+        // Add hostname
+        if ($this->contextConfig->exists('mysql.hostname')) {
+            $command->addArgumentTemplate('-h%s', $this->contextConfig->get('mysql.hostname'));
+        }
+
+        if ($database !== null) {
+            $command->addArgument($database);
+        }
+
+        return $command;
+    }
+
+
+    /**
+     * Create new mysql command
+     *
+     * @param null|string $database Database name
+     *
+     * @return RemoteCommandBuilder
+     */
+    protected function createLocalMySqlCommand($database = null) {
+        $command = new RemoteCommandBuilder('mysql');
+        $command
+            // batch mode
+            ->addArgument('-B')
+            // skip column names
+            ->addArgument('-N');
+
+        // Add username
+        if (DatabaseConnection::getDbUsername()) {
+            $command->addArgumentTemplate('-u%s', DatabaseConnection::getDbUsername());
+        }
+
+        // Add password
+        if (DatabaseConnection::getDbPassword()) {
+            $command->addArgumentTemplate('-p%s', DatabaseConnection::getDbPassword());
+        }
+
+        // Add hostname
+        if (DatabaseConnection::getDbHostname()) {
+            $command->addArgumentTemplate('-h%s', DatabaseConnection::getDbHostname());
+        }
+
+        // Add hostname
+        if (DatabaseConnection::getDbPort()) {
+            $command->addArgumentTemplate('-P%s', DatabaseConnection::getDbPort());
+        }
+
+        if ($database !== null) {
+            $command->addArgument($database);
+        }
+
+        return $command;
+    }
+
+    /**
+     * Create new mysqldump command
+     *
+     * @param null|string $database Database name
+     *
+     * @return RemoteCommandBuilder
+     */
+    protected function createRemoteMySqlDumpCommand($database = null) {
+        $command = new RemoteCommandBuilder('mysqldump');
+
+        // Add username
+        if ($this->contextConfig->exists('mysql.username')) {
+            $command->addArgumentTemplate('-u%s', $this->contextConfig->get('mysql.username'));
+        }
+
+        // Add password
+        if ($this->contextConfig->exists('mysql.password')) {
+            $command->addArgumentTemplate('-p%s', $this->contextConfig->get('mysql.password'));
+        }
+
+        // Add hostname
+        if ($this->contextConfig->exists('mysql.hostname')) {
+            $command->addArgumentTemplate('-h%s', $this->contextConfig->get('mysql.hostname'));
+        }
+
+        // Add custom options
+        if ($this->contextConfig->exists('mysqldump.option')) {
+            $command->addArgumentRaw($this->contextConfig->get('mysqldump.option'));
+        }
+
+        // Transfer compression
+        switch($this->contextConfig->get('mysql.compression')) {
+            case 'bzip2':
+                // Add pipe compressor (bzip2 compressed transfer via ssh)
+                $command->addPipeCommand( new CommandBuilder('bzip2', '--compress --stdout') );
+                break;
+
+            case 'gzip':
+                // Add pipe compressor (gzip compressed transfer via ssh)
+                $command->addPipeCommand( new CommandBuilder('gzip', '--stdout') );
+                break;
+        }
+
+        if ($database !== null) {
+            $command->addArgument($database);
+        }
+
+        return $command;
+    }
+
+    /**
+     * Create new mysqldump command
+     *
+     * @param null|string $database Database name
+     *
+     * @return RemoteCommandBuilder
+     */
+    protected function createLocalMySqlDumpCommand($database = null) {
+        $command = new RemoteCommandBuilder('mysqldump');
+
+        // Add username
+        if (DatabaseConnection::getDbUsername()) {
+            $command->addArgumentTemplate('-u%s', DatabaseConnection::getDbUsername());
+        }
+
+        // Add password
+        if (DatabaseConnection::getDbPassword()) {
+            $command->addArgumentTemplate('-p%s', DatabaseConnection::getDbPassword());
+        }
+
+        // Add hostname
+        if (DatabaseConnection::getDbHostname()) {
+            $command->addArgumentTemplate('-h%s', DatabaseConnection::getDbHostname());
+        }
+
+        // Add hostname
+        if (DatabaseConnection::getDbPort()) {
+            $command->addArgumentTemplate('-P%s', DatabaseConnection::getDbPort());
+        }
+
+        // Add custom options
+        if ($this->contextConfig->exists('mysqldump.option')) {
+            $command->addArgumentRaw($this->contextConfig->get('mysqldump.option'));
+        }
+
+        if ($database !== null) {
+            $command->addArgument($database);
+        }
+
+        // Transfer compression
+        switch($this->contextConfig->get('mysql.compression')) {
+            case 'bzip2':
+                // Add pipe compressor (bzip2 compressed transfer via ssh)
+                $command->addPipeCommand( new CommandBuilder('bzip2', '--compress --stdout') );
+                break;
+
+            case 'gzip':
+                // Add pipe compressor (gzip compressed transfer via ssh)
+                $command->addPipeCommand( new CommandBuilder('gzip', '--stdout') );
+                break;
+        }
+
+        return $command;
+    }
+
+
+    /**
+     * Add mysqldump filter to command
+     *
+     * @param CommandBuilderInterface $commandDump  Command
+     * @param string                  $database     Database
+     * @param boolean                 $isRemote     Remote filter
+     *
+     * @return CommandBuilderInterface
+     */
+    protected function addMysqlDumpFilterArguments(CommandBuilderInterface $commandDump, $database, $isRemote = true) {
+        $command = $commandDump;
+
+        $filter = $this->contextConfig->get('mysql.filter');
+
+        // get filter
+        if (is_array($filter)) {
+            $filterList = (array)$filter;
+            $filter     = 'custom table filter';
+        } else {
+            $filterList = $this->getApplication()->getConfigValue('mysql-backup-filter', $filter);
+        }
+
+        if (empty($filterList)) {
+            throw new \RuntimeException('MySQL dump filters "' . $filter . '" not available"');
+        }
+
+        $this->output->writeln('<p>Using filter "' . $filter . '"</p>');
+
+        // Get table list (from cloned mysqldump command)
+        if ($isRemote) {
+            $tableListDumper = $this->createRemoteMySqlCommand($database);
+        } else {
+            $tableListDumper = $this->createLocalMySqlCommand($database);
+        }
+
+        $tableListDumper->addArgumentTemplate('-e %s', 'show tables;');
+
+        if ($isRemote) {
+            $tableListDumper = $this->wrapRemoteCommand($tableListDumper);
+        }
+        $tableList       = $tableListDumper->execute()->getOutput();
+
+        // Filter table list
+        $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $filterList, $database);
+
+        // Dump only structure
+        $commandStructure = clone $command;
+        $commandStructure
+            ->addArgument('--no-data')
+            ->clearPipes();
+
+        // Dump only data (only filtered tables)
+        $commandData = clone $command;
+        $commandData
+            ->addArgument('--no-create-info')
+            ->clearPipes();
+
+        if (!empty($ignoredTableList)) {
+            $commandData->addArgumentTemplateMultiple('--ignore-table=%s', $ignoredTableList);
+        }
+
+        $commandPipeList = $command->getPipeList();
+
+        // Combine both commands to one
+        $command = new OutputCombineCommandBuilder();
+        $command
+            ->addCommandForCombinedOutput($commandStructure)
+            ->addCommandForCombinedOutput($commandData);
+
+        // Read compression pipe
+        if (!empty($commandPipeList)) {
+            $command->setPipeList($commandPipeList);
         }
 
         return $command;
