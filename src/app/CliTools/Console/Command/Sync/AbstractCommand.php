@@ -371,7 +371,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $ret = $this->workingPath;
 
         // remove right /
-        $ret = rtrim($this->workingPath, '/');
+        $ret = rtrim($ret, '/');
 
         if ($this->config->exists('rsync.workdir')) {
             $ret .= '/' . $this->config->get('rsync.workdir');

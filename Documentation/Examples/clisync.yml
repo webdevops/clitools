@@ -30,7 +30,7 @@ sync:
 
     rsync:
         # set target as sub directroy (will be appended to working directory)
-        #workdir: "html/"
+        workdir: ""
 
         # directory list/patterns for synchronization
         directory:
@@ -77,7 +77,7 @@ deploy:
     _:
         rsync:
             # set target as sub directroy (will be appended to working directory)
-            workdir: "html/"
+            workdir: ""
 
             # directory list/patterns for synchronization
             directory:
@@ -112,7 +112,7 @@ share:
         # source/target directory or server via ssh (eg. backup-server:/backup/projectname)
         path: "/tmp/foo/"
         # set target as sub directroy (will be appended to working directory
-        #target: "html/"
+        workdir: ""
 
         # List of directories for backup
         directory:
