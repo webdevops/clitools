@@ -320,7 +320,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     protected function createRsyncCommand($source, $target, array $filelist = null, array $exclude = null) {
         $this->output->writeln('<comment>Rsync from ' . $source . ' to ' . $target . '</comment>');
 
-        $command = new CommandBuilder('rsync', '-rlptD --delete-after --progress -h');
+        $command = new CommandBuilder('rsync', '-rlptD --delete-after --progress --human-readable');
 
         // Add file list (external file with --files-from option)
         if (!empty($filelist)) {
@@ -373,8 +373,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         // remove right /
         $ret = rtrim($this->workingPath, '/');
 
-        if ($this->config->exists('rsync.target')) {
-            $ret .= '/' . $this->config->get('rsync.target');
+        if ($this->config->exists('rsync.workdir')) {
+            $ret .= '/' . $this->config->get('rsync.workdir');
         }
 
         return $ret;

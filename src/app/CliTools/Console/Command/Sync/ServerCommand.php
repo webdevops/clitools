@@ -33,6 +33,13 @@ use Symfony\Component\Console\Input\InputArgument;
 class ServerCommand extends AbstractSyncCommand {
 
     /**
+     * Config area
+     *
+     * @var string
+     */
+    protected $confArea = 'sync';
+
+    /**
      * Server configuration name
      * @var string
      */
@@ -154,13 +161,13 @@ class ServerCommand extends AbstractSyncCommand {
             // ##########
             $this->output->writeln('<p>Fetching foreign database "' . $foreignDatabase . '"</p>');
 
-            $mysqldump = $this->createMySqlDumpCommand($foreignDatabase);
+            $mysqldump = $this->createRemoteMySqlDumpCommand($foreignDatabase);
 
             if ($this->config['mysql']['filter']) {
                 $mysqldump = $this->addFilterArguments($mysqldump, $foreignDatabase, $this->config['mysql']['filter']);
             }
 
-            $command = $this->wrapCommand($mysqldump);
+            $command = $this->wrapRemoteCommand($mysqldump);
             $command->setOutputRedirectToFile($dumpFile);
 
             $command->executeInteractive();
@@ -174,112 +181,6 @@ class ServerCommand extends AbstractSyncCommand {
         }
     }
 
-    /**
-     * Create new mysql command
-     *
-     * @param null|string $database Database name
-     *
-     * @return RemoteCommandBuilder
-     */
-    protected function createMySqlCommand($database = null) {
-        $command = new RemoteCommandBuilder('mysql');
-        $command
-              // batch mode
-            ->addArgument('-B')
-              // skip column names
-            ->addArgument('-N');
-
-        // Add username
-        if ($this->config->exists('mysql.username')) {
-            $command->addArgumentTemplate('-u%s', $this->config->get('mysql.username'));
-        }
-
-        // Add password
-        if ($this->config->exists('mysql.password')) {
-            $command->addArgumentTemplate('-p%s', $this->config->get('mysql.password'));
-        }
-
-        // Add hostname
-        if ($this->config->exists('mysql.hostname')) {
-            $command->addArgumentTemplate('-h%s', $this->config->get('mysql.hostname'));
-        }
-
-        if ($database !== null) {
-            $command->addArgument($database);
-        }
-
-        return $command;
-    }
-
-    /**
-     * Create new mysql command
-     *
-     * @param null|string $database Database name
-     *
-     * @return RemoteCommandBuilder
-     */
-    protected function createMySqlDumpCommand($database = null) {
-        $command = new RemoteCommandBuilder('mysqldump');
-
-        // Add username
-        if ($this->config->exists('mysql.username')) {
-            $command->addArgumentTemplate('-u%s', $this->config->get('mysql.username'));
-        }
-
-        // Add password
-        if ($this->config->exists('mysql.password')) {
-            $command->addArgumentTemplate('-p%s', $this->config->get('mysql.password'));
-        }
-
-        // Add hostname
-        if ($this->config->exists('mysql.hostname')) {
-            $command->addArgumentTemplate('-h%s', $this->config->get('mysql.hostname'));
-        }
-
-        // Add custom options
-        if ($this->config->exists('mysqldump.option')) {
-            $command->addArgumentRaw($this->config->get('mysqldump.option'));
-        }
-
-        // Transfer compression
-        switch($this->config->get('mysql.compression')) {
-            case 'bzip2':
-                // Add pipe compressor (bzip2 compressed transfer via ssh)
-                $command->addPipeCommand( new CommandBuilder('bzip2', '--compress --stdout') );
-                break;
-
-            case 'gzip':
-                // Add pipe compressor (gzip compressed transfer via ssh)
-                $command->addPipeCommand( new CommandBuilder('gzip', '--stdout') );
-                break;
-        }
-
-
-        if ($database !== null) {
-            $command->addArgument($database);
-        }
-
-        return $command;
-    }
-
-    /**
-     * Wrap command with ssh if needed
-     *
-     * @param  CommandBuilderInterface $command
-     * @return CommandBuilderInterface
-     */
-    protected function wrapCommand(CommandBuilderInterface $command) {
-        // Wrap in ssh if needed
-        if ($this->config->exists('ssh.hostname')) {
-            $sshCommand = new CommandBuilder('ssh', '-o BatchMode=yes');
-            $sshCommand->addArgument($this->config->get('ssh.hostname'))
-                ->append($command, true);
-
-            $command = $sshCommand;
-        }
-
-        return $command;
-    }
 
     /**
      * Create rsync command for share sync
@@ -332,10 +233,10 @@ class ServerCommand extends AbstractSyncCommand {
         $this->output->writeln('<p>Using filter "' . $filter . '"</p>');
 
         // Get table list (from cloned mysqldump command)
-        $tableListDumper = $this->createMySqlCommand($database);
+        $tableListDumper = $this->createRemoteMySqlCommand($database);
         $tableListDumper->addArgumentTemplate('-e %s', 'show tables;');
 
-        $tableListDumper = $this->wrapCommand($tableListDumper);
+        $tableListDumper = $this->wrapRemoteCommand($tableListDumper);
         $tableList       = $tableListDumper->execute()->getOutput();
 
         // Filter table list

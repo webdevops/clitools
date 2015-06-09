@@ -58,7 +58,7 @@ class InitCommand extends \CliTools\Console\Command\AbstractCommand {
 #######################################
 # Sync from server (eg. live server)
 #######################################
-server:
+sync:
 
    ##################
    # Global config
@@ -122,6 +122,13 @@ server:
       database:
         - typo3:website_live
         - other_database
+
+#######################################
+# Deployment to server
+#######################################
+
+deploy:
+
 
 #######################################
 # Shared server (sharing between developers)
