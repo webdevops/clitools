@@ -1,104 +1,139 @@
 #######################################
 # Sync from server (eg. live server)
 #######################################
-server:
+sync:
 
    ##################
    # Global config
    ##################
-  _:
+    _:
     mysql:
         # MySQL predefined filter for typo3 (eg. no caching tables)
-      filter: typo3
+        filter: typo3
 
-      # MySQL custom filter (preg_match)
-      #filter:
-      #  - "/^cachingframework_.*/i"
-      #  - "/^cf_.*/i"
-      #  - "/^cache_.*/i"
-      #  - "/^index_.*/i"
-      #  - "/^sys_log$/i"
-      #  - "/^sys_history$/i"
-      #  - "/^tx_extbase_cache.*/i"
+        # MySQL custom filter (preg_match)
+        #filter:
+        #  - "/^cachingframework_.*/i"
+        #  - "/^cf_.*/i"
+        #  - "/^cache_.*/i"
+        #  - "/^index_.*/i"
+        #  - "/^sys_log$/i"
+        #  - "/^sys_history$/i"
+        #  - "/^tx_extbase_cache.*/i"
 
         # Transfer compression (none if empty, bzip2 or gzip)
-      compression: bzip2
+        compression: bzip2
 
         # specific mysqldump settings
-      mysqldump:
-        option: "--opt --single-transaction"
+        mysqldump:
+            option: "--opt --single-transaction"
 
     rsync:
         # set target as sub directroy (will be appended to working directory)
-      #target: "html/"
+        #workdir: "html/"
 
         # directory list/patterns for synchronization
-      directory:
-        - "/fileadmin/"
-        - "/uploads/"
-        - "/typo3conf/l10n/"
+        directory:
+            - "/fileadmin/"
+            - "/uploads/"
+            - "/typo3conf/l10n/"
 
         # directory exclude list/patterns
-      exclude:
-        - "/fileadmin/_processed_/**"
+        exclude:
+            - "/fileadmin/_processed_/**"
 
    ##################
    # Config "production"
    ##################
-  production:
-      # ssh server host or name (see .ssh/config, eg for mysql/mysqldump)
-    ssh:
-      hostname: live-server
+    production:
+        # ssh server host or name (see .ssh/config, eg for mysql/mysqldump)
+        ssh:
+            hostname: live-server
 
-      # rsync for some directories
-    rsync:
-        # server and source directory (server host or name - see .ssh/config)
-      path: "live-server:/var/www/website/htdocs"
-        # set target as sub directroy (will be appended to working directory)
-      #target: "html/"
+        # rsync for some directories
+        rsync:
+            # server and source directory (server host or name - see .ssh/config)
+            path: "live-server:/var/www/website/htdocs"
 
-    mysql:
-        # mysql connection
-      hostname: localhost
-      username: typo3
-      password: loremipsum
+        mysql:
+            # mysql connection
+            hostname: localhost
+            username: typo3
+            password: loremipsum
 
         # List of databases for sync ("local:foreign" for different database names - or only "database" if same name should be used localy)
-      database:
-        - typo3:website_live
-        - other_database
+        database:
+            - typo3:website_live
+            - other_database
+        
+#######################################
+# Deployment to server
+#######################################
+deploy:
+
+     ##################
+     # Global config
+     ##################
+    _:
+        rsync:
+            # set target as sub directroy (will be appended to working directory)
+            workdir: "html/"
+
+            # directory list/patterns for synchronization
+            directory:
+                - "/"
+
+            # directory exclude list/patterns
+            exclude:
+                - ".git*"
+                - "/fileadmin/"
+                - "/uploads/"
+                - "/typo3conf/l10n/"
+
+   ##################
+   # Config "production"
+   ##################
+    production:
+        # ssh server host or name (see .ssh/config, eg for mysql/mysqldump)
+        ssh:
+            hostname: live-server
+
+        # rsync for some directories
+        rsync:
+            # server and source directory (server host or name - see .ssh/config)
+            path: "live-server:/var/www/website/htdocs"
 
 #######################################
 # Shared server (sharing between developers)
 #######################################
 share:
 
-  rsync:
-      # source/target directory or server via ssh (eg. backup-server:/backup/projectname)
-    path: "/tmp/foo/"
-      # set target as sub directroy (will be appended to working directory
-    #target: "html/"
+    rsync:
+        # source/target directory or server via ssh (eg. backup-server:/backup/projectname)
+        path: "/tmp/foo/"
+        # set target as sub directroy (will be appended to working directory
+        #target: "html/"
 
-      # List of directories for backup
-    directory:
-      - "/fileadmin/"
-      - "/uploads/"
-      - "/typo3conf/l10n/"
+        # List of directories for backup
+        directory:
+            - "/fileadmin/"
+            - "/uploads/"
+            - "/typo3conf/l10n/"
 
-      # List of excludes (eg. specific files)
-    exclude:
-        # no avi files
-      - "/example/**/*.avi"
-        # no mp4 files
-      - "/example/**/*.mp4"
+        # List of excludes (eg. specific files)
+        exclude:
+            # no avi files
+            - "/example/**/*.avi"
+            # no mp4 files
+            - "/example/**/*.mp4"
 
-  mysql:
-      # MySQL filter for typo3 (eg. no caching tables)
-    filter: typo3
+    mysql:
+        # MySQL filter for typo3 (eg. no caching tables)
+        filter: typo3
 
-      # List of databases for backup
-    database:
-      - typo3
+        # List of databases for backup
+        database:
+            - typo3
 
 #######################################
 # Task configuration
@@ -106,8 +141,8 @@ share:
 task:
 
     # These commands will be executed after backup, restore and sync
-  finalize:
-      # create user "dev" with password "dev"
-    - "ct typo3:beuser"
-      # append toplevel-domain .vm to all domains
-    - "ct typo3:domain"
+    finalize:
+        # create user "dev" with password "dev"
+        - "ct typo3:beuser"
+        # append toplevel-domain .vm to all domains
+        - "ct typo3:domain"
