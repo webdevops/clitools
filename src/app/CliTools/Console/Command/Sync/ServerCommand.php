@@ -140,7 +140,7 @@ class ServerCommand extends AbstractSyncCommand {
         // ##################
         // Sync databases
         // ##################
-        foreach ($this->config->getArray('mysql.database') as $databaseConf) {
+        foreach ($this->contextConfig->getArray('mysql.database') as $databaseConf) {
             if (strpos($databaseConf, ':') !== false) {
                 // local and foreign database in one string
                 list($localDatabase, $foreignDatabase) = explode(':', $databaseConf, 2);
@@ -163,8 +163,8 @@ class ServerCommand extends AbstractSyncCommand {
 
             $mysqldump = $this->createRemoteMySqlDumpCommand($foreignDatabase);
 
-            if ($this->config['mysql']['filter']) {
-                $mysqldump = $this->addFilterArguments($mysqldump, $foreignDatabase, $this->config['mysql']['filter']);
+            if ($this->contextConfig['mysql']['filter']) {
+                $mysqldump = $this->addFilterArguments($mysqldump, $foreignDatabase, $this->contextConfig['mysql']['filter']);
             }
 
             $command = $this->wrapRemoteCommand($mysqldump);
@@ -194,13 +194,13 @@ class ServerCommand extends AbstractSyncCommand {
      */
     protected function createRsyncCommand($source, $target, array $filelist = null, array $exclude = null) {
         // Add file list (external file with --files-from option)
-        if (!$filelist && $this->config->exists('rsync.directory')) {
-            $filelist = $this->config->get('rsync.directory');
+        if (!$filelist && $this->contextConfig->exists('rsync.directory')) {
+            $filelist = $this->contextConfig->get('rsync.directory');
         }
 
         // Add exclude (external file with --exclude-from option)
-        if (!$exclude && $this->config->exists('rsync.exclude')) {
-            $exclude = $this->config->get('rsync.exclude');
+        if (!$exclude && $this->contextConfig->exists('rsync.exclude')) {
+            $exclude = $this->contextConfig->get('rsync.exclude');
         }
 
         return parent::createRsyncCommand($source, $target, $filelist, $exclude);

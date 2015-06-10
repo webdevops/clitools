@@ -26,6 +26,8 @@ use CliTools\Utility\ConsoleUtility;
 use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
 use CliTools\Console\Shell\CommandBuilder\SelfCommandBuilder;
 use CliTools\Reader\ConfigReader;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
@@ -87,7 +89,6 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function configure() {
         $this
-            ->setName('sync:server')
             ->setDescription('Sync files and database from server')
             ->addArgument(
                 'context',
@@ -133,12 +134,6 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         // Read configuration
         $this->readConfiguration();
-
-        // Validate configuration
-        if (!$this->validateConfiguration()) {
-            $this->output->writeln('<p-error>Configuration could not be validated</p-error>');
-            throw new \CliTools\Exception\StopException(1);
-        }
     }
 
     /**
@@ -150,20 +145,20 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $ret = true;
 
         // Rsync (optional)
-        if ($this->config->exists('rsync')) {
+        if ($this->contextConfig->exists('rsync')) {
             if (!$this->validateConfigurationRsync()) {
                 $ret = false;
             }
         }
 
         // MySQL (optional)
-        if ($this->config->exists('mysql.database')) {
+        if ($this->contextConfig->exists('mysql.database')) {
             if (!$this->validateConfigurationMysql()) {
                 $ret = false;
             }
         } else {
             // Clear mysql if any options set
-            $this->config->clear('mysql');
+            $this->contextConfig->clear('mysql');
         }
 
         return $ret;
@@ -194,7 +189,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * Read and validate configuration
      */
     protected function readConfiguration() {
-        $this->config   = new ConfigReader();
+        $this->config = new ConfigReader();
 
         if (empty($this->confArea)) {
             throw new \RuntimeException('Config area not set, cannot continue');
@@ -306,6 +301,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     protected function initContext() {
         $context = $this->getContextFromUser();
         $this->buildContextConfiguration($context);
+
+        // Validate configuration
+        if (!$this->validateConfiguration()) {
+            $this->output->writeln('<p-error>Configuration could not be validated</p-error>');
+            throw new \CliTools\Exception\StopException(1);
+        }
     }
 
     /**
@@ -410,7 +411,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         }
 
         // Check if there are any rsync directories
-        if (!$this->config->exists('rsync.directory')) {
+        if (!$this->contextConfig->exists('rsync.directory')) {
             $this->output->writeln('<comment>No rsync directory configuration found, filesync disabled</comment>');
         }
 
@@ -426,7 +427,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $ret = true;
 
         // Check if one database is configured
-        if (!$this->config->exists('mysql.database')) {
+        if (!$this->contextConfig->exists('mysql.database')) {
             $this->output->writeln('<p-error>No mysql database configuration found</p-error>');
             $ret = false;
         }
@@ -548,12 +549,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function getRsyncPathFromConfig() {
         $ret = false;
-        if ($this->config->exists('rsync.path')) {
+        if ($this->contextConfig->exists('rsync.path')) {
             // Use path from rsync
-            $ret = $this->config->get('rsync.path');
-        } elseif($this->config->exists('ssh.hostname') && $this->config->exists('ssh.path')) {
+            $ret = $this->contextConfig->get('rsync.path');
+        } elseif($this->contextConfig->exists('ssh.hostname') && $this->contextConfig->exists('ssh.path')) {
             // Build path from ssh configuration
-            $ret = $this->config->get('ssh.hostname') . ':' . $this->config->get('ssh.path');
+            $ret = $this->contextConfig->get('ssh.hostname') . ':' . $this->contextConfig->get('ssh.path');
         }
 
         return $ret;
@@ -571,8 +572,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         // remove right /
         $ret = rtrim($ret, '/');
 
-        if ($this->config->exists('rsync.workdir')) {
-            $ret .= '/' . $this->config->get('rsync.workdir');
+        if ($this->contextConfig->exists('rsync.workdir')) {
+            $ret .= '/' . $this->contextConfig->get('rsync.workdir');
         }
 
         return $ret;
@@ -646,6 +647,112 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         if ($filter !== null) {
             $command->addArgumentTemplate('--filter=%s', $filter);
+        }
+
+        return $command;
+    }
+
+    /**
+     * Wrap command with ssh if needed
+     *
+     * @param  CommandBuilderInterface $command
+     * @return CommandBuilderInterface
+     */
+    protected function wrapRemoteCommand(CommandBuilderInterface $command) {
+        // Wrap in ssh if needed
+        if ($this->contextConfig->exists('ssh.hostname')) {
+            $sshCommand = new CommandBuilder('ssh', '-o BatchMode=yes');
+            $sshCommand->addArgument($this->contextConfig->get('ssh.hostname'))
+                       ->append($command, true);
+
+            $command = $sshCommand;
+        }
+
+        return $command;
+    }
+
+    /**
+     * Create new mysql command
+     *
+     * @param null|string $database Database name
+     *
+     * @return RemoteCommandBuilder
+     */
+    protected function createRemoteMySqlCommand($database = null) {
+        $command = new RemoteCommandBuilder('mysql');
+        $command
+            // batch mode
+            ->addArgument('-B')
+            // skip column names
+            ->addArgument('-N');
+
+        // Add username
+        if ($this->contextConfig->exists('mysql.username')) {
+            $command->addArgumentTemplate('-u%s', $this->contextConfig->get('mysql.username'));
+        }
+
+        // Add password
+        if ($this->contextConfig->exists('mysql.password')) {
+            $command->addArgumentTemplate('-p%s', $this->contextConfig->get('mysql.password'));
+        }
+
+        // Add hostname
+        if ($this->contextConfig->exists('mysql.hostname')) {
+            $command->addArgumentTemplate('-h%s', $this->contextConfig->get('mysql.hostname'));
+        }
+
+        if ($database !== null) {
+            $command->addArgument($database);
+        }
+
+        return $command;
+    }
+
+    /**
+     * Create new mysql command
+     *
+     * @param null|string $database Database name
+     *
+     * @return RemoteCommandBuilder
+     */
+    protected function createRemoteMySqlDumpCommand($database = null) {
+        $command = new RemoteCommandBuilder('mysqldump');
+
+        // Add username
+        if ($this->contextConfig->exists('mysql.username')) {
+            $command->addArgumentTemplate('-u%s', $this->contextConfig->get('mysql.username'));
+        }
+
+        // Add password
+        if ($this->contextConfig->exists('mysql.password')) {
+            $command->addArgumentTemplate('-p%s', $this->contextConfig->get('mysql.password'));
+        }
+
+        // Add hostname
+        if ($this->contextConfig->exists('mysql.hostname')) {
+            $command->addArgumentTemplate('-h%s', $this->contextConfig->get('mysql.hostname'));
+        }
+
+        // Add custom options
+        if ($this->contextConfig->exists('mysqldump.option')) {
+            $command->addArgumentRaw($this->contextConfig->get('mysqldump.option'));
+        }
+
+        // Transfer compression
+        switch($this->contextConfig->get('mysql.compression')) {
+            case 'bzip2':
+                // Add pipe compressor (bzip2 compressed transfer via ssh)
+                $command->addPipeCommand( new CommandBuilder('bzip2', '--compress --stdout') );
+                break;
+
+            case 'gzip':
+                // Add pipe compressor (gzip compressed transfer via ssh)
+                $command->addPipeCommand( new CommandBuilder('gzip', '--stdout') );
+                break;
+        }
+
+        if ($database !== null) {
+            $command->addArgument($database);
         }
 
         return $command;
