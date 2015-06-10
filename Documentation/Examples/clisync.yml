@@ -179,7 +179,7 @@ deploy:
 share:
 
     ##################
-    # Global config (for deploy)
+    # Global config (for share)
     ##################
     GLOBAL:
         mysql:
