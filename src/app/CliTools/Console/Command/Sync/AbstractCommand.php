@@ -376,19 +376,19 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
                 $line = array();
 
                 // hostname
-                $optPath = $context . '.ssh.hostname';
+                $optPath = $this->confArea . '.' . $context . '.ssh.hostname';
                 if ($this->config->exists($optPath)) {
                     $line[] = '<info>host:</info>' . $this->config->get($optPath);
                 }
 
                 // rsync path
-                $optPath = $context . '.rsync.path';
+                $optPath = $this->confArea . '.' . $context . '.rsync.path';
                 if ($this->config->exists($optPath)) {
                     $line[] = '<info>rsync:</info>' . $this->config->get($optPath);
                 }
 
                 // mysql database list
-                $optPath = $context . '.mysql.database';
+                $optPath = $this->confArea . '.' . $context . '.mysql.database';
                 if ($this->config->exists($optPath)) {
                     $dbList        = $this->config->getArray($optPath);
                     $foreignDbList = array();
