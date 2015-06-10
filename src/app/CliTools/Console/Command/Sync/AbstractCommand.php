@@ -994,10 +994,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         $tableListDumper->addArgumentTemplate('-e %s', 'show tables;');
 
+        // wrap with ssh (for remote execution)
         if ($isRemote) {
             $tableListDumper = $this->wrapRemoteCommand($tableListDumper);
         }
-        $tableList       = $tableListDumper->execute()->getOutput();
+
+        $tableList = $tableListDumper->execute()->getOutput();
 
         // Filter table list
         $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $filterList, $database);
