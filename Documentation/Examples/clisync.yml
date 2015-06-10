@@ -1,6 +1,6 @@
-#######################################
+###########################################################
 # Global (applied to all server sections)
-#######################################
+###########################################################
 
 GLOBAL:
     ## MYSQL
@@ -20,6 +20,7 @@ GLOBAL:
         #  - "/^sys_log$/i"
         #  - "/^sys_history$/i"
         #  - "/^tx_extbase_cache.*/i"
+
         # Transfer compression (none if empty, bzip2 or gzip)
         compression: bzip2
 
@@ -61,7 +62,7 @@ GLOBAL:
 
     ## commands
     command:
-        # Start-Tasks: shell command which should be run before startup
+        # Start-Tasks: shell command which should be run before run
         startup:
             # add some here
 
@@ -82,9 +83,10 @@ GLOBAL:
 
 
 
-#######################################
+
+###########################################################
 # Sync from server (eg. live server)
-#######################################
+###########################################################
 sync:
 
     ##################
@@ -129,9 +131,12 @@ sync:
             database:
                 - typo3:website_live
 
-#######################################
+
+
+
+###########################################################
 # Deployment to server
-#######################################
+###########################################################
 deploy:
 
     ##################
@@ -165,9 +170,12 @@ deploy:
             # server and source directory (server host or name - see .ssh/config)
             path: "live-server:/var/www/website/htdocs"
 
-#######################################
+
+
+
+###########################################################
 # Shared server (sharing between developers)
-#######################################
+###########################################################
 share:
 
    ##################
