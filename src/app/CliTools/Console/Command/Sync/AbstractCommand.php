@@ -396,8 +396,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
                     foreach ($dbList as $databaseConf) {
                         if (strpos($databaseConf, ':') !== false) {
                             // local and foreign database in one string
-                            list($localDatabase, $foreignDatabase) = explode(':', $databaseConf, 2);
-                            $foreignDbList[] = $foreignDatabase;
+                            $databaseConf = explode(':', $databaseConf, 2);
+                            $foreignDbList[] = $databaseConf[1];
                         } else {
                             // database equal
                             $foreignDbList[] = $databaseConf;

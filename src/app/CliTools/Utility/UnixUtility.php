@@ -317,7 +317,7 @@ abstract class UnixUtility {
                 if (!empty($output)) {
                     $outputLine      = trim(reset($output));
                     $outputLineParts = preg_split('/[\s]+/', $outputLine);
-                    list($pid, $cmd) = $outputLineParts;
+                    list($pid)       = $outputLineParts;
 
                     posix_kill($pid, SIGHUP);
                 }
