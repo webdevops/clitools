@@ -20,8 +20,6 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use Symfony\Component\Console\Input\InputOption;
-
 class RestoreCommand extends AbstractShareCommand {
 
     /**

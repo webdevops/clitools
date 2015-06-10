@@ -21,7 +21,6 @@ namespace CliTools\Database;
  */
 
 use CliTools\Utility\ConsoleUtility;
-use AD7six\Dsn\Dsn;
 
 class DatabaseConnection {
 
