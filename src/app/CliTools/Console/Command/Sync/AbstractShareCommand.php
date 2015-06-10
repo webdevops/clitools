@@ -22,7 +22,7 @@ namespace CliTools\Console\Command\Sync;
 
 use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
 
-abstract class AbstractShareCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
+abstract class AbstractShareCommand extends AbstractCommand {
 
     const PATH_DUMP   = '/dump/';
     const PATH_DATA   = '/data/';
@@ -48,31 +48,6 @@ abstract class AbstractShareCommand extends \CliTools\Console\Command\Sync\Abstr
         $ret = $ret && $this->validateConfigurationRsync();
 
         return $ret;
-    }
-
-    /**
-     * Create rsync command for share sync
-     *
-     * @param string  $source            Rsync Source
-     * @param string  $target            Rsync target
-     * @param boolean $useExcludeInclude Use file/exclude lists
-     *
-     * @return CommandBuilderInterface
-     */
-    protected function createShareRsyncCommand($source, $target, $useExcludeInclude = false) {
-        // File list
-        $filelist = null;
-        if ($useExcludeInclude && $this->config->exists('rsync.directory')) {
-            $filelist = $this->config->get('rsync.directory');
-        }
-
-        // Exclude list
-        $exclude  = null;
-        if ($useExcludeInclude && $this->config->exists('rsync.exclude')) {
-            $exclude = $this->config->get('rsync.exclude');
-        }
-
-        return $this->createRsyncCommand($source, $target, $filelist, $exclude);
     }
 
 }

@@ -22,13 +22,7 @@ namespace CliTools\Console\Command\Sync;
 
 use CliTools\Database\DatabaseConnection;
 
-class ServerCommand extends AbstractCommand {
-
-    /**
-     * Server configuration name
-     * @var string
-     */
-    protected $contextName;
+class ServerCommand extends AbstractRemoteSyncCommand {
 
     /**
      * Configure command

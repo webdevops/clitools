@@ -30,7 +30,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class DeployCommand extends AbstractSyncCommand {
+class DeployCommand extends AbstractRemoteSyncCommand {
 
     /**
      * Config area

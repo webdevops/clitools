@@ -25,7 +25,7 @@ use CliTools\Console\Shell\CommandBuilder\RemoteCommandBuilder;
 use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
 
 
-abstract class AbstractSyncCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
+abstract class AbstractRemoteSyncCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
     
     /**
      * Validate configuration
@@ -51,8 +51,5 @@ abstract class AbstractSyncCommand extends \CliTools\Console\Command\Sync\Abstra
 
         return $ret;
     }
-
-
-
 
 }

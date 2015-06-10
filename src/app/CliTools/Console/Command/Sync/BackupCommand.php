@@ -20,7 +20,7 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class BackupCommand extends AbstractCommand {
+class BackupCommand extends AbstractShareCommand {
 
     /**
      * Configure command
@@ -31,7 +31,6 @@ class BackupCommand extends AbstractCommand {
         $this
             ->setName('sync:backup')
             ->setDescription('Backup files and database from share');
-
     }
 
     /**
