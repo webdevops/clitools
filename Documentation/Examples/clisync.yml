@@ -59,6 +59,8 @@ GLOBAL:
             - ".buildpath"
             - ".project"
 
+
+
     task:
         # Start-Tasks: shell command which should be run before startup
         startup:
@@ -66,10 +68,20 @@ GLOBAL:
 
         # Final-Tasks: shell command which should be after run
         finalize:
-            # create user "dev" with password "dev"
+            # add some here
+
+            # EXAMPLE: local task
+            # - date
+
+            # EXAMPLE: remote task (will be send over ssh)
+            #- { type: 'remote', command: 'date' }
+
+            # EXAMPLE: create user "dev" with password "dev"
             - "ct typo3:beuser"
-            # append toplevel-domain .vm to all domains
+            # EXAMPLE: append toplevel-domain .vm to all domains
             - "ct typo3:domain"
+
+
 
 #######################################
 # Sync from server (eg. live server)
@@ -133,7 +145,7 @@ deploy:
         rsync:
             # directory list/patterns for synchronization
             directory:
-                - "/"
+                - "/typo3conf/ext/"
 
             # directory exclude list/patterns
             exclude:

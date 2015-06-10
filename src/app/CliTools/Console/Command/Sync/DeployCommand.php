@@ -20,49 +20,21 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\FilterUtility;
-use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
-use CliTools\Console\Shell\CommandBuilder\RemoteCommandBuilder;
-use CliTools\Console\Shell\CommandBuilder\OutputCombineCommandBuilder;
-use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
 use CliTools\Database\DatabaseConnection;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputArgument;
-
 
 class DeployCommand extends AbstractRemoteSyncCommand {
-
-    /**
-     * Config area
-     *
-     * @var string
-     */
-    protected $confArea = 'deploy';
-
-    /**
-     * Server configuration name
-     * @var string
-     */
-    protected $contextName;
 
     /**
      * Configure command
      */
     protected function configure() {
+        parent::configure();
+
+        $this->confArea = 'deploy';
+
         $this
             ->setName('sync:deploy')
-            ->setDescription('Deploy files and database to server')
-            ->addArgument(
-                'context',
-                InputArgument::OPTIONAL,
-                'Configuration name for server'
-            )
-            ->addOption(
-                'rsync',
-                null,
-                InputOption::VALUE_NONE,
-                'Run only rsync'
-            );
+            ->setDescription('Deploy files and database to server');
     }
 
     /**
@@ -76,7 +48,7 @@ class DeployCommand extends AbstractRemoteSyncCommand {
     /**
      * Backup task
      */
-    protected function runTask() {
+    protected function runMain() {
         // ##################
         // Option specific runners
         // ##################
@@ -96,18 +68,18 @@ class DeployCommand extends AbstractRemoteSyncCommand {
         // ##################
 
         // Check database connection
-        if ($runMysql && $this->config->exists('mysql')) {
+        if ($runMysql && $this->contextConfig->exists('mysql')) {
             DatabaseConnection::ping();
         }
 
         // Sync files with rsync to local storage
-        if ($runRsync && $this->config->exists('rsync')) {
+        if ($runRsync && $this->contextConfig->exists('rsync')) {
             $this->output->writeln('<h1>Starting FILE deployment</h1>');
             $this->runTaskRsync();
         }
 
         // Sync database to local server
-        if ($runMysql && $this->config->exists('mysql')) {
+        if ($runMysql && $this->contextConfig->exists('mysql')) {
             $this->output->writeln('<h1>Starting MYSQL deployment</h1>');
             $this->output->writeln('<p>TODO - not implemented</h1>');
         }
@@ -118,37 +90,24 @@ class DeployCommand extends AbstractRemoteSyncCommand {
      */
     protected function runTaskRsync() {
         // ##################
-        // Restore dirs
+        // Deploy dirs
         // ##################
         $source = $this->getRsyncWorkingPath();
         $target = $this->getRsyncPathFromConfig();
-        $command = $this->createRsyncCommand($source, $target);
+
+        $fileList = array();
+        if ($this->contextConfig->exists('rsync.directory')) {
+            $fileList = $this->contextConfig->get('rsync.directory');
+        }
+
+        $excludeList = array();
+        if ($this->contextConfig->exists('rsync.exclude')) {
+            $excludeList = $this->contextConfig->get('rsync.exclude');
+        }
+
+        $command = $this->createRsyncCommand($source, $target, $fileList, $excludeList);
 
         $command->executeInteractive();
-    }
-
-    /**
-     * Create rsync command for share sync
-     *
-     * @param string     $source    Source directory
-     * @param string     $target    Target directory
-     * @param array|null $filelist  List of files (patterns)
-     * @param array|null $exclude   List of excludes (patterns)
-     *
-     * @return CommandBuilder
-     */
-    protected function createRsyncCommand($source, $target, array $filelist = null, array $exclude = null) {
-        // Add file list (external file with --files-from option)
-        if (!$filelist && $this->config->exists('rsync.directory')) {
-            $filelist = $this->config->get('rsync.directory');
-        }
-
-        // Add exclude (external file with --exclude-from option)
-        if (!$exclude && $this->config->exists('rsync.exclude')) {
-            $exclude = $this->config->get('rsync.exclude');
-        }
-
-        return parent::createRsyncCommand($source, $target, $filelist, $exclude);
     }
 
 }

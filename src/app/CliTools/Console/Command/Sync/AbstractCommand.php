@@ -266,12 +266,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $contextConf = $areaConf[$context];
 
         // Merge
-        $conf = array_merge_recursive($globalConf, $areaGlobalConf, $contextConf);
+        $conf = array_replace_recursive($globalConf, $areaGlobalConf, $contextConf);
 
         // Set configuration
         $this->contextConfig->setData($conf);
     }
-
 
     /**
      * Execute command
@@ -509,13 +508,58 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             foreach ($taskList as $task) {
 
                 if (is_string($task)) {
+                    // Simple, local task
                     $command = new CommandBuilder();
-                    $command->parse($task)->executeInteractive();
-                } else {
-                    $this->output->writeln('<p-error>Complex task support is not yet available</p-error>');
+                    $command->parse($task);
+                } elseif(is_array($task)) {
+                    // Complex task
+                    $command = $this->buildComplexTask($task);
+                }
+
+                if ($command) {
+                    $command->executeInteractive();
                 }
             }
         }
+    }
+
+    /**
+     * Build complex task
+     *
+     * @param array $task Task configuration
+     *
+     * @return CommandBuilder|CommandBuilderInterface
+     */
+    protected function buildComplexTask(array $task) {
+        if (empty($task['type'])) {
+            $task['type'] = 'local';
+        }
+
+        if (empty($task['command'])) {
+            throw new \RuntimeException('Task command is empty');
+        }
+
+        // Process task type
+        switch ($task['type']) {
+            case 'remote':
+                // Remote command
+                $command = new RemoteCommandBuilder();
+                $command->parse($task['command']);
+                $command = $this->wrapRemoteCommand($command);
+                break;
+
+            case 'local':
+                // Local command
+                $command = new CommandBuilder();
+                $command->parse($task['command']);
+                break;
+
+            default:
+                throw new \RuntimeException('Unknown task type');
+                break;
+        }
+
+        return $command;
     }
 
     /**

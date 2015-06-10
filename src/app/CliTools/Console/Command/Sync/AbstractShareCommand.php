@@ -20,8 +20,6 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
-
 abstract class AbstractShareCommand extends AbstractCommand {
 
     const PATH_DUMP   = '/dump/';

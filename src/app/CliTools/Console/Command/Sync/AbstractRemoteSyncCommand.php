@@ -20,11 +20,6 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
-use CliTools\Console\Shell\CommandBuilder\RemoteCommandBuilder;
-use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
-
-
 abstract class AbstractRemoteSyncCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
     
     /**
