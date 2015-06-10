@@ -16,6 +16,11 @@
 #           mysql:
 #               hostname: 192.168.56.2
 #
+# All other configurations can be overwritten as well
+#
+# HINT:
+#   You can check the configuration with the "--config" option
+#
 
 GLOBAL:
     ## MYSQL
