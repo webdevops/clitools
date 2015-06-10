@@ -11,9 +11,10 @@
 # if you ned eg. another mysql hostname just set it in the
 # context:
 #
-#   production
-#       mysql:
-#           hostname: 192.168.56.2
+#   sync:
+#       production
+#           mysql:
+#               hostname: 192.168.56.2
 #
 
 GLOBAL:
