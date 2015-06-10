@@ -12,7 +12,7 @@
 # context:
 #
 #   sync:
-#       production
+#       production:
 #           mysql:
 #               hostname: 192.168.56.2
 #
