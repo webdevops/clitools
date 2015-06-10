@@ -29,12 +29,16 @@ use CliTools\Reader\ConfigReader;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Console\Helper\QuestionHelper;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 
 abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand {
 
     const CONFIG_FILE = 'clisync.yml';
     const PATH_DUMP   = '/dump/';
     const PATH_DATA   = '/data/';
+
+    const GLOBAL_KEY  = 'GLOBAL';
 
     /**
      * Config area
@@ -65,18 +69,44 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     protected $tempDir;
 
     /**
-     * Sync configuration
+     * Configuration
      *
      * @var ConfigReader
      */
     protected $config = array();
 
     /**
-     * Task configuration
+     * Context configuration
      *
      * @var ConfigReader
      */
-    protected $taskConf = array();
+    protected $contextConfig = array();
+
+    /**
+     * Configure command
+     */
+    protected function configure() {
+        $this
+            ->setName('sync:server')
+            ->setDescription('Sync files and database from server')
+            ->addArgument(
+                'context',
+                InputArgument::OPTIONAL,
+                'Configuration name for server'
+            )
+            ->addOption(
+                'mysql',
+                null,
+                InputOption::VALUE_NONE,
+                'Run only mysql'
+            )
+            ->addOption(
+                'rsync',
+                null,
+                InputOption::VALUE_NONE,
+                'Run only rsync'
+            );
+    }
 
     /**
      * Initializes the command just after the input has been validated.
@@ -91,81 +121,23 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     protected function initialize(InputInterface $input, OutputInterface $output) {
         parent::initialize($input, $output);
 
-        $confFileList = array(
-            self::CONFIG_FILE,
-            '.' . self::CONFIG_FILE,
-        );
+        $this->initializeConfiguration();
+    }
 
-
-        // Find configuration file
-        $this->confFilePath = UnixUtility::findFileInDirectortyTree($confFileList);
-        if (empty($this->confFilePath)) {
-            throw new \RuntimeException('<p-error>No ' . self::CONFIG_FILE . ' found in tree</p-error>');
-        }
-
-        $this->workingPath = dirname($this->confFilePath);
-
-        $output->writeln('<comment>Found ' . self::CONFIG_FILE . ' directory: ' . $this->workingPath . '</comment>');
+    /**
+     * Init configuration
+     */
+    protected function initializeConfiguration() {
+        // Search for configuration in path
+        $this->findConfigurationInPath();
 
         // Read configuration
         $this->readConfiguration();
 
         // Validate configuration
         if (!$this->validateConfiguration()) {
-            throw new \RuntimeException('<p-error>Configuration could not be validated</p-error>');
-        }
-    }
-
-    /**
-     * Execute command
-     *
-     * @param  InputInterface  $input  Input instance
-     * @param  OutputInterface $output Output instance
-     *
-     * @return int|null|void
-     * @throws \Exception
-     */
-    public function execute(InputInterface $input, OutputInterface $output) {
-        $this->startup();
-
-        try {
-            $this->runTask();
-            $this->runFinalizeTasks();
-        } catch (\Exception $e) {
-            $this->cleanup();
-            throw $e;
-        }
-
-        $this->cleanup();
-    }
-
-    /**
-     * Read and validate configuration
-     */
-    protected function readConfiguration() {
-        $this->config   = new ConfigReader();
-        $this->taskConf = new ConfigReader();
-
-        if (empty($this->confArea)) {
-            throw new \RuntimeException('Config area not set, cannot continue');
-        }
-
-        if (!file_exists($this->confFilePath)) {
-            throw new \RuntimeException('Config file "' . $this->confFilePath . '" not found');
-        }
-
-        $conf = Yaml::parse(PhpUtility::fileGetContents($this->confFilePath));
-
-        // store task specific configuration
-        if (!empty($conf['task'])) {
-            $this->taskConf->setData($conf['task']);
-        }
-
-        // Switch to area configuration
-        if (!empty($conf)) {
-            $this->config->setData($conf[$this->confArea]);
-        } else {
-            throw new \RuntimeException('Could not parse "' . $this->confFilePath . '"');
+            $this->output->writeln('<p-error>Configuration could not be validated</p-error>');
+            throw new \CliTools\Exception\StopException(1);
         }
     }
 
@@ -192,6 +164,230 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         } else {
             // Clear mysql if any options set
             $this->config->clear('mysql');
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Find configuration file in current path
+     */
+    protected function findConfigurationInPath() {
+        $confFileList = array(
+            self::CONFIG_FILE,
+            '.' . self::CONFIG_FILE,
+        );
+
+        // Find configuration file
+        $this->confFilePath = UnixUtility::findFileInDirectortyTree($confFileList);
+        if (empty($this->confFilePath)) {
+            $this->output->writeln('<p-error>No ' . self::CONFIG_FILE . ' found in tree</p-error>');
+            throw new \CliTools\Exception\StopException(1);
+        }
+
+        $this->workingPath = dirname($this->confFilePath);
+
+        $this->output->writeln('<comment>Found ' . self::CONFIG_FILE . ' directory: ' . $this->workingPath . '</comment>');
+    }
+
+    /**
+     * Read and validate configuration
+     */
+    protected function readConfiguration() {
+        $this->config   = new ConfigReader();
+
+        if (empty($this->confArea)) {
+            throw new \RuntimeException('Config area not set, cannot continue');
+        }
+
+        if (!file_exists($this->confFilePath)) {
+            throw new \RuntimeException('Config file "' . $this->confFilePath . '" not found');
+        }
+
+        $conf = Yaml::parse(PhpUtility::fileGetContents($this->confFilePath));
+
+        // Switch to area configuration
+        if (!empty($conf)) {
+            $this->config->setData($conf);
+        } else {
+            throw new \RuntimeException('Could not parse "' . $this->confFilePath . '"');
+        }
+    }
+
+    /**
+     * Get context list from current configuration
+     *
+     * @return array|null
+     */
+    protected function getContextListFromConfiguration() {
+        return $this->config->getArray($this->confArea);
+    }
+
+    /**
+     * Get task list from current configuration
+     *
+     * @param $section
+     * @return array
+     */
+    protected function getTaskList($section) {
+        $ret = array();
+        // TODO
+
+        return $ret;
+    }
+
+    /**
+     * Build context configuration
+     *
+     * @param $context
+     */
+    protected function buildContextConfiguration($context) {
+        $this->contextConfig = new ConfigReader();
+
+        // Fetch global conf
+        $globalConf = array();
+        if ($this->config->exists(self::GLOBAL_KEY)) {
+            $globalConf = $this->config->get(self::GLOBAL_KEY);
+        }
+
+        // Fetch area conf
+        $areaConf = $this->config->get($this->confArea);
+
+        // Fetch area global conf
+        $areaGlobalConf = array();
+        if ($this->config->exists($this->confArea . '.' . self::GLOBAL_KEY)) {
+            $areaGlobalConf = $this->config->get($this->confArea . '.' . self::GLOBAL_KEY);
+        }
+
+        // Fetch context conf
+        if (empty($areaConf[$context])) {
+            $this->output->writeln('<p-error>No context "' . $context . '" found</p-error>');
+            throw new \CliTools\Exception\StopException(1);
+        }
+        $contextConf = $areaConf[$context];
+
+        // Merge
+        $conf = array_merge_recursive($globalConf, $areaGlobalConf, $contextConf);
+
+        // Set configuration
+        $this->contextConfig->setData($conf);
+    }
+
+
+    /**
+     * Execute command
+     *
+     * @param  InputInterface  $input  Input instance
+     * @param  OutputInterface $output Output instance
+     *
+     * @return int|null|void
+     * @throws \Exception
+     */
+    public function execute(InputInterface $input, OutputInterface $output) {
+        $this->startup();
+
+        try {
+            $this->initContext();
+            $this->runTasks('startup');
+            $this->runMain();
+            $this->runTasks('finalize');
+        } catch (\Exception $e) {
+            $this->cleanup();
+            throw $e;
+        }
+
+        $this->cleanup();
+    }
+
+
+    /**
+     * Init context
+     */
+    protected function initContext() {
+        $context = $this->getContextFromUser();
+        $this->buildContextConfiguration($context);
+    }
+
+    /**
+     * Get context from user
+     */
+    protected function getContextFromUser() {
+        $ret = null;
+
+        if (!$this->input->getArgument('context')) {
+            // ########################
+            // Ask user for server context
+            // ########################
+
+            $serverList = $this->config->getList($this->confArea);
+            $serverList = array_diff($serverList, array(self::GLOBAL_KEY));
+
+            if (empty($serverList)) {
+                throw new \RuntimeException('No valid servers found in configuration');
+            }
+
+            $serverOptionList = array();
+
+            foreach ($serverList as $context) {
+                $line = array();
+
+                // hostname
+                $optPath = $context . '.ssh.hostname';
+                if ($this->config->exists($optPath)) {
+                    $line[] = '<info>host:</info>' . $this->config->get($optPath);
+                }
+
+                // rsync path
+                $optPath = $context . '.rsync.path';
+                if ($this->config->exists($optPath)) {
+                    $line[] = '<info>rsync:</info>' . $this->config->get($optPath);
+                }
+
+                // mysql database list
+                $optPath = $context . '.mysql.database';
+                if ($this->config->exists($optPath)) {
+                    $dbList        = $this->config->getArray($optPath);
+                    $foreignDbList = array();
+
+                    foreach ($dbList as $databaseConf) {
+                        if (strpos($databaseConf, ':') !== false) {
+                            // local and foreign database in one string
+                            list($localDatabase, $foreignDatabase) = explode(':', $databaseConf, 2);
+                            $foreignDbList[] = $foreignDatabase;
+                        } else {
+                            // database equal
+                            $foreignDbList[] = $databaseConf;
+                        }
+                    }
+
+                    if (!empty($foreignDbList)) {
+                        $line[] .= '<info>mysql:</info>' . implode(', ', $foreignDbList);
+                    }
+                }
+
+                if (!empty($line)) {
+                    $line = implode(' ', $line);
+                } else {
+                    // fallback
+                    $line = $context;
+                }
+
+                $serverOptionList[$context] = $line;
+            }
+
+            try {
+                $question = new ChoiceQuestion('Please choose server context for synchronization', $serverOptionList);
+                $question->setMaxAttempts(1);
+
+                $questionDialog = new QuestionHelper();
+
+                $ret = $questionDialog->ask($this->input, $this->output, $question);
+            } catch(\InvalidArgumentException $e) {
+                // Invalid server context, just stop here
+                throw new \CliTools\Exception\StopException(1);
+            }
+        } else {
+            $ret = $this->input->getArgument('context');
         }
 
         return $ret;
@@ -294,13 +490,15 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     }
 
     /**
-     * Run finalize tasks
+     * Run start tasks
      */
-    protected function runFinalizeTasks() {
-        if ($this->taskConf->exists('finalize')) {
-            $this->output->writeln('<info> ---- Starting FINALIZE TASKS ---- </info>');
+    protected function runTasks($area) {
+        $taskList = $this->getTaskList($area);
 
-            foreach ($this->taskConf->getArray('finalize') as $task) {
+        if (!empty($taskList)) {
+            $this->output->writeln('<info> ---- Starting ' . strtoupper($area) . ' tasks ---- </info>');
+
+            foreach ($taskList as $task) {
                 $command = new CommandBuilder();
                 $command->parse($task)->executeInteractive();
             }

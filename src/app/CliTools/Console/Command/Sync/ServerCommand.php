@@ -82,7 +82,7 @@ class ServerCommand extends AbstractSyncCommand {
     /**
      * Backup task
      */
-    protected function runTask() {
+    protected function runMain() {
         // ##################
         // Option specific runners
         // ##################

@@ -1,13 +1,13 @@
 #######################################
-# Sync from server (eg. live server)
+# Global (applied to all server sections)
 #######################################
-sync:
 
-   ##################
-   # Global config
-   ##################
-    _:
+GLOBAL:
+    ## MYSQL
     mysql:
+        # mysql connection
+        hostname: localhost
+
         # MySQL predefined filter for typo3 (eg. no caching tables)
         filter: typo3
 
@@ -20,31 +20,83 @@ sync:
         #  - "/^sys_log$/i"
         #  - "/^sys_history$/i"
         #  - "/^tx_extbase_cache.*/i"
-
         # Transfer compression (none if empty, bzip2 or gzip)
         compression: bzip2
 
         # specific mysqldump settings
         mysqldump:
-            option: "--opt --single-transaction"
+            option: "--opt --skip-lock-tables --single-transaction"
 
+    ## RSYNC
     rsync:
         # set target as sub directroy (will be appended to working directory)
         workdir: ""
 
-        # directory list/patterns for synchronization
-        directory:
-            - "/fileadmin/"
-            - "/uploads/"
-            - "/typo3conf/l10n/"
-
-        # directory exclude list/patterns
+        # exclude list/patterns for files and directories
         exclude:
-            - "/fileadmin/_processed_/**"
+            # Temp files
+            - "*~"
+            - "._*"
 
-   ##################
-   # Config "production"
-   ##################
+            # VCS
+            - ".git*"
+            - ".gitignore"
+            - ".gitmodules"
+            - ".svn"
+
+            # Build files
+            - "composer.json"
+            - "bower.json"
+            - "gulpfile.js"
+            - "Gruntfile.js"
+            - "Makefile"
+
+            # Caches and other files
+            - "node_modules"
+            - ".sass-cache"
+            - ".settings"
+            - ".bowerrc"
+            - ".buildpath"
+            - ".project"
+
+    task:
+        # Start-Tasks: shell command which should be run before startup
+        startup:
+            # add some here
+
+        # Final-Tasks: shell command which should be after run
+        final:
+            # create user "dev" with password "dev"
+            - "ct typo3:beuser"
+            # append toplevel-domain .vm to all domains
+            - "ct typo3:domain"
+
+#######################################
+# Sync from server (eg. live server)
+#######################################
+sync:
+
+    ##################
+    # Global config
+    ##################
+    GLOBAL:
+        mysql:
+            ## put your mysql settings here (see global conf)
+
+        rsync:
+            # directory list/patterns for synchronization
+            directory:
+                - "/fileadmin/"
+                - "/uploads/"
+                - "/typo3conf/l10n/"
+
+            # directory exclude list/patterns
+            exclude:
+                - "/fileadmin/_processed_/**"
+
+    ##################
+    # Config "production"
+    ##################
     production:
         # ssh server host or name (see .ssh/config, eg for mysql/mysqldump)
         ssh:
@@ -56,36 +108,35 @@ sync:
             path: "live-server:/var/www/website/htdocs"
 
         mysql:
-            # mysql connection
-            hostname: localhost
             username: typo3
             password: loremipsum
 
-        # List of databases for sync ("local:foreign" for different database names - or only "database" if same name should be used localy)
+        # List of databases for synchronization
+        #   examples:
+        #       local:foreign
+        #       samename
         database:
             - typo3:website_live
-            - other_database
-        
+
 #######################################
 # Deployment to server
 #######################################
 deploy:
 
-     ##################
-     # Global config
-     ##################
-    _:
-        rsync:
-            # set target as sub directroy (will be appended to working directory)
-            workdir: ""
+    ##################
+    # Global config
+    ##################
+    GLOBAL:
+        mysql:
+            # global mysql configuration
 
+        rsync:
             # directory list/patterns for synchronization
             directory:
                 - "/"
 
             # directory exclude list/patterns
             exclude:
-                - ".git*"
                 - "/fileadmin/"
                 - "/uploads/"
                 - "/typo3conf/l10n/"
@@ -108,41 +159,28 @@ deploy:
 #######################################
 share:
 
-    rsync:
-        # source/target directory or server via ssh (eg. backup-server:/backup/projectname)
-        path: "/tmp/foo/"
-        # set target as sub directroy (will be appended to working directory
-        workdir: ""
+   ##################
+   # Config "development"
+   ##################
+    development:
+        rsync:
+            # source/target directory or server via ssh (eg. backup-server:/backup/projectname)
+            path: "/tmp/foo/"
 
-        # List of directories for backup
-        directory:
-            - "/fileadmin/"
-            - "/uploads/"
-            - "/typo3conf/l10n/"
+            # List of directories for backup
+            directory:
+                - "/fileadmin/"
+                - "/uploads/"
+                - "/typo3conf/l10n/"
 
-        # List of excludes (eg. specific files)
-        exclude:
-            # no avi files
-            - "/example/**/*.avi"
-            # no mp4 files
-            - "/example/**/*.mp4"
+            # List of excludes (eg. specific files)
+            exclude:
+                # no avi files
+                - "/example/**/*.avi"
+                # no mp4 files
+                - "/example/**/*.mp4"
 
-    mysql:
-        # MySQL filter for typo3 (eg. no caching tables)
-        filter: typo3
-
-        # List of databases for backup
-        database:
-            - typo3
-
-#######################################
-# Task configuration
-#######################################
-task:
-
-    # These commands will be executed after backup, restore and sync
-    finalize:
-        # create user "dev" with password "dev"
-        - "ct typo3:beuser"
-        # append toplevel-domain .vm to all domains
-        - "ct typo3:domain"
+        mysql:
+            # List of databases for backup
+            database:
+                - typo3
