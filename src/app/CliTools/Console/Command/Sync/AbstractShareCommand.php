@@ -24,12 +24,17 @@ use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
 
 abstract class AbstractShareCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
 
+    const PATH_DUMP   = '/dump/';
+    const PATH_DATA   = '/data/';
+
     /**
-     * Config area
-     *
-     * @var string
+     * Configure command
      */
-    protected $confArea = 'share';
+    protected function configure() {
+        parent::configure();
+
+        $this->confArea = 'share';
+    }
 
     /**
      * Validate configuration

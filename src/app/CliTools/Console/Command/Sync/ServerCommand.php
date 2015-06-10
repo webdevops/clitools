@@ -20,24 +20,9 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\FilterUtility;
-use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
-use CliTools\Console\Shell\CommandBuilder\RemoteCommandBuilder;
-use CliTools\Console\Shell\CommandBuilder\OutputCombineCommandBuilder;
-use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
 use CliTools\Database\DatabaseConnection;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputArgument;
 
-
-class ServerCommand extends AbstractSyncCommand {
-
-    /**
-     * Config area
-     *
-     * @var string
-     */
-    protected $confArea = 'sync';
+class ServerCommand extends AbstractCommand {
 
     /**
      * Server configuration name
@@ -49,26 +34,13 @@ class ServerCommand extends AbstractSyncCommand {
      * Configure command
      */
     protected function configure() {
+        parent::configure();
+
+        $this->confArea = 'sync';
+
         $this
             ->setName('sync:server')
-            ->setDescription('Sync files and database from server')
-            ->addArgument(
-                'context',
-                InputArgument::OPTIONAL,
-                'Configuration name for server'
-            )
-            ->addOption(
-                'mysql',
-                null,
-                InputOption::VALUE_NONE,
-                'Run only mysql'
-            )
-            ->addOption(
-                'rsync',
-                null,
-                InputOption::VALUE_NONE,
-                'Run only rsync'
-            );
+            ->setDescription('Sync files and database from server');
     }
 
     /**
@@ -77,6 +49,31 @@ class ServerCommand extends AbstractSyncCommand {
     protected function startup() {
         $this->output->writeln('<h2>Starting server synchronization</h2>');
         parent::startup();
+    }
+
+    /**
+     * Validate configuration
+     *
+     * @return boolean
+     */
+    protected function validateConfiguration() {
+        $ret = parent::validateConfiguration();
+
+        $output = $this->output;
+
+        // ##################
+        // SSH (optional)
+        // ##################
+
+        if ($this->contextConfig->exists('ssh')) {
+            // Check if one database is configured
+            if (!$this->contextConfig->exists('ssh.hostname')) {
+                $output->writeln('<p-error>No ssh hostname configuration found</p-error>');
+                $ret = false;
+            }
+        }
+
+        return $ret;
     }
 
     /**
@@ -102,18 +99,18 @@ class ServerCommand extends AbstractSyncCommand {
         // ##################
 
         // Check database connection
-        if ($runMysql && $this->config->exists('mysql')) {
+        if ($runMysql && $this->contextConfig->exists('mysql')) {
             DatabaseConnection::ping();
         }
 
         // Sync files with rsync to local storage
-        if ($runRsync && $this->config->exists('rsync')) {
+        if ($runRsync && $this->contextConfig->exists('rsync')) {
             $this->output->writeln('<h1>Starting FILE sync</h1>');
             $this->runTaskRsync();
         }
 
         // Sync database to local server
-        if ($runMysql && $this->config->exists('mysql')) {
+        if ($runMysql && $this->contextConfig->exists('mysql')) {
             $this->output->writeln('<h1>Starting MYSQL sync</h1>');
             $this->runTaskDatabase();
         }
@@ -128,7 +125,18 @@ class ServerCommand extends AbstractSyncCommand {
         // ##################
         $source = $this->getRsyncPathFromConfig();
         $target = $this->getRsyncWorkingPath();
-        $command = $this->createRsyncCommand($source, $target);
+
+        $fileList = array();
+        if ($this->contextConfig->exists('rsync.directory')) {
+            $fileList = $this->contextConfig->get('rsync.directory');
+        }
+
+        $excludeList = array();
+        if ($this->contextConfig->exists('rsync.exclude')) {
+            $excludeList = $this->contextConfig->get('rsync.exclude');
+        }
+
+        $command = $this->createRsyncCommand($source, $target, $fileList, $excludeList);
 
         $command->executeInteractive();
     }
@@ -163,8 +171,8 @@ class ServerCommand extends AbstractSyncCommand {
 
             $mysqldump = $this->createRemoteMySqlDumpCommand($foreignDatabase);
 
-            if ($this->contextConfig['mysql']['filter']) {
-                $mysqldump = $this->addFilterArguments($mysqldump, $foreignDatabase, $this->contextConfig['mysql']['filter']);
+            if ($this->contextConfig->exists('mysql.filter')) {
+                $mysqldump = $this->addMysqlDumpFilterArguments($mysqldump, $foreignDatabase, $this->contextConfig->get('mysql.filter'));
             }
 
             $command = $this->wrapRemoteCommand($mysqldump);
@@ -181,97 +189,5 @@ class ServerCommand extends AbstractSyncCommand {
         }
     }
 
-
-    /**
-     * Create rsync command for share sync
-     *
-     * @param string     $source    Source directory
-     * @param string     $target    Target directory
-     * @param array|null $filelist  List of files (patterns)
-     * @param array|null $exclude   List of excludes (patterns)
-     *
-     * @return CommandBuilder
-     */
-    protected function createRsyncCommand($source, $target, array $filelist = null, array $exclude = null) {
-        // Add file list (external file with --files-from option)
-        if (!$filelist && $this->contextConfig->exists('rsync.directory')) {
-            $filelist = $this->contextConfig->get('rsync.directory');
-        }
-
-        // Add exclude (external file with --exclude-from option)
-        if (!$exclude && $this->contextConfig->exists('rsync.exclude')) {
-            $exclude = $this->contextConfig->get('rsync.exclude');
-        }
-
-        return parent::createRsyncCommand($source, $target, $filelist, $exclude);
-    }
-
-    /**
-     * Add filter to command
-     *
-     * @param CommandBuilderInterface $commandDump  Command
-     * @param string                  $database     Database
-     * @param string                  $filter       Filter name
-     *
-     * @return CommandBuilderInterface
-     */
-    protected function addFilterArguments(CommandBuilderInterface $commandDump, $database, $filter) {
-        $command = $commandDump;
-
-        // get filter
-        if (is_array($filter)) {
-            $filterList = (array)$filter;
-            $filter     = 'custom table filter';
-        } else {
-            $filterList = $this->getApplication()->getConfigValue('mysql-backup-filter', $filter);
-        }
-
-        if (empty($filterList)) {
-            throw new \RuntimeException('MySQL dump filters "' . $filter . '" not available"');
-        }
-
-        $this->output->writeln('<p>Using filter "' . $filter . '"</p>');
-
-        // Get table list (from cloned mysqldump command)
-        $tableListDumper = $this->createRemoteMySqlCommand($database);
-        $tableListDumper->addArgumentTemplate('-e %s', 'show tables;');
-
-        $tableListDumper = $this->wrapRemoteCommand($tableListDumper);
-        $tableList       = $tableListDumper->execute()->getOutput();
-
-        // Filter table list
-        $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $filterList, $database);
-
-        // Dump only structure
-        $commandStructure = clone $command;
-        $commandStructure
-            ->addArgument('--no-data')
-            ->clearPipes();
-
-        // Dump only data (only filtered tables)
-        $commandData = clone $command;
-        $commandData
-            ->addArgument('--no-create-info')
-            ->clearPipes();
-
-        if (!empty($ignoredTableList)) {
-            $commandData->addArgumentTemplateMultiple('--ignore-table=%s', $ignoredTableList);
-        }
-
-        $commandPipeList = $command->getPipeList();
-
-        // Combine both commands to one
-        $command = new OutputCombineCommandBuilder();
-        $command
-            ->addCommandForCombinedOutput($commandStructure)
-            ->addCommandForCombinedOutput($commandData);
-
-        // Readd compression pipe
-        if (!empty($commandPipeList)) {
-            $command->setPipeList($commandPipeList);
-        }
-
-        return $command;
-    }
 
 }

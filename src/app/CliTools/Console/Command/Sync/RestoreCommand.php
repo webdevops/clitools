@@ -30,8 +30,9 @@ class RestoreCommand extends AbstractShareCommand {
     protected function configure() {
         parent::configure();
 
-        $this->confArea = 'share';
-        $this->setName('sync:restore');
+        $this
+            ->setName('sync:restore')
+            ->setDescription('Restore files and database from share');
     }
 
     /**

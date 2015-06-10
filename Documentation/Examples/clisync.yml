@@ -111,12 +111,12 @@ sync:
             username: typo3
             password: loremipsum
 
-        # List of databases for synchronization
-        #   examples:
-        #       local:foreign
-        #       samename
-        database:
-            - typo3:website_live
+            # List of databases for synchronization
+            #   examples:
+            #       local:foreign
+            #       samename
+            database:
+                - typo3:website_live
 
 #######################################
 # Deployment to server

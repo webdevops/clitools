@@ -28,8 +28,10 @@ class BackupCommand extends AbstractCommand {
     protected function configure() {
         parent::configure();
 
-        $this->confArea = 'share';
-        $this->setName('sync:backup');
+        $this
+            ->setName('sync:backup')
+            ->setDescription('Backup files and database from share');
+
     }
 
     /**

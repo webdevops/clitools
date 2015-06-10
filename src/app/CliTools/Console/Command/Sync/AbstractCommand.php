@@ -23,8 +23,12 @@ namespace CliTools\Console\Command\Sync;
 use CliTools\Utility\PhpUtility;
 use CliTools\Utility\UnixUtility;
 use CliTools\Utility\ConsoleUtility;
+use CliTools\Utility\FilterUtility;
 use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\RemoteCommandBuilder;
 use CliTools\Console\Shell\CommandBuilder\SelfCommandBuilder;
+use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
+use CliTools\Console\Shell\CommandBuilder\OutputCombineCommandBuilder;
 use CliTools\Reader\ConfigReader;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
@@ -37,9 +41,6 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand {
 
     const CONFIG_FILE = 'clisync.yml';
-    const PATH_DUMP   = '/dump/';
-    const PATH_DATA   = '/data/';
-
     const GLOBAL_KEY  = 'GLOBAL';
 
     /**
@@ -753,6 +754,76 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         if ($database !== null) {
             $command->addArgument($database);
+        }
+
+        return $command;
+    }
+
+
+    /**
+     * Add mysqldump filter to command
+     *
+     * @param CommandBuilderInterface $commandDump  Command
+     * @param string                  $database     Database
+     *
+     * @return CommandBuilderInterface
+     */
+    protected function addMysqlDumpFilterArguments(CommandBuilderInterface $commandDump, $database) {
+        $command = $commandDump;
+
+        $filter = $this->contextConfig->get('mysql.filter');
+
+        // get filter
+        if (is_array($filter)) {
+            $filterList = (array)$filter;
+            $filter     = 'custom table filter';
+        } else {
+            $filterList = $this->getApplication()->getConfigValue('mysql-backup-filter', $filter);
+        }
+
+        if (empty($filterList)) {
+            throw new \RuntimeException('MySQL dump filters "' . $filter . '" not available"');
+        }
+
+        $this->output->writeln('<p>Using filter "' . $filter . '"</p>');
+
+        // Get table list (from cloned mysqldump command)
+        $tableListDumper = $this->createRemoteMySqlCommand($database);
+        $tableListDumper->addArgumentTemplate('-e %s', 'show tables;');
+
+        $tableListDumper = $this->wrapRemoteCommand($tableListDumper);
+        $tableList       = $tableListDumper->execute()->getOutput();
+
+        // Filter table list
+        $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $filterList, $database);
+
+        // Dump only structure
+        $commandStructure = clone $command;
+        $commandStructure
+            ->addArgument('--no-data')
+            ->clearPipes();
+
+        // Dump only data (only filtered tables)
+        $commandData = clone $command;
+        $commandData
+            ->addArgument('--no-create-info')
+            ->clearPipes();
+
+        if (!empty($ignoredTableList)) {
+            $commandData->addArgumentTemplateMultiple('--ignore-table=%s', $ignoredTableList);
+        }
+
+        $commandPipeList = $command->getPipeList();
+
+        // Combine both commands to one
+        $command = new OutputCombineCommandBuilder();
+        $command
+            ->addCommandForCombinedOutput($commandStructure)
+            ->addCommandForCombinedOutput($commandData);
+
+        // Readd compression pipe
+        if (!empty($commandPipeList)) {
+            $command->setPipeList($commandPipeList);
         }
 
         return $command;
