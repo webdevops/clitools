@@ -108,7 +108,7 @@ sync:
                 - "/fileadmin/_processed_/**"
 
     ##################
-    # Config "production"
+    # Context "production"
     ##################
     production:
         # ssh server host or name (see .ssh/config, eg for mysql/mysqldump)
@@ -158,7 +158,7 @@ deploy:
                 - "/typo3conf/l10n/"
 
    ##################
-   # Config "production"
+   # Context "production"
    ##################
     production:
         # ssh server host or name (see .ssh/config, eg for mysql/mysqldump)
@@ -201,7 +201,7 @@ share:
                 - "/typo3conf/l10n/"
 
    ##################
-   # Config "development"
+   # Context "development"
    ##################
     development:
         rsync:
