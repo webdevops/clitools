@@ -65,7 +65,7 @@ GLOBAL:
             # add some here
 
         # Final-Tasks: shell command which should be after run
-        final:
+        finalize:
             # create user "dev" with password "dev"
             - "ct typo3:beuser"
             # append toplevel-domain .vm to all domains

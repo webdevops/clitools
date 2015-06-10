@@ -222,12 +222,15 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Get task list from current configuration
      *
-     * @param $section
+     * @param string $section Section name for tasks (startup, final)
      * @return array
      */
     protected function getTaskList($section) {
         $ret = array();
-        // TODO
+
+        if ($this->contextConfig->exists('task.' . $section)) {
+            $ret = $this->contextConfig->get('task.' . $section);
+        }
 
         return $ret;
     }
@@ -280,10 +283,14 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @throws \Exception
      */
     public function execute(InputInterface $input, OutputInterface $output) {
-        $this->startup();
-
         try {
+            // Get context selection
             $this->initContext();
+
+            // Create temp directory and check environment
+            $this->startup();
+
+            // Run playbook
             $this->runTasks('startup');
             $this->runMain();
             $this->runTasks('finalize');
@@ -294,7 +301,6 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         $this->cleanup();
     }
-
 
     /**
      * Init context
@@ -501,8 +507,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $this->output->writeln('<info> ---- Starting ' . strtoupper($area) . ' tasks ---- </info>');
 
             foreach ($taskList as $task) {
-                $command = new CommandBuilder();
-                $command->parse($task)->executeInteractive();
+
+                if (is_string($task)) {
+                    $command = new CommandBuilder();
+                    $command->parse($task)->executeInteractive();
+                } else {
+                    $this->output->writeln('<p-error>Complex task support is not yet available</p-error>');
+                }
             }
         }
     }
