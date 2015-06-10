@@ -1,6 +1,20 @@
 ###########################################################
 # Global (applied to all server sections)
 ###########################################################
+#
+# Configuration merge order:
+# 1. context configuration will override all settings
+# 2. sync/deploy/share GLOBAL will override default settings
+# 3. GLOBAL are the defaults
+#
+# EXAMPLE:
+# if you ned eg. another mysql hostname just set it in the
+# context:
+#
+#   production
+#       mysql:
+#           hostname: 192.168.56.2
+#
 
 GLOBAL:
     ## MYSQL
