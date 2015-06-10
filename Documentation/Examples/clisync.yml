@@ -90,7 +90,7 @@ GLOBAL:
 sync:
 
     ##################
-    # Global config
+    # Global config (for sync)
     ##################
     GLOBAL:
         mysql:
@@ -140,7 +140,7 @@ sync:
 deploy:
 
     ##################
-    # Global config
+    # Global config (for deploy)
     ##################
     GLOBAL:
         mysql:
@@ -178,6 +178,28 @@ deploy:
 ###########################################################
 share:
 
+    ##################
+    # Global config (for deploy)
+    ##################
+    GLOBAL:
+        mysql:
+            # List of databases for backup
+            database:
+                - typo3
+
+        rsync:
+            # List of directories for backup
+            directory:
+                - "/fileadmin/"
+                - "/uploads/"
+                - "/typo3conf/l10n/"
+
+            # directory exclude list/patterns
+            exclude:
+                - "/fileadmin/"
+                - "/uploads/"
+                - "/typo3conf/l10n/"
+
    ##################
    # Config "development"
    ##################
@@ -185,21 +207,3 @@ share:
         rsync:
             # source/target directory or server via ssh (eg. backup-server:/backup/projectname)
             path: "/tmp/foo/"
-
-            # List of directories for backup
-            directory:
-                - "/fileadmin/"
-                - "/uploads/"
-                - "/typo3conf/l10n/"
-
-            # List of excludes (eg. specific files)
-            exclude:
-                # no avi files
-                - "/example/**/*.avi"
-                # no mp4 files
-                - "/example/**/*.mp4"
-
-        mysql:
-            # List of databases for backup
-            database:
-                - typo3
