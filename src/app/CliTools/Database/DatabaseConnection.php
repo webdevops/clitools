@@ -21,6 +21,7 @@ namespace CliTools\Database;
  */
 
 use CliTools\Utility\ConsoleUtility;
+use AD7six\Dsn\Dsn;
 
 class DatabaseConnection {
 
@@ -102,6 +103,25 @@ class DatabaseConnection {
     public static function getDbPassword() {
         return self::$dbPassword;
     }
+
+    /**
+     * Get Db Hostname
+     *
+     * @return string
+     */
+    public static function getDbHostname() {
+        return self::parseDsnValue('host');
+    }
+
+    /**
+     * Get Db Port
+     *
+     * @return string
+     */
+    public static function getDbPort() {
+        return self::parseDsnValue('port');
+    }
+
 
     /**
      * Get connection
@@ -592,5 +612,23 @@ class DatabaseConnection {
      */
     public static function sanitizeSqlDatabase($database) {
         return '`' . preg_replace('/[^_a-zA-Z0-9]/', '', $database) . '`';
+    }
+
+    /**
+     * Parse DSN and return value
+     *
+     * @param string      $key     DSN Key
+     * @param string|null $default Default value
+     * @return string|null
+     */
+    protected static function parseDsnValue($key, $default = NULL) {
+        $ret = $default;
+
+        $pattern = sprintf('~%s=([^;]*)(?:;|$)~', preg_quote($key, '~'));
+        if (preg_match($pattern, self::$dbDsn, $matches)) {
+            $ret = $matches[1];
+        }
+
+        return $ret;
     }
 }

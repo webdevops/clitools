@@ -59,9 +59,8 @@ GLOBAL:
             - ".buildpath"
             - ".project"
 
-
-
-    task:
+    ## commands
+    command:
         # Start-Tasks: shell command which should be run before startup
         startup:
             # add some here

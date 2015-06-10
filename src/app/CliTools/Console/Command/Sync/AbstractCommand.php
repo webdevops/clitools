@@ -30,6 +30,7 @@ use CliTools\Console\Shell\CommandBuilder\SelfCommandBuilder;
 use CliTools\Console\Shell\CommandBuilder\CommandBuilderInterface;
 use CliTools\Console\Shell\CommandBuilder\OutputCombineCommandBuilder;
 use CliTools\Reader\ConfigReader;
+use CliTools\Database\DatabaseConnection;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -107,6 +108,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
                 null,
                 InputOption::VALUE_NONE,
                 'Run only rsync'
+            )
+            ->addOption(
+                'config',
+                null,
+                InputOption::VALUE_NONE,
+                'Show generated config'
             );
     }
 
@@ -220,16 +227,16 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     }
 
     /**
-     * Get task list from current configuration
+     * Get command list from current configuration
      *
-     * @param string $section Section name for tasks (startup, final)
+     * @param string $section Section name for commands (startup, final)
      * @return array
      */
-    protected function getTaskList($section) {
+    protected function getCommandList($section) {
         $ret = array();
 
-        if ($this->contextConfig->exists('task.' . $section)) {
-            $ret = $this->contextConfig->get('task.' . $section);
+        if ($this->contextConfig->exists('command.' . $section)) {
+            $ret = $this->contextConfig->get('command.' . $section);
         }
 
         return $ret;
@@ -265,7 +272,31 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         }
         $contextConf = $areaConf[$context];
 
+
+        $arrayFilterRecursive = function($input, $callback) use (&$arrayFilterRecursive) {
+            $ret = array();
+            foreach ($input as $key => $value) {
+                if (is_array($value)) {
+                    $value = $arrayFilterRecursive($value, $callback);
+                } else {
+                    if (strlen($value)==0) {
+                        $value = null;
+                    }
+                }
+
+                if ($value !== null && $value !== false && $value !== true) {
+                    $ret[$key] = $value;
+                }
+            }
+
+            return $ret;
+        };
+
         // Merge
+        $globalConf     = $arrayFilterRecursive( $globalConf, 'strlen' );
+        $areaGlobalConf = $arrayFilterRecursive( $areaGlobalConf, 'strlen' );
+        $contextConf    = $arrayFilterRecursive( $contextConf, 'strlen' );
+
         $conf = array_replace_recursive($globalConf, $areaGlobalConf, $contextConf);
 
         // Set configuration
@@ -286,13 +317,19 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             // Get context selection
             $this->initContext();
 
-            // Create temp directory and check environment
-            $this->startup();
+            if ($this->input->getOption('config')) {
+                // only show configuration
+                $this->showContextConfig();
+            } else {
+                // Create temp directory and check environment
+                $this->startup();
 
-            // Run playbook
-            $this->runTasks('startup');
-            $this->runMain();
-            $this->runTasks('finalize');
+                // Run playbook
+                $this->runCommands('startup');
+                $this->runMain();
+                $this->runCommands('finalize');
+            }
+
         } catch (\Exception $e) {
             $this->cleanup();
             throw $e;
@@ -401,6 +438,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     }
 
     /**
+     * Show context configuration
+     */
+    protected function showContextConfig() {
+        print_r($this->contextConfig->get());
+    }
+
+    /**
      * Validate configuration (rsync)
      *
      * @return boolean
@@ -497,23 +541,23 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     }
 
     /**
-     * Run start tasks
+     * Run defined commands
      */
-    protected function runTasks($area) {
-        $taskList = $this->getTaskList($area);
+    protected function runCommands($area) {
+        $commandList = $this->getCommandList($area);
 
-        if (!empty($taskList)) {
-            $this->output->writeln('<info> ---- Starting ' . strtoupper($area) . ' tasks ---- </info>');
+        if (!empty($commandList)) {
+            $this->output->writeln('<info> ---- Starting ' . strtoupper($area) . ' commands ---- </info>');
 
-            foreach ($taskList as $task) {
+            foreach ($commandList as $commandRow) {
 
-                if (is_string($task)) {
+                if (is_string($commandRow)) {
                     // Simple, local task
                     $command = new CommandBuilder();
-                    $command->parse($task);
-                } elseif(is_array($task)) {
+                    $command->parse($commandRow);
+                } elseif(is_array($commandRow)) {
                     // Complex task
-                    $command = $this->buildComplexTask($task);
+                    $command = $this->buildComplexTask($commandRow);
                 }
 
                 if ($command) {
@@ -764,8 +808,51 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         return $command;
     }
 
+
     /**
      * Create new mysql command
+     *
+     * @param null|string $database Database name
+     *
+     * @return RemoteCommandBuilder
+     */
+    protected function createLocalMySqlCommand($database = null) {
+        $command = new RemoteCommandBuilder('mysql');
+        $command
+            // batch mode
+            ->addArgument('-B')
+            // skip column names
+            ->addArgument('-N');
+
+        // Add username
+        if (DatabaseConnection::getDbUsername()) {
+            $command->addArgumentTemplate('-u%s', DatabaseConnection::getDbUsername());
+        }
+
+        // Add password
+        if (DatabaseConnection::getDbPassword()) {
+            $command->addArgumentTemplate('-p%s', DatabaseConnection::getDbPassword());
+        }
+
+        // Add hostname
+        if (DatabaseConnection::getDbHostname()) {
+            $command->addArgumentTemplate('-h%s', DatabaseConnection::getDbHostname());
+        }
+
+        // Add hostname
+        if (DatabaseConnection::getDbPort()) {
+            $command->addArgumentTemplate('-P%s', DatabaseConnection::getDbPort());
+        }
+
+        if ($database !== null) {
+            $command->addArgument($database);
+        }
+
+        return $command;
+    }
+
+    /**
+     * Create new mysqldump command
      *
      * @param null|string $database Database name
      *
@@ -814,16 +901,72 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         return $command;
     }
 
+    /**
+     * Create new mysqldump command
+     *
+     * @param null|string $database Database name
+     *
+     * @return RemoteCommandBuilder
+     */
+    protected function createLocalMySqlDumpCommand($database = null) {
+        $command = new RemoteCommandBuilder('mysqldump');
+
+        // Add username
+        if (DatabaseConnection::getDbUsername()) {
+            $command->addArgumentTemplate('-u%s', DatabaseConnection::getDbUsername());
+        }
+
+        // Add password
+        if (DatabaseConnection::getDbPassword()) {
+            $command->addArgumentTemplate('-p%s', DatabaseConnection::getDbPassword());
+        }
+
+        // Add hostname
+        if (DatabaseConnection::getDbHostname()) {
+            $command->addArgumentTemplate('-h%s', DatabaseConnection::getDbHostname());
+        }
+
+        // Add hostname
+        if (DatabaseConnection::getDbPort()) {
+            $command->addArgumentTemplate('-P%s', DatabaseConnection::getDbPort());
+        }
+
+        // Add custom options
+        if ($this->contextConfig->exists('mysqldump.option')) {
+            $command->addArgumentRaw($this->contextConfig->get('mysqldump.option'));
+        }
+
+        if ($database !== null) {
+            $command->addArgument($database);
+        }
+
+        // Transfer compression
+        switch($this->contextConfig->get('mysql.compression')) {
+            case 'bzip2':
+                // Add pipe compressor (bzip2 compressed transfer via ssh)
+                $command->addPipeCommand( new CommandBuilder('bzip2', '--compress --stdout') );
+                break;
+
+            case 'gzip':
+                // Add pipe compressor (gzip compressed transfer via ssh)
+                $command->addPipeCommand( new CommandBuilder('gzip', '--stdout') );
+                break;
+        }
+
+        return $command;
+    }
+
 
     /**
      * Add mysqldump filter to command
      *
      * @param CommandBuilderInterface $commandDump  Command
      * @param string                  $database     Database
+     * @param boolean                 $isRemote     Remote filter
      *
      * @return CommandBuilderInterface
      */
-    protected function addMysqlDumpFilterArguments(CommandBuilderInterface $commandDump, $database) {
+    protected function addMysqlDumpFilterArguments(CommandBuilderInterface $commandDump, $database, $isRemote = true) {
         $command = $commandDump;
 
         $filter = $this->contextConfig->get('mysql.filter');
@@ -843,10 +986,17 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $this->output->writeln('<p>Using filter "' . $filter . '"</p>');
 
         // Get table list (from cloned mysqldump command)
-        $tableListDumper = $this->createRemoteMySqlCommand($database);
+        if ($isRemote) {
+            $tableListDumper = $this->createRemoteMySqlCommand($database);
+        } else {
+            $tableListDumper = $this->createLocalMySqlCommand($database);
+        }
+
         $tableListDumper->addArgumentTemplate('-e %s', 'show tables;');
 
-        $tableListDumper = $this->wrapRemoteCommand($tableListDumper);
+        if ($isRemote) {
+            $tableListDumper = $this->wrapRemoteCommand($tableListDumper);
+        }
         $tableList       = $tableListDumper->execute()->getOutput();
 
         // Filter table list
@@ -876,7 +1026,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             ->addCommandForCombinedOutput($commandStructure)
             ->addCommandForCombinedOutput($commandData);
 
-        // Readd compression pipe
+        // Read compression pipe
         if (!empty($commandPipeList)) {
             $command->setPipeList($commandPipeList);
         }

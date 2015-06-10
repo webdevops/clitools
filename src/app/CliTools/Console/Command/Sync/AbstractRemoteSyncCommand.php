@@ -20,7 +20,7 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-abstract class AbstractRemoteSyncCommand extends \CliTools\Console\Command\Sync\AbstractCommand {
+abstract class AbstractRemoteSyncCommand extends AbstractCommand {
     
     /**
      * Validate configuration

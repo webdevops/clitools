@@ -20,6 +20,8 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Console\Shell\CommandBuilder\OutputCombineCommandBuilder;
+
 class BackupCommand extends AbstractShareCommand {
 
     /**
@@ -96,17 +98,36 @@ class BackupCommand extends AbstractShareCommand {
     }
 
     /**
-     * Sync files with mysql
+     * Sync database
      */
     protected function runTaskMysql() {
+        // ##################
+        // Sync databases
+        // ##################
         foreach ($this->contextConfig->getArray('mysql.database') as $database) {
-            $this->output->writeln('<info>Dumping database ' . $database . '</info>');
+            // make sure we don't have any leading whitespaces
+            $database = trim($database);
 
             // dump database
-            $dumpFile = $this->tempDir . '/mysql/' . $database . '.sql.bz2';
+            $dumpFile = $this->tempDir . '/mysql/' . $database . '.dump';
 
-            $this->createMysqlBackupCommand($database, $dumpFile)
-                 ->executeInteractive();
+            // ##########
+            // Dump from server
+            // ##########
+            $this->output->writeln('<p>Dumping database "' . $database . '"</p>');
+
+            $mysqldump = $this->createLocalMySqlDumpCommand($database);
+
+            if ($this->contextConfig->exists('mysql.filter')) {
+                $mysqldump = $this->addMysqlDumpFilterArguments($mysqldump, $database, false);
+            }
+
+            $command = new OutputCombineCommandBuilder();
+            $command->addCommandForCombinedOutput($mysqldump);
+
+            $command
+                ->setOutputRedirectToFile($dumpFile)
+                ->executeInteractive();
         }
 
         // ##################
