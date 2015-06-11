@@ -877,8 +877,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         }
 
         // Add custom options
-        if ($this->contextConfig->exists('mysqldump.option')) {
-            $command->addArgumentRaw($this->contextConfig->get('mysqldump.option'));
+        if ($this->contextConfig->exists('mysql.mysqldump.option')) {
+            $command->addArgumentRaw($this->contextConfig->get('mysql.mysqldump.option'));
         }
 
         // Transfer compression
@@ -932,8 +932,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         }
 
         // Add custom options
-        if ($this->contextConfig->exists('mysqldump.option')) {
-            $command->addArgumentRaw($this->contextConfig->get('mysqldump.option'));
+        if ($this->contextConfig->exists('mysql.mysqldump.option')) {
+            $command->addArgumentRaw($this->contextConfig->get('mysql.mysqldump.option'));
         }
 
         if ($database !== null) {
