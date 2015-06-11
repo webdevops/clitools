@@ -126,6 +126,7 @@ sync:
             # directory exclude list/patterns
             exclude:
                 - "/fileadmin/_processed_/**"
+                - "/fileadmin/_temp_/**"
 
     ##################
     # Context "production"
