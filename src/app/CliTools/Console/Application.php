@@ -377,11 +377,11 @@ class Application extends \Symfony\Component\Console\Application {
     }
 
     /**
-     * Set process title
+     * Set terminal title
      *
      * @param string $title Title
      */
-    public function setProcessTitle($title) {
+    public function setTerminalTitle($title) {
         // DECSLPP.
         echo "\033]0;" . 'ct: ' . $title . "\033\\";
     }

@@ -137,7 +137,7 @@ class CreateCommand extends AbstractCommand {
             try {
                 $editor = new EditorCommandBuilder();
 
-                $this->getApplication()->setProcessTitle('Edit ' . basename($path));
+                $this->setTerminalTitle('Edit', basename($path));
 
                 $this->output->writeln('<h2>Starting interactive EDITOR for file ' .$path . '</h2>');
                 sleep(1);
@@ -158,7 +158,7 @@ class CreateCommand extends AbstractCommand {
      * @param string $repo Repository
      */
     protected function createDockerInstance($path, $repo) {
-        $this->getApplication()->setProcessTitle('Cloning docker');
+        $this->setTerminalTitle('Cloning docker');
 
         $command = new CommandBuilder('git','clone --branch=master --recursive %s %s', array($repo, $path));
         $command->executeInteractive();
@@ -171,7 +171,7 @@ class CreateCommand extends AbstractCommand {
      * @param string $repo Repository
      */
     protected function initCode($path, $repo) {
-        $this->getApplication()->setProcessTitle('Cloning code');
+        $this->setTerminalTitle('Cloning code');
 
         $path .= '/code';
 
@@ -240,7 +240,7 @@ class CreateCommand extends AbstractCommand {
      * @param string $makeCommand Makefile command
      */
     protected function runMakefile($path, $makeCommand) {
-        $this->getApplication()->setProcessTitle('Run make');
+        $this->setTerminalTitle('Run make');
 
         $path .= '/code';
 
@@ -264,7 +264,7 @@ class CreateCommand extends AbstractCommand {
      * @param string $path Path
      */
     protected function startDockerInstance($path) {
-        $this->getApplication()->setProcessTitle('Start docker');
+        $this->setTerminalTitle('Start docker');
 
         $this->output->writeln('<comment>Building docker containers "' . $path . '"</comment>');
 

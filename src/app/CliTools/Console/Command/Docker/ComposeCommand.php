@@ -52,6 +52,8 @@ class ComposeCommand extends AbstractCommand implements \CliTools\Console\Filter
             $command->setArgumentList($paramList);
         }
 
+        $this->setTerminalTitle('docker-compose', $paramList);
+
         $ret = $this->executeDockerCompose($command);
 
         return $ret;

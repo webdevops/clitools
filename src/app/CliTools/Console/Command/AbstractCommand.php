@@ -211,4 +211,46 @@ abstract class AbstractCommand extends Command {
 
         $this->finishMessageList = array();
     }
+
+    /**
+     * Gets the application instance for this command.
+     *
+     * @return \CliTools\Console\Application An Application instance
+     *
+     * @api
+     */
+    public function getApplication() {
+        return parent::getApplication();
+    }
+
+    /**
+     * Sets the terminal title of the command.
+     *
+     * This feature should be used only when creating a long process command,
+     * like a daemon.
+     *
+     * PHP 5.5+ or the proctitle PECL library is required
+     *
+     * @param string $title The terminal title
+     *
+     * @return Command The current instance
+     */
+    public function setTerminalTitle($title) {
+        $args = func_get_args();
+
+        $titleList = array();
+        foreach($args as $value) {
+            if (is_array($value)) {
+               $value = implode(' ', $value);
+            }
+
+            $titleList[] = trim($value);
+        }
+
+        $title = implode(' ', $titleList);
+        $title = trim($title);
+
+        $this->getApplication()->setTerminalTitle($title);
+        return $this;
+    }
 }
