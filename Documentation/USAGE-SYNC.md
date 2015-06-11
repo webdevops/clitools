@@ -29,13 +29,13 @@ In the `clisync.yml` you can specify multiple servers.
 Now you can sync your `production` server to your local installation:
 
 ```bash
-# Full sync (files and database)
-ct sync:server production
+# Full sync (files and database, with interactive context selection)
+ct sync:server
 
-# Only MySQL
+# Only MySQL (from production context, without interactive context selection)
 ct sync:server production --mysql
 
-# Only Files
+# Only Files (from production context, without interactive context selection)
 ct sync:server production --rsync
 ```
 
@@ -63,6 +63,21 @@ ct sync:restore --mysql
 # ... only files
 ct sync:restore --rsync
 
+```
+
+## Lightweight deployment (ct sync:deploy)
+
+With `sync:deploy` you can push your files to your production servers.
+Please keep in mind that this feature is just an wrapped rsync and should only be
+the simplest solution for deployment. For more advanced or centralized deployemnt try
+solutions build on Jenkis, Ansible and others.
+
+```bash
+# Push your project to your servers (with interactive context selection)
+ct sync:deploy
+
+# Push your project to your staging server (without interactive context selection)
+ct sync:deploy staging
 ```
 
 ## Advanced ssh options
