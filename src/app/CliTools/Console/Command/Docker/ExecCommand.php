@@ -22,7 +22,7 @@ namespace CliTools\Console\Command\Docker;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Shell\CommandBuilder\RemoteCommandBuilder;
+use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
 
 class ExecCommand extends AbstractCommand implements \CliTools\Console\Filter\AnyParameterFilterInterface {
 

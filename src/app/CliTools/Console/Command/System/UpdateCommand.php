@@ -21,8 +21,8 @@ namespace CliTools\Console\Command\System;
  */
 
 use CliTools\Service\SelfUpdateService;
-use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
-use CliTools\Console\Shell\CommandBuilder\SelfCommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\SelfCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -87,7 +87,7 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
                 $command = new CommandBuilder('git', 'pull');
                 $command->executeInteractive();
 
-                $command = new \CliTools\Console\Shell\CommandBuilder\SelfCommandBuilder();
+                $command = new \CliTools\Shell\CommandBuilder\SelfCommandBuilder();
                 $command->addArgument('user:rebuildsshconfig');
                 $command->executeInteractive();
             } catch (\RuntimeException $e) {

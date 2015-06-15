@@ -21,7 +21,7 @@ namespace CliTools\Console\Command\TYPO3;
  */
 
 use CliTools\Utility\Typo3Utility;
-use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

@@ -1,6 +1,6 @@
 <?php
 
-namespace CliTools\Console\Shell\CommandBuilder;
+namespace CliTools\Shell\CommandBuilder;
 
 /*
  * CliTools Command
@@ -20,22 +20,6 @@ namespace CliTools\Console\Shell\CommandBuilder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class EditorCommandBuilder extends CommandBuilder {
+class CommandBuilder extends AbstractCommandBuilder {
 
-    /**
-     * Initalized command
-     *
-     * @throws \RuntimeException
-     */
-    protected function initialize() {
-        parent::initialize();
-
-        $editorCmd = getenv('EDITOR');
-
-        if (empty($editorCmd)) {
-            throw new \RuntimeException('No $EDITOR environment variable set');
-        }
-
-        $this->parse($editorCmd);
-    }
 }

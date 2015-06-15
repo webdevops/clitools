@@ -1,6 +1,6 @@
 <?php
 
-namespace CliTools\Console\Shell\CommandBuilder;
+namespace CliTools\Shell\CommandBuilder;
 
 /*
  * CliTools Command
@@ -20,6 +20,6 @@ namespace CliTools\Console\Shell\CommandBuilder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class CommandBuilder extends AbstractCommandBuilder {
+class RemoteCommandBuilder extends CommandBuilder {
 
 }

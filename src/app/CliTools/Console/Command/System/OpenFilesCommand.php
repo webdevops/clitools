@@ -21,7 +21,7 @@ namespace CliTools\Console\Command\System;
  */
 
 use CliTools\Utility\FormatUtility;
-use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputInterface;

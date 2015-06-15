@@ -20,8 +20,8 @@ namespace CliTools\Console\Command\Vagrant;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
-use CliTools\Console\Shell\CommandBuilder\SelfCommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\SelfCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;

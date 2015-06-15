@@ -26,7 +26,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 
 class SniffCommand extends AbstractCommand {
 

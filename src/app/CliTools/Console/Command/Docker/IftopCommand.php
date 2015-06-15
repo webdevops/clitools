@@ -22,7 +22,7 @@ namespace CliTools\Console\Command\Docker;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 
 class IftopCommand extends \CliTools\Console\Command\AbstractCommand {
 

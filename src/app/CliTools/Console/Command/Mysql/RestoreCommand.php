@@ -25,7 +25,7 @@ use CliTools\Utility\PhpUtility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 
 class RestoreCommand extends AbstractCommand {
 

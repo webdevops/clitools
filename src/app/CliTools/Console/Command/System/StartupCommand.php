@@ -22,8 +22,8 @@ namespace CliTools\Console\Command\System;
 
 use CliTools\Utility\UnixUtility;
 use CliTools\Database\DatabaseConnection;
-use CliTools\Console\Shell\CommandBuilder\CommandBuilder;
-use CliTools\Console\Shell\CommandBuilder\SelfCommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\SelfCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
