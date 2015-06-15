@@ -9,10 +9,15 @@ SCRIPT_DIR=$(dirname $(readlink -f "$0"))
 
 OLD_PWD=`pwd`
 
+## copy configs
+cp "$SCRIPT_DIR/Documentation/Examples/clisync.yml"  "$SCRIPT_DIR/src/conf/"
+
+## run composer
 cd "$SCRIPT_DIR/src"
 composer install --no-dev
 composer dump-autoload --optimize --no-dev
 
+## create phar
 cd "$SCRIPT_DIR/"
 box.phar build -c box.json
 

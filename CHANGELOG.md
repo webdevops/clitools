@@ -18,7 +18,7 @@ CliTools Changelog
 - Added `vagrant:share` with automatic domain setting for TYPO3 projects (ALPHA! not finished!)
 - TTY banner now will be reloaded (SIGHUB is send to getty tty1)
 - Added docker detection for sync features
-- Updated to Symfony 2.7
+- Updated to Symfony 2.7.1
 - Refactored some classes
 - Fixed some issues
 - Added gzip compression for PHAR
