@@ -47,6 +47,7 @@ class ExecCommand extends AbstractCommand implements \CliTools\Console\Filter\An
         $paramList = $this->getFullParameterList();
         $container = $this->getApplication()->getConfigValue('docker', 'container');
 
+
         if (!empty($paramList)) {
             $firstParam = array_shift($paramList);
 

@@ -64,6 +64,9 @@ abstract class AbstractCommand extends Command {
         $this->output = $output;
 
         ConsoleUtility::initialize($input, $output);
+
+        // Set default terminal title
+        $this->setTerminalTitle(explode(':', $this->getName()));
     }
 
     /**

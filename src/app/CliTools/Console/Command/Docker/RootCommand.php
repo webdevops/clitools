@@ -56,6 +56,8 @@ class RootCommand extends AbstractCommand {
             $container = $input->getArgument('container');
         }
 
+        $this->setTerminalTitle('docker', 'root', $container);
+
         $command = new RemoteCommandBuilder('bash');
         $ret = $this->executeDockerExec($container, $command);
 

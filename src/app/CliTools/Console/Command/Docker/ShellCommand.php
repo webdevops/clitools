@@ -71,6 +71,8 @@ class ShellCommand extends AbstractCommand {
             $cliUser = $this->getDockerEnv($container, 'CLI_USER');
         }
 
+        $this->setTerminalTitle('docker', 'shell', $container);
+
         $command = new RemoteCommandBuilder('bash');
 
         if (!empty($cliUser)) {
