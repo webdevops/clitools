@@ -41,18 +41,6 @@ class SniffCommand extends AbstractCommand {
                 'protocol',
                 InputArgument::OPTIONAL,
                 'Protocol'
-            )
-            ->addOption(
-                'full',
-                null,
-                InputOption::VALUE_NONE,
-                'Show full output (if supported by protocol)'
-            )
-            ->addOption(
-                'filter',
-                null,
-                InputOption::VALUE_NONE,
-                'Additonal filter'
             );
     }
 
@@ -72,7 +60,6 @@ class SniffCommand extends AbstractCommand {
         $output->writeln('<h2>Starting network sniffing</h2>');
 
         $protocol   = $this->getProtocol();
-        $fullOutput = $input->getOption('full');
 
         $command = new CommandBuilder();
 
@@ -127,12 +114,16 @@ class SniffCommand extends AbstractCommand {
             case 'http':
                 $output->writeln('<p>Using protocol "http"</p>');
                 $command->setCommand('tshark');
+                $command->addArgumentRaw('tcp port 80 or tcp port 443 -2 -V -R "http.request" -Tfields -e ip.dst -e http.request.method -e http.request.full_uri');
+                break;
 
-                if ($fullOutput) {
-                    $command->addArgumentRaw('tcp port 80 or tcp port 443 -2 -V -R "http.request || http.response"');
-                } else {
-                    $command->addArgumentRaw('tcp port 80 or tcp port 443 -2 -V -R "http.request" -Tfields -e ip.dst -e http.request.method -e http.request.full_uri');
-                }
+            // ##############
+            // HTTP (full)
+            // ##############
+            case 'http-full':
+                $output->writeln('<p>Using protocol "http" (full mode)</p>');
+                $command->setCommand('tshark');
+                $command->addArgumentRaw('tcp port 80 or tcp port 443 -2 -V -R "http.request || http.response"');
                 break;
 
             // ##############
@@ -234,6 +225,8 @@ class SniffCommand extends AbstractCommand {
                 break;
         }
 
+        $this->setTerminalTitle('sniffer', $protocol, '(' .  $command->getCommand() .')');
+
         $command->executeInteractive();
 
         return 0;
@@ -250,7 +243,8 @@ class SniffCommand extends AbstractCommand {
 
         if(!$this->input->getArgument('protocol')) {
             $protocolList = array(
-                'http'          => 'HTTP',
+                'http'          => 'HTTP (requests only)',
+                'http-full'     => 'HTTP (full)',
                 'solr'          => 'Solr',
                 'elasticsearch' => 'Elasticsearch',
                 'memcache'      => 'Memcache',
