@@ -141,6 +141,10 @@ sync:
             # server and source directory (server host or name - see .ssh/config)
             path: "live-server:/var/www/website/htdocs"
 
+            #conf:
+            #    maxSize: 20M
+            #    minSize: 10kb
+
         mysql:
             username: typo3
             password: loremipsum
