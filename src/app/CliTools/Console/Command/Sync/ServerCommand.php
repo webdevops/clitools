@@ -120,18 +120,7 @@ class ServerCommand extends AbstractRemoteSyncCommand {
         $source = $this->getRsyncPathFromConfig();
         $target = $this->getRsyncWorkingPath();
 
-        $fileList = array();
-        if ($this->contextConfig->exists('rsync.directory')) {
-            $fileList = $this->contextConfig->get('rsync.directory');
-        }
-
-        $excludeList = array();
-        if ($this->contextConfig->exists('rsync.exclude')) {
-            $excludeList = $this->contextConfig->get('rsync.exclude');
-        }
-
-        $command = $this->createRsyncCommand($source, $target, $fileList, $excludeList);
-
+        $command = $this->createRsyncCommandWithConfiguration($source, $target, 'rsync');
         $command->executeInteractive();
     }
 

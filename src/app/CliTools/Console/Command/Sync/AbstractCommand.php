@@ -611,12 +611,68 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @param string     $source    Source directory
      * @param string     $target    Target directory
-     * @param array|null $filelist  List of files (patterns)
-     * @param array|null $exclude   List of excludes (patterns)
+     * @param string     $confKey   List of files (patterns)
      *
      * @return CommandBuilder
      */
-    protected function createRsyncCommand($source, $target, array $filelist = null, array $exclude = null) {
+    protected function createRsyncCommandWithConfiguration($source, $target, $confKey) {
+        $options = array();
+
+        // #############
+        // Filelist
+        // #############
+        $fileList = array();
+        if ($this->contextConfig->exists($confKey . '.directory')) {
+            $fileList = $this->contextConfig->get($confKey . '.directory');
+        }
+
+        // #############
+        // Excludes
+        // #############
+        $excludeList = array();
+        if ($this->contextConfig->exists($confKey . '.exclude')) {
+            $excludeList = $this->contextConfig->get($confKey . '.exclude');
+        }
+
+        // #############
+        // Max size
+        // #############
+        if ($this->contextConfig->exists($confKey . '.conf.maxSize')) {
+            $options['max-size'] = array(
+                'template' => '--max-size=%s',
+                'params' => array(
+                    $this->contextConfig->get($confKey . '.conf.maxSize')
+                ),
+            );
+        }
+
+        // #############
+        // Min size
+        // #############
+        if ($this->contextConfig->exists($confKey . '.conf.minSize')) {
+            $options['min-size'] = array(
+                'template' => '--min-size=%s',
+                'params' => array(
+                    $this->contextConfig->get($confKey . '.conf.minSize')
+                ),
+            );
+        }
+
+        return $this->createRsyncCommand($source, $target, $fileList, $excludeList, $options);
+    }
+
+    /**
+     * Create rsync command for sync
+     *
+     * @param string     $source    Source directory
+     * @param string     $target    Target directory
+     * @param array|null $filelist  List of files (patterns)
+     * @param array|null $exclude   List of excludes (patterns)
+     * @param array|null $options   Custom rsync options
+     *
+     * @return CommandBuilder
+     */
+    protected function createRsyncCommand($source, $target, array $filelist = null, array $exclude = null, array $options = null) {
         $this->output->writeln('<comment>Rsync from ' . $source . ' to ' . $target . '</comment>');
 
         $command = new CommandBuilder('rsync', '-rlptD --delete-after --progress --human-readable');
@@ -629,6 +685,17 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         // Add exclude (external file with --exclude-from option)
         if (!empty($exclude)) {
             $this->rsyncAddExcludeList($command, $exclude);
+        }
+
+        if (!empty($options)) {
+            foreach ($options as $optionValue) {
+                if (is_array($optionValue)) {
+                    $command->addArgumentTemplateList($optionValue['template'], $optionValue['params']);
+                } else {
+                    $command->addArgument($optionValue);
+                }
+
+            }
         }
 
         // Paths should have leading / to prevent sync issues
