@@ -23,6 +23,7 @@ CliTools is based on Symfony Components (Console).
 - [Usage `ct typo3:...` commands](/Documentation/USAGE-TYPO3.md)
 - [Usage `ct php:...` commands](/Documentation/USAGE-PHP.md)
 - [Command overview](/Documentation/COMMANDS.md)
+- [Shell aliases](/Documentation/ALIASES.md)
 
 ## Credits
 
