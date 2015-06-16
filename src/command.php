@@ -20,7 +20,7 @@
  */
 
 error_reporting(E_ALL);
-define('CLITOOLS_COMMAND_VERSION', '1.9.912');
+define('CLITOOLS_COMMAND_VERSION', '2.0.0');
 define('CLITOOLS_ROOT_FS', __DIR__);
 
 require __DIR__ . '/vendor/autoload.php';
