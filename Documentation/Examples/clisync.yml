@@ -219,12 +219,6 @@ share:
                 - "/uploads/"
                 - "/typo3conf/l10n/"
 
-            # directory exclude list/patterns
-            exclude:
-                - "/fileadmin/"
-                - "/uploads/"
-                - "/typo3conf/l10n/"
-
    ##################
    # Context "development"
    ##################
