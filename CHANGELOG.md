@@ -1,7 +1,7 @@
 CliTools Changelog
 ==================
 
-1.10.0 - Upcoming
+2.0.0 - 2015-06-16
 ------------------
 - Added GitHub based `self-update`
 - Added `make` (auto search for Makefile in tree)
@@ -22,6 +22,7 @@ CliTools Changelog
 - Refactored some classes
 - Fixed some issues
 - Added gzip compression for PHAR
+- SLOC: 5,999
 
 1.9.0 - 2015-05-06
 ------------------
@@ -34,6 +35,7 @@ CliTools Changelog
 - Refactored shell command execution (again)
 - Fixed code styling
 - Improved code and fixed some smaller bugs
+- SLOC: 4,038
 
 1.8.0 - 2015-04-26
 ------------------
@@ -49,36 +51,44 @@ CliTools Changelog
 - Implemented command check
 - Improved disk usage warning (wall and growl, will trigger when usage is >=90 in local and remote mounts)
 - Refactored shell command execution
+- SLOC: 3,562
 
 1.7.4 - 2015-04-21
 ------------------
 - Improved `docker:tshark`
+- SLOC: 2,787
 
 1.7.3 - 2015-04-21
 ------------------
 - Fixed `docker:tshark`
+- SLOC: 2,780
 
 1.7.2 - 2015-04-21
 ------------------
 - Added required php modules checks
 - Added interactive error return code check
+- SLOC: 2,777
 
 1.7.0 - 2015-04-19
 ------------------
 - Added `docker:tshark`, easy network sniffing
 - Added `php:trace --all`, for immediate tracing all php processes
 - Fixed bugs
+- SLOC: 2,755
 
 1.6.3 - 2015-04-16
 ------------------
 - Added `docker:tshark`, easy network sniffing
 - Added `php:trace --all`, for immediate tracing all php processes
 - Fixed bugs
+- SLOC: 2,832
 
 1.6.2 - 2015-04-15
 ------------------
 - Fixed bugs
+- SLOC: 2,811
 
 1.5.1 - 2015-03-29
 ------------------
 - Added growl support
+- SLOC: 2,773
