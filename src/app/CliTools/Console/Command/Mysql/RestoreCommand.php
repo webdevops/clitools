@@ -21,18 +21,22 @@ namespace CliTools\Console\Command\Mysql;
  */
 
 use CliTools\Database\DatabaseConnection;
+use CliTools\Utility\PhpUtility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 
-class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
+class RestoreCommand extends AbstractCommand {
 
     /**
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:restore')
+        parent::configure();
+
+        $this
+            ->setName('mysql:restore')
             ->setDescription('Restore database')
             ->addArgument(
                 'db',
@@ -59,45 +63,42 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
         $dumpFile = $input->getArgument('file');
 
         if (!is_file($dumpFile) || !is_readable($dumpFile)) {
-            $output->writeln('<error>File is not readable</error>');
+            $output->writeln('<p-error>File is not readable</p-error>');
 
             return 1;
         }
 
-        // Get mime type from file
-        $finfo        = finfo_open(FILEINFO_MIME_TYPE);
-        $dumpFileType = finfo_file($finfo, $dumpFile);
-        finfo_close($finfo);
+        $dumpFileType = PhpUtility::getMimeType($dumpFile);
 
-        if ($dumpFileType === 'application/octet-stream') {
-            $finfo        = finfo_open();
-            $dumpFileInfo = finfo_file($finfo, $dumpFile);
-            finfo_close($finfo);
-
-            if (strpos($dumpFileInfo, 'LZMA compressed data') !== false) {
-                $dumpFileType = 'application/x-lzma';
-            }
-        }
+        $output->writeln('<h2>Restoring dump "' . $dumpFile . '" into database "' . $database . '"</h2>');
 
         if (DatabaseConnection::databaseExists($database)) {
             // Dropping
-            $output->writeln('<comment>Dropping Database "' . $database . '"...</comment>');
+            $output->writeln('<p>Dropping database</p>');
             $query = 'DROP DATABASE IF EXISTS ' . DatabaseConnection::sanitizeSqlDatabase($database);
             DatabaseConnection::exec($query);
         }
 
         // Creating
-        $output->writeln('<comment>Creating Database "' . $database . '"...</comment>');
+        $output->writeln('<p>Creating database</p>');
         $query = 'CREATE DATABASE ' . DatabaseConnection::sanitizeSqlDatabase($database);
         DatabaseConnection::exec($query);
 
         // Inserting
-        $output->writeln('<comment>Restoring dump into Database "' . $database . '"...</comment>');
         putenv('USER=' . DatabaseConnection::getDbUsername());
         putenv('MYSQL_PWD=' . DatabaseConnection::getDbPassword());
 
 
         $commandMysql = new CommandBuilder('mysql','--user=%s %s --one-database', array(DatabaseConnection::getDbUsername(), $database));
+
+        // Set server connection details
+        if ($input->getOption('host')) {
+            $commandMysql->addArgumentTemplate('-h %s', $input->getOption('host'));
+        }
+
+        if ($input->getOption('port')) {
+            $commandMysql->addArgumentTemplate('-P %s', $input->getOption('port'));
+        }
 
         $commandFile = new CommandBuilder();
         $commandFile->addArgument($dumpFile);
@@ -105,27 +106,35 @@ class RestoreCommand extends \CliTools\Console\Command\AbstractCommand {
 
         switch ($dumpFileType) {
             case 'application/x-bzip2':
+                $output->writeln('<p>Using BZIP2 decompression</p>');
                 $commandFile->setCommand('bzcat');
                 break;
 
             case 'application/gzip':
+            case 'application/x-gzip':
+                $output->writeln('<p>Using GZIP decompression</p>');
                 $commandFile->setCommand('gzcat');
                 break;
 
             case 'application/x-lzma':
             case 'application/x-xz':
+            $output->writeln('<p>Using LZMA decompression</p>');
                 $commandFile->setCommand('xzcat');
                 break;
 
             default:
+                $output->writeln('<p>Using plaintext (no decompression)</p>');
                 $commandFile->setCommand('cat');
                 break;
         }
 
+        $output->writeln('<p>Reading dump</p>');
         $commandFile->executeInteractive();
 
-        $output->writeln('<info>Database "' . $database . '" restored</info>');
+        $output->writeln('<h2>Database "' . $database . '" restored</h2>');
 
         return 0;
     }
+
+
 }

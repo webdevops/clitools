@@ -21,7 +21,7 @@ namespace CliTools\Console\Command\System;
  */
 
 use CliTools\Utility\UnixUtility;
-use CliTools\Console\Builder\SelfCommandBuilder;
+use CliTools\Shell\CommandBuilder\SelfCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -38,7 +38,8 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
      * Configure command
      */
     protected function configure() {
-        $this->setName('system:crontask')
+        $this
+            ->setName('system:crontask')
             ->setDescription('System cron task');
     }
 
@@ -73,6 +74,8 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
 
         file_put_contents('/etc/issue', $outputIssue);
         file_put_contents('/etc/motd', $output);
+
+        UnixUtility::reloadTtyBanner('tty1');
     }
 
     /**

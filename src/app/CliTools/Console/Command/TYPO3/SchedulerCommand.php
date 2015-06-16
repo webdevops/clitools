@@ -21,7 +21,7 @@ namespace CliTools\Console\Command\TYPO3;
  */
 
 use CliTools\Utility\Typo3Utility;
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -32,13 +32,14 @@ class SchedulerCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('typo3:scheduler')
+        $this
+            ->setName('typo3:scheduler')
             ->setDescription('Run scheduler on all (or one specific) TYPO3 instances')
             ->addArgument(
                 'path',
                 InputArgument::OPTIONAL,
                 'Path to TYPO3 instance'
-            );
+);
     }
 
     /**

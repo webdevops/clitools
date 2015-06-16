@@ -1,6 +1,6 @@
 <?php
 
-namespace CliTools\Console\Builder;
+namespace CliTools\Shell\CommandBuilder;
 
 /*
  * CliTools Command
@@ -20,34 +20,22 @@ namespace CliTools\Console\Builder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class FullSelfCommandBuilder extends CommandBuilder {
-
+class EditorCommandBuilder extends CommandBuilder {
 
     /**
      * Initalized command
+     *
+     * @throws \RuntimeException
      */
     protected function initialize() {
         parent::initialize();
 
-        $arguments = $_SERVER['argv'];
+        $editorCmd = getenv('EDITOR');
 
-        if (\Phar::running()) {
-            // running as phar
-            $this->setCommand(array_shift($arguments));
-        } elseif (!empty($_SERVER['_'])) {
-            if ($_SERVER['argv'][0] !== $_SERVER['_']) {
-                $this->setCommand($_SERVER['_']);
-                $this->addArgument(array_shift($arguments));
-            }
+        if (empty($editorCmd)) {
+            throw new \RuntimeException('No $EDITOR environment variable set');
         }
 
-        // Fallback
-        if (!$this->getCommand()) {
-            $this->setCommand('php');
-            $this->addArgument($_SERVER['PHP_SELF']);
-        }
-
-        // All other arguments
-        $this->addArgumentList($arguments);
+        $this->parse($editorCmd);
     }
 }

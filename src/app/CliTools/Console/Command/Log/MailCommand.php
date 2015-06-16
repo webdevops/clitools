@@ -30,7 +30,8 @@ class MailCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('log:mail')
+        $this
+            ->setName('log:mail')
             ->setDescription('Show up mail log')
             ->addArgument(
                 'grep',
@@ -54,6 +55,7 @@ class MailCommand extends \CliTools\Console\Command\AbstractCommand {
             $grep = $input->getArgument('grep');
         }
 
+        $output->writeln('<h2>Starting mail log tail</h2>');
 
         // Show log
         $logList = array(

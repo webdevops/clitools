@@ -1,6 +1,6 @@
 <?php
 
-namespace CliTools\Console\Builder;
+namespace CliTools\Shell\CommandBuilder;
 
 /*
  * CliTools Command
@@ -28,9 +28,20 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     // Constants
     // ##########################################
 
+    /**
+     * Redirect STDOUT and STDERR to /dev/null (no output)
+     */
     const OUTPUT_REDIRECT_NULL       = ' &> /dev/null';
+
+    /**
+     * Redirect STDERR to STDOUT
+     */
     const OUTPUT_REDIRECT_ALL_STDOUT = ' 2>&1';
-    const OUTPUT_REDIRECT_NO_STDERR = ' 2> /dev/null';
+
+    /**
+     * Redirect STDERR to /dev/null (no error output)
+     */
+    const OUTPUT_REDIRECT_NO_STDERR  = ' 2> /dev/null';
 
     // ##########################################
     // Attributs
@@ -55,7 +66,7 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      *
      * @var null|string
      */
-    protected $outputRedirect = null;
+    protected $outputRedirect;
 
     /**
      * Command pipe
@@ -174,7 +185,8 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      * @return $this
      */
     public function setArgumentList(array $args) {
-        $this->argumentList = $args;
+        $this->clearArguments();
+        $this->appendArgumentsToList($args);
         return $this;
     }
 
@@ -209,10 +221,10 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     }
 
     /**
-     * Set argument with template
+     * Add argument with template
      *
-     * @param string $arg     Argument sprintf
-     * @param string $params  Argument parameters
+     * @param string $arg        Argument sprintf
+     * @param string $params...  Argument parameters
      *
      * @return $this
      */
@@ -224,6 +236,22 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     }
 
     /**
+     * Add argument with template multiple times
+     *
+     * @param string $arg     Argument sprintf
+     * @param array  $paramList  Argument parameters
+     *
+     * @return $this
+     */
+    public function addArgumentTemplateMultiple($arg, $paramList) {
+        foreach ($paramList as $param) {
+            $this->addArgumentTemplate($arg, $param);
+        }
+
+        return $this;
+    }
+
+    /**
      * Set argument with template
      *
      * @param string $arg     Argument sprintf
@@ -232,6 +260,8 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      * @return $this
      */
     public function addArgumentTemplateList($arg, array $params) {
+        $this->validateArgumentValue($arg);
+
         $params = array_map('escapeshellarg', $params);
         $this->argumentList[] = vsprintf($arg, $params);
         return $this;
@@ -245,12 +275,45 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      * @return $this
      */
     public function addArgumentList(array $arg, $escape = true) {
+        $this->appendArgumentsToList($arg, $escape);
+        return $this;
+    }
+
+    /**
+     * Append one argument to list
+     *
+     * @param array   $arg    Arguments
+     * @param boolean $escape Enable argument escaping
+     *
+     * @return $this
+     */
+    protected function appendArgumentToList($arg, $escape = true) {
+        $this->validateArgumentValue($arg);
+
         if ($escape) {
-            $arg = array_map('escapeshellarg', $arg);
+            $arg = escapeshellarg($arg);
         }
 
-        $this->argumentList = array_merge($this->argumentList, $arg);
-        return $this;
+        $this->argumentList[] = $arg;
+    }
+
+    /**
+     * Append multiple arguments to list
+     *
+     * @param array   $args    Arguments
+     * @param boolean $escape Enable argument escaping
+     *
+     * @return $this
+     */
+    protected function appendArgumentsToList($args, $escape = true) {
+        // Validate each argument value
+        array_walk($args, array($this, 'validateArgumentValue'));
+
+        if ($escape) {
+            $args = array_map('escapeshellarg', $args);
+        }
+
+        $this->argumentList = array_merge($this->argumentList, $args);
     }
 
     /**
@@ -295,6 +358,16 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     }
 
     /**
+     * Clear output redirect
+     *
+     * @return $this
+     */
+    public function clearOutputRedirect() {
+        $this->outputRedirect = null;
+        return $this;
+    }
+
+    /**
      * Parse command and attributs from exec line
      *
      * WARNING: Not safe!
@@ -303,10 +376,20 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      * @return $this
      */
     public function parse($str) {
-        list($command, $attributs) = explode(' ', $str, 2);
+        $parsedCmd = explode(' ', $str, 2);
 
-        $this->setCommand($command);
-        $this->setArgumentList(array($attributs), false);
+        // Check required command
+        if (empty($parsedCmd[0])) {
+            throw new \RuntimeException('Command is empty');
+        }
+
+        // Set command (first value)
+        $this->setCommand($parsedCmd[0]);
+
+        // Set arguments (second values)
+        if (!empty($parsedCmd[1])) {
+            $this->addArgumentRaw($parsedCmd[1]);
+        }
         return $this;
     }
 
@@ -378,6 +461,15 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
         return $this;
     }
 
+    /**
+     * Clear pipe list
+     *
+     * @return $this
+     */
+    public function clearPipes() {
+        $this->pipeList = array();
+        return $this;
+    }
 
     /**
      * Add pipe command
@@ -400,7 +492,7 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
         $ret = array();
 
         if (!$this->isExecuteable()) {
-            throw new \RuntimeException('Command "' . $this->getCommand() . '" is not executable or available');
+            throw new \RuntimeException('Command "' . $this->getCommand() . '" is not executable or available, please install it');
         }
 
         // Add command
@@ -460,10 +552,23 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     /**
      * Execute command
      *
+     * @param array $opts Option array
      * @return Executor
      */
-    public function executeInteractive() {
-        return $this->getExecutor()->execInteractive();
+    public function executeInteractive(array $opts = null) {
+        return $this->getExecutor()->execInteractive($opts);
+    }
+
+    /**
+     * Validate argument value
+     *
+     * @param mixed $value Value
+     * @throws \RuntimeException
+     */
+    protected function validateArgumentValue($value) {
+        if (strlen($value) === 0) {
+            throw new \RuntimeException('Argument value cannot be empty');
+        }
     }
 
     // ##########################################

@@ -29,7 +29,8 @@ class RebuildSshConfigCommand extends \CliTools\Console\Command\AbstractCommand 
      * Configure command
      */
     protected function configure() {
-        $this->setName('user:rebuildsshconfig')
+        $this
+            ->setName('user:rebuildsshconfig')
             ->setDescription('Rebuild SSH Config for current user');
     }
 
@@ -45,7 +46,7 @@ class RebuildSshConfigCommand extends \CliTools\Console\Command\AbstractCommand 
         $userHome = getenv('HOME');
         $userName = getenv('USER');
 
-        $output->writeln('<info>Rebuilding ~/.ssh/config ...</info>');
+        $output->writeln('<h2>Rebuilding ~/.ssh/config ...</h2>');
 
         $targetConfFile = $userHome . '/.ssh/config';
         $userConfFile   = $userHome . '/.ssh/config.user';
@@ -77,13 +78,13 @@ class RebuildSshConfigCommand extends \CliTools\Console\Command\AbstractCommand 
             $confContent[] = '# from: ' . $defaultUserFile;
             $confContent[] = file_get_contents($defaultUserFile);
 
-            $output->writeln('<comment>Using user defaults from ' . $defaultUserFile . '</comment>');
+            $output->writeln('<p>Using user defaults from ' . $defaultUserFile . '</p>');
         } elseif (file_exists($defaultFile)) {
             // System default
             $confContent[] = '# from: ' . $defaultFile;
             $confContent[] = file_get_contents($defaultFile);
 
-            $output->writeln('<comment>Using system defaults from ' . $defaultFile . '</comment>');
+            $output->writeln('<p>Using system defaults from ' . $defaultFile . '</p>');
         } else {
             // No default found, provide at least good defaults
             $confContent[] = '# from: no config';
@@ -95,7 +96,7 @@ class RebuildSshConfigCommand extends \CliTools\Console\Command\AbstractCommand 
             $confContent[] = '    ServerAliveInterval     60';
             $confContent[] = '    ForwardAgent            no';
 
-            $output->writeln('<comment>No defaults found, setting internal defaults</comment>');
+            $output->writeln('<p>No defaults found, setting internal defaults</p>');
         }
         $confContent[] = '';
 
@@ -131,7 +132,7 @@ class RebuildSshConfigCommand extends \CliTools\Console\Command\AbstractCommand 
                 $confContent[] = file_get_contents($filePath);
                 $confContent[] = '';
 
-                $output->writeln('<comment>Using ' . $filePath . '</comment>');
+                $output->writeln('<p>Using ' . $filePath . '</p>');
             }
         }
 
@@ -146,7 +147,7 @@ class RebuildSshConfigCommand extends \CliTools\Console\Command\AbstractCommand 
         if (file_exists($userConfFile)) {
             $confContent[] = file_get_contents($userConfFile);
 
-            $output->writeln('<comment>Using ' . $userConfFile . '</comment>');
+            $output->writeln('<p>Using ' . $userConfFile . '</p>');
         }
         $confContent[] = '';
 
@@ -166,7 +167,7 @@ class RebuildSshConfigCommand extends \CliTools\Console\Command\AbstractCommand 
         // Write file
         file_put_contents($targetConfFile, $confContent);
 
-        $output->writeln('<info>Finished rebuilding ssh configuration</info>');
+        $output->writeln('<h2>Finished rebuilding ssh configuration</h2>');
 
         return 0;
     }

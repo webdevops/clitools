@@ -24,10 +24,17 @@ use CliTools\Utility\ConsoleUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\FullSelfCommandBuilder;
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\FullSelfCommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 
 abstract class AbstractCommand extends Command {
+
+    /**
+     * Message list (will be shown at the end)
+     *
+     * @var array
+     */
+    protected $finishMessageList = array();
 
     /**
      * Input
@@ -57,7 +64,43 @@ abstract class AbstractCommand extends Command {
         $this->output = $output;
 
         ConsoleUtility::initialize($input, $output);
+
+        // Set default terminal title
+        $this->setTerminalTitle(explode(':', $this->getName()));
     }
+
+    /**
+     * Runs the command.
+     *
+     * The code to execute is either defined directly with the
+     * setCode() method or by overriding the execute() method
+     * in a sub-class.
+     *
+     * @param InputInterface  $input  An InputInterface instance
+     * @param OutputInterface $output An OutputInterface instance
+     *
+     * @return int The command exit code
+     *
+     * @throws \Exception
+     *
+     * @see setCode()
+     * @see execute()
+     *
+     * @api
+     */
+    public function run(InputInterface $input, OutputInterface $output) {
+
+        try {
+            $ret = parent::run($input, $output);
+            $this->showFinishMessages();
+        } catch (\Exception $e) {
+            $this->showFinishMessages();
+            throw $e;
+        }
+
+        return $ret;
+    }
+
 
     /**
      * Get full parameter list
@@ -99,7 +142,7 @@ abstract class AbstractCommand extends Command {
             } catch (\Exception $e) {
                 // do not display exception here because it's a child process
             }
-            exit(0);
+            throw new \CliTools\Exception\StopException(0);
         } else {
             // running as root
         }
@@ -123,11 +166,13 @@ abstract class AbstractCommand extends Command {
         // check if logfiles are accessable
         foreach ($logList as $log) {
             if (!is_readable($log)) {
-                $output->writeln('<error>Can\'t read ' . $log . '</error>');
+                $output->writeln('<p-error>Can\'t read ' . $log . '</p-error>');
 
                 return 1;
             }
         }
+
+        $output->writeln('<p>Reading logfile with multitail</p>');
 
         $command = new CommandBuilder('multitail', '--follow-all');
 
@@ -141,5 +186,74 @@ abstract class AbstractCommand extends Command {
         $command->executeInteractive();
 
         return 0;
+    }
+
+    /**
+     * Add message to finish list
+     *
+     * @param string $message Message
+     */
+    protected function addFinishMessage($message) {
+        $this->output->writeln($message);
+        $this->finishMessageList[] = $message;
+    }
+
+    /**
+     * Show all finish messages
+     */
+    protected function showFinishMessages() {
+
+        if (!empty($this->finishMessageList)) {
+            $this->output->writeln('');
+            $this->output->writeln('Replay finish message log:');
+
+            foreach ($this->finishMessageList as $message) {
+                $this->output->writeln('  - ' . $message);
+            }
+        }
+
+        $this->finishMessageList = array();
+    }
+
+    /**
+     * Gets the application instance for this command.
+     *
+     * @return \CliTools\Console\Application An Application instance
+     *
+     * @api
+     */
+    public function getApplication() {
+        return parent::getApplication();
+    }
+
+    /**
+     * Sets the terminal title of the command.
+     *
+     * This feature should be used only when creating a long process command,
+     * like a daemon.
+     *
+     * PHP 5.5+ or the proctitle PECL library is required
+     *
+     * @param string $title The terminal title
+     *
+     * @return Command The current instance
+     */
+    public function setTerminalTitle($title) {
+        $args = func_get_args();
+
+        $titleList = array();
+        foreach($args as $value) {
+            if (is_array($value)) {
+               $value = implode(' ', $value);
+            }
+
+            $titleList[] = trim($value);
+        }
+
+        $title = implode(' ', $titleList);
+        $title = trim($title);
+
+        $this->getApplication()->setTerminalTitle($title);
+        return $this;
     }
 }

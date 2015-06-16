@@ -1,4 +1,7 @@
 <?php
+
+namespace CliTools\Shell\CommandBuilder;
+
 /*
  * CliTools Command
  * Copyright (C) 2015 Markus Blaschke <markus@familie-blaschke.net>
@@ -17,14 +20,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-error_reporting(E_ALL);
+class CommandBuilder extends AbstractCommandBuilder {
 
-// ####################################
-// Autoload
-// ####################################
-
-$loader = new Symfony\Component\ClassLoader\UniversalClassLoader();
-$loader->registerNamespaces(array(
-        'CliTools' => __DIR__
-    ));
-$loader->register();
+}

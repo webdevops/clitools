@@ -23,7 +23,7 @@ namespace CliTools\Console\Command\Docker;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\RemoteCommandBuilder;
+use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
 
 class RootCommand extends AbstractCommand {
 
@@ -31,7 +31,8 @@ class RootCommand extends AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:root')
+        $this
+            ->setName('docker:root')
             ->setDescription('Enter shell as root in docker container')
             ->addArgument(
                 'container',
@@ -54,6 +55,8 @@ class RootCommand extends AbstractCommand {
         if ($input->getArgument('container')) {
             $container = $input->getArgument('container');
         }
+
+        $this->setTerminalTitle('docker', 'root', $container);
 
         $command = new RemoteCommandBuilder('bash');
         $ret = $this->executeDockerExec($container, $command);

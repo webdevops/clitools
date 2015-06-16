@@ -22,15 +22,16 @@ namespace CliTools\Console\Command\Mysql;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 
-class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
+class RestartCommand extends AbstractCommand {
 
     /**
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:restart')
+        $this
+            ->setName('mysql:restart')
             ->setDescription('Restart MySQL');
     }
 

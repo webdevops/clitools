@@ -22,7 +22,7 @@ namespace CliTools\Console\Command\Docker;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\RemoteCommandBuilder;
+use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
 
 class MysqlCommand extends AbstractCommand {
 
@@ -30,7 +30,8 @@ class MysqlCommand extends AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:mysql')
+        $this
+            ->setName('docker:mysql')
             ->setDescription('Enter mysql in docker container');
     }
 

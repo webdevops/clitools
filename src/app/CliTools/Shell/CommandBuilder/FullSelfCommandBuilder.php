@@ -1,6 +1,6 @@
 <?php
 
-namespace CliTools\Console\Builder;
+namespace CliTools\Shell\CommandBuilder;
 
 /*
  * CliTools Command
@@ -20,7 +20,7 @@ namespace CliTools\Console\Builder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class SelfCommandBuilder extends CommandBuilder {
+class FullSelfCommandBuilder extends CommandBuilder {
 
 
     /**
@@ -37,7 +37,7 @@ class SelfCommandBuilder extends CommandBuilder {
         } elseif (!empty($_SERVER['_'])) {
             if ($_SERVER['argv'][0] !== $_SERVER['_']) {
                 $this->setCommand($_SERVER['_']);
-                $this->addArgument(reset($arguments));
+                $this->addArgument(array_shift($arguments));
             }
         }
 
@@ -46,5 +46,8 @@ class SelfCommandBuilder extends CommandBuilder {
             $this->setCommand('php');
             $this->addArgument($_SERVER['PHP_SELF']);
         }
+
+        // All other arguments
+        $this->addArgumentList($arguments);
     }
 }

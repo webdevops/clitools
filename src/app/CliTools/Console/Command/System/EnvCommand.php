@@ -30,7 +30,8 @@ class EnvCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('system:env')
+        $this
+            ->setName('system:env')
             ->setDescription('List environment variables');
     }
 

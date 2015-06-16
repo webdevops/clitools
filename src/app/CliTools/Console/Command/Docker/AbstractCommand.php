@@ -20,8 +20,8 @@ namespace CliTools\Console\Command\Docker;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Builder\CommandBuilderInterface;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilderInterface;
 use CliTools\Utility\PhpUtility;
 
 abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand {
@@ -40,8 +40,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function getDockerPath() {
         if ($this->dockerPath === null) {
-            $this->dockerPath = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
-            $this->output->writeln('<comment>Found docker directory: ' . $this->dockerPath . '</comment>');
+            $composePath = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
+
+            if (!empty($composePath)) {
+                $this->dockerPath = dirname($composePath);
+                $this->output->writeln('<comment>Found docker directory: ' . $this->dockerPath . '</comment>');
+            }
         }
 
         return $this->dockerPath;
@@ -59,22 +63,26 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $ret = null;
 
         if (empty($containerName)) {
-            $this->output->writeln('<error>No container specified</error>');
+            $this->output->writeln('<p-error>No container specified</p-error>');
             return false;
         }
 
         if (empty($envName)) {
-            $this->output->writeln('<error>No environment name specified</error>');
+            $this->output->writeln('<p-error>No environment name specified</p-error>');
             return false;
         }
 
+        // Search updir for docker-compose.yml
         $path = $this->getDockerPath();
 
         if (!empty($path)) {
+            // Genrate full docker container name
             $dockerContainerName = \CliTools\Utility\DockerUtility::getDockerInstanceName($containerName, 1, $path);
 
+            // Switch to directory of docker-compose.yml
             PhpUtility::chdir($path);
 
+            // Get docker confguration (fetched directly from docker)
             $conf = \CliTools\Utility\DockerUtility::getDockerConfiguration($dockerContainerName);
 
             if (empty($conf)) {
@@ -99,20 +107,23 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function executeDockerExec($containerName, CommandBuilderInterface $command) {
         if (empty($containerName)) {
-            $this->output->writeln('<error>No container specified</error>');
+            $this->output->writeln('<p-error>No container specified</p-error>');
             return 1;
         }
 
         if (!$command->isExecuteable()) {
-            $this->output->writeln('<error>No command specified or not executeable</error>');
+            $this->output->writeln('<p-error>No command specified or not executeable</p-error>');
             return 1;
         }
 
+        // Search updir for docker-compose.yml
         $path = $this->getDockerPath();
 
         if (!empty($path)) {
+            // Genrate full docker container name
             $dockerContainerName = \CliTools\Utility\DockerUtility::getDockerInstanceName($containerName, 1, $path);
 
+            // Switch to directory of docker-compose.yml
             PhpUtility::chdir($path);
 
             $this->output->writeln('<info>Executing "' . $command->getCommand() . '" in docker container "' . $dockerContainerName . '" ...</info>');
@@ -121,7 +132,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $dockerCommand->append($command, false);
             $dockerCommand->executeInteractive();
         } else {
-            $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
+            $this->output->writeln('<p-error>No docker-compose.yml found in tree</p-error>');
 
             return 1;
         }
@@ -137,16 +148,20 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @return int|null|void
      */
     protected function executeDockerCompose(CommandBuilderInterface $command = null) {
+        // Search updir for docker-compose.yml
         $path = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
 
         if (!empty($path)) {
+            $path = dirname($path);
             $this->output->writeln('<comment>Found docker directory: ' . $path . '</comment>');
+
+            // Switch to directory of docker-compose.yml
             PhpUtility::chdir($path);
 
             $command->setCommand('docker-compose');
             $command->executeInteractive();
         } else {
-            $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
+            $this->output->writeln('<p-error>No docker-compose.yml found in tree</p-error>');
 
             return 1;
         }
@@ -163,9 +178,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @return int|null|void
      */
     protected function executeDockerComposeRun($containerName, CommandBuilderInterface $command) {
+        // Search updir for docker-compose.yml
         $path = $this->getDockerPath();
 
         if (!empty($path)) {
+            // Switch to directory of docker-compose.yml
             PhpUtility::chdir($path);
 
             $this->output->writeln('<info>Executing "' . $command->getCommand() . '" in docker container "' . $containerName . '" ...</info>');
@@ -174,7 +191,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $dockerCommand->append($command, false);
             $dockerCommand->executeInteractive();
         } else {
-            $this->output->writeln('<error>No docker-compose.yml found in tree</error>');
+            $this->output->writeln('<p-error>No docker-compose.yml found in tree</p-error>');
 
             return 1;
         }

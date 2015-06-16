@@ -77,6 +77,15 @@ class DatabaseConnection {
     }
 
     /**
+     * Get Db DSN
+     *
+     * @return string
+     */
+    public static function getDsn() {
+        return self::$dbDsn;
+    }
+
+    /**
      * Get Db Username
      *
      * @return string
@@ -93,6 +102,25 @@ class DatabaseConnection {
     public static function getDbPassword() {
         return self::$dbPassword;
     }
+
+    /**
+     * Get Db Hostname
+     *
+     * @return string
+     */
+    public static function getDbHostname() {
+        return self::parseDsnValue('host');
+    }
+
+    /**
+     * Get Db Port
+     *
+     * @return string
+     */
+    public static function getDbPort() {
+        return self::parseDsnValue('port');
+    }
+
 
     /**
      * Get connection
@@ -121,6 +149,24 @@ class DatabaseConnection {
         return self::$connection;
     }
 
+
+    /**
+     * Ping server
+     *
+     * @return bool
+     */
+    public static function ping() {
+        ConsoleUtility::verboseWriteln('DB::PING', null);
+        try {
+            self::getConnection()->query('SELECT 1');
+        } catch (\PDOException $e) {
+            ConsoleUtility::verboseWriteln('DB::QUERY::EXCEPTION', $e);
+            throw $e;
+        }
+
+        return true;
+    }
+
     /**
      * Execute SELECT query
      *
@@ -143,6 +189,17 @@ class DatabaseConnection {
     }
 
     /**
+     * Switch database
+     *
+     * @param  string $database Database
+     *
+     * @throws \PDOException
+     */
+    public static function switchDatabase($database) {
+        self::exec('USE ' . self::sanitizeSqlDatabase($database));
+    }
+
+    /**
      * Execute INSERT/DELETE/UPDATE query
      *
      * @param  string $query SQL query
@@ -161,6 +218,29 @@ class DatabaseConnection {
         }
 
         return $ret;
+    }
+
+
+    /**
+     * Generate and execute INSERT query
+     *
+     * @param  string $table  Table name
+     * @param  array  $values Values
+     *
+     * @return int
+     * @throws \PDOException
+     */
+    public static function insert($table, $values) {
+        $fieldList = array_keys($values);
+
+        $valueList = array();
+        foreach ($values as $value) {
+            $valueList[] = self::quote($value);
+        }
+
+        $query = 'INSERT INTO %s (%s) VALUES (%s)';
+        $query = sprintf($query, $table, implode(',',$fieldList), implode(',',$valueList));
+        self::exec($query);
     }
 
     /**
@@ -359,6 +439,22 @@ class DatabaseConnection {
     }
 
     /**
+     * Return list of databases
+     *
+     * @return array
+     */
+    public static function databaseList() {
+        // Get list of databases
+        $query = 'SELECT SCHEMA_NAME FROM information_schema.SCHEMATA';
+        $ret   = DatabaseConnection::getCol($query);
+
+        // Filter mysql specific databases
+        $ret = array_diff($ret, array('mysql', 'information_schema', 'performance_schema'));
+
+        return $ret;
+    }
+
+    /**
      * Return list of tables of one database
      *
      * @param string $database Database name
@@ -368,6 +464,22 @@ class DatabaseConnection {
         $query = 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s';
         $query = sprintf($query, self::quote($database));
         $ret   = self::getCol($query);
+
+        return $ret;
+    }
+
+
+    /**
+     * Check if table exists in database
+     *
+     * @param string $database Database name
+     * @param string $table    Table name
+     * @return boolean
+     */
+    public static function tableExists($database, $table) {
+        $query = 'SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s';
+        $query = sprintf($query, self::quote($database), self::quote($table) );
+        $ret   = (bool)self::getOne($query);
 
         return $ret;
     }
@@ -487,7 +599,7 @@ class DatabaseConnection {
      * @return string
      */
     public static function sanitizeSqlTable($table) {
-        return preg_replace('/[^_a-zA-Z0-9]/', '', $table);
+        return '`' . preg_replace('/[^_a-zA-Z0-9]/', '', $table) . '`';
     }
 
     /**
@@ -498,6 +610,24 @@ class DatabaseConnection {
      * @return string
      */
     public static function sanitizeSqlDatabase($database) {
-        return preg_replace('/[^_a-zA-Z0-9]/', '', $database);
+        return '`' . preg_replace('/[^_a-zA-Z0-9]/', '', $database) . '`';
+    }
+
+    /**
+     * Parse DSN and return value
+     *
+     * @param string      $key     DSN Key
+     * @param string|null $default Default value
+     * @return string|null
+     */
+    protected static function parseDsnValue($key, $default = NULL) {
+        $ret = $default;
+
+        $pattern = sprintf('~%s=([^;]*)(?:;|$)~', preg_quote($key, '~'));
+        if (preg_match($pattern, self::$dbDsn, $matches)) {
+            $ret = $matches[1];
+        }
+
+        return $ret;
     }
 }

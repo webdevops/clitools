@@ -32,7 +32,8 @@ class InstallerCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('typo3:installer')
+        $this
+            ->setName('typo3:installer')
             ->setDescription('Enable installer on all (or one specific) TYPO3 instances')
             ->addArgument(
                 'path',

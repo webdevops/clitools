@@ -20,9 +20,10 @@ namespace CliTools\Console\Command\System;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Utility\UnixUtility;
 use CliTools\Database\DatabaseConnection;
-use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Builder\SelfCommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\SelfCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -32,7 +33,8 @@ class StartupCommand extends \CliTools\Console\Command\AbstractCommand implement
      * Configure command
      */
     protected function configure() {
-        $this->setName('system:startup')
+        $this
+            ->setName('system:startup')
             ->setDescription('System startup task');
     }
 
@@ -64,6 +66,8 @@ class StartupCommand extends \CliTools\Console\Command\AbstractCommand implement
 
         file_put_contents('/etc/issue', $outputIssue);
         file_put_contents('/etc/motd', $output);
+
+        UnixUtility::reloadTtyBanner('tty1');
     }
 
     /**

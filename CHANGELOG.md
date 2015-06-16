@@ -1,6 +1,29 @@
 CliTools Changelog
 ==================
 
+2.0.0 - 2015-06-16
+------------------
+- Added GitHub based `self-update`
+- Added `make` (auto search for Makefile in tree)
+- Added `php:composer` (auto search for composer.json in tree)
+- Added `mysql:convert` for automatic changing charset and collation of one database
+- Added `sync:server` for syncing any configured server to your local development system (reads clisync.yml or .clisync.yml)
+- Added `sync:backup` for backup to a shared server (reads clisync.yml or .clisync.yml)
+- Added `sync:restore` for restore from a shared server (reads clisync.yml or .clisync.yml)
+- Added `sync:deploy` for lightweight deployment to a foreign server (reads clisync.yml or .clisync.yml)
+- Added `typo3:domain --list` for only list the domains of one or all databases
+- Added `typo3:domain --remove=domain/pattern` for domain cleanup (eg. vagrant share)
+- Added `typo3:domain --duplication=suffix` for domain duplication
+- Added `typo3:domain --baseurl` for setting config.baseURL in SetupTS
+- Added `vagrant:share` with automatic domain setting for TYPO3 projects (ALPHA! not finished!)
+- TTY banner now will be reloaded (SIGHUB is send to getty tty1)
+- Added docker detection for sync features
+- Updated to Symfony 2.7.1
+- Refactored some classes
+- Fixed some issues
+- Added gzip compression for PHAR
+- SLOC: 5,999
+
 1.9.0 - 2015-05-06
 ------------------
 - Added `mysql:backup` (with --filter=typo3, support for plain sql, gzip, bzip2, lzma compression)
@@ -12,6 +35,7 @@ CliTools Changelog
 - Refactored shell command execution (again)
 - Fixed code styling
 - Improved code and fixed some smaller bugs
+- SLOC: 4,038
 
 1.8.0 - 2015-04-26
 ------------------
@@ -27,36 +51,44 @@ CliTools Changelog
 - Implemented command check
 - Improved disk usage warning (wall and growl, will trigger when usage is >=90 in local and remote mounts)
 - Refactored shell command execution
+- SLOC: 3,562
 
 1.7.4 - 2015-04-21
 ------------------
 - Improved `docker:tshark`
+- SLOC: 2,787
 
 1.7.3 - 2015-04-21
 ------------------
 - Fixed `docker:tshark`
+- SLOC: 2,780
 
 1.7.2 - 2015-04-21
 ------------------
 - Added required php modules checks
 - Added interactive error return code check
+- SLOC: 2,777
 
 1.7.0 - 2015-04-19
 ------------------
 - Added `docker:tshark`, easy network sniffing
 - Added `php:trace --all`, for immediate tracing all php processes
 - Fixed bugs
+- SLOC: 2,755
 
 1.6.3 - 2015-04-16
 ------------------
 - Added `docker:tshark`, easy network sniffing
 - Added `php:trace --all`, for immediate tracing all php processes
 - Fixed bugs
+- SLOC: 2,832
 
 1.6.2 - 2015-04-15
 ------------------
 - Fixed bugs
+- SLOC: 2,811
 
 1.5.1 - 2015-03-29
 ------------------
 - Added growl support
+- SLOC: 2,773

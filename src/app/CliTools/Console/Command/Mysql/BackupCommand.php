@@ -21,31 +21,36 @@ namespace CliTools\Console\Command\Mysql;
  */
 
 use CliTools\Database\DatabaseConnection;
-use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Builder\CommandBuilderInterface;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilderInterface;
+use CliTools\Utility\FilterUtility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
+class BackupCommand extends AbstractCommand {
 
     /**
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:backup')
-             ->setDescription('Backup database')
-             ->addArgument(
+        parent::configure();
+
+        $this
+            ->setName('mysql:backup')
+            ->setDescription('Backup database')
+            ->addArgument(
                  'db',
                  InputArgument::REQUIRED,
                  'Database name'
-             )
-             ->addArgument(
+            )
+            ->addArgument(
                  'file',
                  InputArgument::REQUIRED,
                  'File (mysql dump)'
-             )->addOption(
+            )
+            ->addOption(
                 'filter',
                 'f',
                 InputOption::VALUE_REQUIRED,
@@ -67,10 +72,12 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
         $filter   = $input->getOption('filter');
 
         if (!DatabaseConnection::databaseExists($database)) {
-            $output->writeln('<error>Database "' . $database . '" does not exists</error>');
+            $output->writeln('<p-error>Database "' . $database . '" does not exists</p-error>');
 
             return 1;
         }
+
+        $output->writeln('<h2>Dumping database "' . $database . '" into file "' . $dumpFile . '"</h2>');
 
         $fileExt = pathinfo($dumpFile, PATHINFO_EXTENSION);
 
@@ -82,20 +89,22 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
 
         switch ($fileExt) {
             case 'bz':
+            case 'bz2':
             case 'bzip2':
-                $output->writeln('<comment>Using BZIP2 compression</comment>');
+                $output->writeln('<p>Using BZIP2 compression</p>');
                 $commandCompressor = new CommandBuilder('bzip2');
                 break;
 
             case 'gz':
             case 'gzip':
-                $output->writeln('<comment>Using GZIP compression</comment>');
+                $output->writeln('<p>Using GZIP compression</p>');
                 $commandCompressor = new CommandBuilder('gzip');
                 break;
 
             case 'lzma':
+            case 'lz':
             case 'xz':
-                $output->writeln('<comment>Using LZMA compression</comment>');
+                $output->writeln('<p>Using LZMA compression</p>');
                 $commandCompressor = new CommandBuilder('xz');
                 $commandCompressor->addArgument('--compress')
                     ->addArgument('--stdout');
@@ -103,6 +112,15 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
         }
 
         $command = new CommandBuilder('mysqldump','--user=%s %s --single-transaction', array(DatabaseConnection::getDbUsername(), $database));
+
+        // Set server connection details
+        if ($input->getOption('host')) {
+            $command->addArgumentTemplate('-h %s', $input->getOption('host'));
+        }
+
+        if ($input->getOption('port')) {
+            $command->addArgumentTemplate('-P %s', $input->getOption('port'));
+        }
 
         if (!empty($filter)) {
             $command = $this->addFilterArguments($command, $database, $filter);
@@ -112,13 +130,13 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
             $command->addPipeCommand($commandCompressor);
             $commandCompressor->setOutputRedirectToFile($dumpFile);
         } else {
-            $output->writeln('<comment>Using no compression</comment>');
+            $output->writeln('<p>Using no compression</p>');
             $command->setOutputRedirectToFile($dumpFile);
         }
 
         $command->executeInteractive();
 
-        $output->writeln('<info>Database "' . $database . '" stored to "' . $dumpFile . '"</info>');
+        $output->writeln('<h2>Database "' . $database . '" stored to "' . $dumpFile . '"</h2>');
     }
 
     /**
@@ -140,18 +158,11 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
             throw new \RuntimeException('MySQL dump filters "' . $filter . '" not available"');
         }
 
-        // Get filtered tables
-        $tableList = DatabaseConnection::tableList($database);
+        $this->output->writeln('<comment>Using filter "' . $filter . '"</comment>');
 
-        $tableListFiltered = array();
-        foreach ($tableList as $table) {
-            foreach ($filterList as $filter) {
-                if (preg_match($filter, $table)) {
-                    continue 2;
-                }
-            }
-            $tableListFiltered[] = $table;
-        }
+        // Get filtered tables
+        $tableList        = DatabaseConnection::tableList($database);
+        $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $filterList, $database);
 
         // Dump only structure
         $commandStructure = clone $command;
@@ -159,12 +170,14 @@ class BackupCommand extends \CliTools\Console\Command\AbstractCommand {
 
         // Dump only data (only filtered tables)
         $commandData = clone $command;
-        $commandData
-            ->addArgument('--no-create-info')
-            ->addArgumentList($tableListFiltered);
+        $commandData->addArgument('--no-create-info');
+
+        if (!empty($ignoredTableList)) {
+            $commandData->addArgumentTemplateMultiple('--ignore-table=%s', $ignoredTableList);
+        }
 
         // Combine both commands to one
-        $command = new \CliTools\Console\Builder\OutputCombineCommandBuilder();
+        $command = new \CliTools\Shell\CommandBuilder\OutputCombineCommandBuilder();
         $command
             ->addCommandForCombinedOutput($commandStructure)
             ->addCommandForCombinedOutput($commandData);

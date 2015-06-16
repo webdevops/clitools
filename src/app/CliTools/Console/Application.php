@@ -22,6 +22,7 @@ namespace CliTools\Console;
 
 use CliTools\Database\DatabaseConnection;
 use CliTools\Service\SettingsService;
+use CliTools\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -98,6 +99,7 @@ class Application extends \Symfony\Component\Console\Application {
      * Initialize
      */
     public function initialize() {
+        $this->initializeErrorHandler();
         $this->initializeChecks();
         $this->initializeConfiguration();
         $this->initializePosixTrap();
@@ -160,6 +162,9 @@ class Application extends \Symfony\Component\Console\Application {
             } else {
                 $ret = parent::doRun($input, $output);
             }
+        } catch(\CliTools\Exception\StopException $e) {
+            $this->callTearDown();
+            $ret = (int)$e->getMessage();
         } catch (\Exception $e) {
             $this->callTearDown();
             throw $e;
@@ -170,14 +175,44 @@ class Application extends \Symfony\Component\Console\Application {
         return $ret;
     }
 
+
+    /**
+     * Configures the input and output instances based on the user arguments and options.
+     *
+     * @param InputInterface  $input  An InputInterface instance
+     * @param OutputInterface $output An OutputInterface instance
+     */
+    protected function configureIO(InputInterface $input, OutputInterface $output) {
+        parent::configureIO($input, $output);
+
+        $style = new OutputFormatterStyle();
+        $style->setApplication($this);
+        $style->setWrap('-', '-');
+        $output->getFormatter()->setStyle('h1', $style);
+
+        $style = new OutputFormatterStyle();
+        $style->setPaddingOutside(' ===> ');
+        $output->getFormatter()->setStyle('h2', $style);
+
+        $style = new OutputFormatterStyle();
+        $style->setPaddingOutside('   -  ');
+        $output->getFormatter()->setStyle('p', $style);
+
+        $style = new OutputFormatterStyle('white', 'red');
+        $style->setPadding(' [EE] ');
+        $output->getFormatter()->setStyle('p-error', $style);
+    }
+
     /**
      * Initialize POSIX trap
      */
     protected function initializePosixTrap() {
         declare(ticks = 1);
 
-        $signalHandler = function ($signal) {
-            $this->callTearDown();
+        $me = $this;
+
+        $signalHandler = function ($signal) use($me) {
+            $me->callTearDown();
 
             // Prevent terminal messup
             echo "\n";
@@ -185,6 +220,25 @@ class Application extends \Symfony\Component\Console\Application {
 
         pcntl_signal(SIGTERM, $signalHandler);
         pcntl_signal(SIGINT, $signalHandler);
+    }
+
+    /**
+     * Init error handler
+     */
+    protected function initializeErrorHandler() {
+        $errorHandler = function ($errno, $errstr, $errfile, $errline) {
+            $msg = array(
+                'Message: ' . $errstr,
+                'File: ' . $errfile,
+                'Line: ' . $errline,
+            );
+
+            $msg = implode("\n", $msg);
+
+            throw new \RuntimeException($msg, $errno);
+        };
+
+        set_error_handler($errorHandler);
     }
 
     /**
@@ -320,5 +374,15 @@ class Application extends \Symfony\Component\Console\Application {
             $this->settingsService = new SettingsService();
         }
         return $this->settingsService;
+    }
+
+    /**
+     * Set terminal title
+     *
+     * @param string $title Title
+     */
+    public function setTerminalTitle($title) {
+        // DECSLPP.
+        echo "\033]0;" . 'ct: ' . $title . "\033\\";
     }
 }

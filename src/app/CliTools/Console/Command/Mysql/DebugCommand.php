@@ -25,13 +25,14 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
+class DebugCommand extends AbstractCommand {
 
     /**
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:debug')
+        $this
+            ->setName('mysql:debug')
             ->setAliases(array('mysql:querylog'))
             ->setDescription('Debug mysql connections')
             ->addArgument(
@@ -55,11 +56,13 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
         $debugLogLocation = $this->getApplication()->getConfigValue('db', 'debug_log_dir');
         $debugLogDir      = dirname($debugLogLocation);
 
+        $output->writeln('<h2>Starting MySQL general query log</h2>');
+
         // Create directory if not exists
         if (!is_dir($debugLogDir)) {
             if (!mkdir($debugLogDir, 0777, true)) {
-                $output->writeln('<error>Could not create "' . $debugLogDir . '" directory</error>');
-                exit(1);
+                $output->writeln('<p-error>Could not create "' . $debugLogDir . '" directory</p-error>');
+                throw new \CliTools\Exception\StopException(1);
             }
         }
 
@@ -77,14 +80,14 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
         if (!empty($logFileRow['Value'])) {
 
             // Enable general log
-            $output->writeln('<comment>Enabling general log</comment>');
+            $output->writeln('<p>Enabling general log</p>');
             $query = 'SET GLOBAL general_log = \'ON\'';
             DatabaseConnection::exec($query);
 
             // Setup teardown cleanup
             $tearDownFunc = function () use ($output) {
                 // Disable general log
-                $output->writeln('<comment>Disabling general log</comment>');
+                $output->writeln('<p>Disabling general log</p>');
                 $query = 'SET GLOBAL general_log = \'OFF\'';
                 DatabaseConnection::exec($query);
             };
@@ -109,7 +112,7 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
 
             return 0;
         } else {
-            $output->writeln('<error>MySQL general_log_file not set</error>');
+            $output->writeln('<p-error>MySQL general_log_file not set</p-error>');
 
             return 1;
         }

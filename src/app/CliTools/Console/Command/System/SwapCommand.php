@@ -33,7 +33,8 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('system:swap')
+        $this
+            ->setName('system:swap')
             ->setDescription('List swap usage');
     }
 

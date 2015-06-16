@@ -22,7 +22,7 @@ namespace CliTools\Console\Command\Docker;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 
 class UpCommand extends AbstractCommand {
 
@@ -30,7 +30,8 @@ class UpCommand extends AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:up')
+        $this
+            ->setName('docker:up')
             ->setDescription('Start docker container (with fast switching)');
     }
 
@@ -44,8 +45,14 @@ class UpCommand extends AbstractCommand {
      */
     public function execute(InputInterface $input, OutputInterface $output) {
 
-        $dockerPath = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
+        $dockerPath     = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
         $lastDockerPath = $this->getApplication()->getSettingsService()->get('docker.up.last');
+
+        if (!empty($dockerPath)) {
+            $dockerPath = dirname($dockerPath);
+        }
+
+        $output->writeln('<h2>Starting docker containers</h2>');
 
         // Stop last docker instance
         if ($dockerPath && $lastDockerPath) {
@@ -56,6 +63,7 @@ class UpCommand extends AbstractCommand {
         }
 
         // Start current docker containers
+        $this->output->writeln('<p>Start docker containers in "' . $dockerPath . '"</p>');
         $command = new CommandBuilder(null, 'up -d');
         $ret = $this->executeDockerCompose($command);
 
@@ -76,7 +84,7 @@ class UpCommand extends AbstractCommand {
         $currentPath = getcwd();
 
         try {
-            $this->output->writeln('<info>Trying to stop last running docker container in "' . $path . '"</info>');
+            $this->output->writeln('<p>Trying to stop last running docker container in "' . $path . '"</p>');
 
             // Jump into last docker dir
             \CliTools\Utility\PhpUtility::chdir($path);

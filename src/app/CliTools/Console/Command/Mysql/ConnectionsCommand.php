@@ -25,13 +25,16 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ConnectionsCommand extends \CliTools\Console\Command\AbstractCommand {
+class ConnectionsCommand extends AbstractCommand {
 
     /**
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:connections')
+        parent::configure();
+
+        $this
+            ->setName('mysql:connections')
             ->setDescription('List current connections');
     }
 

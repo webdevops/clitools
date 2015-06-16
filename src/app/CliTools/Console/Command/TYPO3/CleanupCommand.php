@@ -31,7 +31,8 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('typo3:cleanup')
+        $this
+            ->setName('typo3:cleanup')
             ->setDescription('Cleanup caches, logs and indexed search')
             ->addArgument(
                 'db',
@@ -53,6 +54,8 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
         // Init
         // ##################
         $dbName = $input->getArgument('db');
+
+        $output->writeln('<h2>Cleanup TYPO3 database</h2>');
 
         // ##############
         // Loop through databases
@@ -104,10 +107,7 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
         $cleanupTableList = array();
 
         // Check if database is TYPO3 instance
-        $query     = 'SELECT table_name
-                    FROM information_schema.tables
-                   WHERE table_schema = ' . DatabaseConnection::quote($database);
-        $tableList = DatabaseConnection::getCol($query);
+        $tableList = DatabaseConnection::tableList($database);
 
         foreach ($tableList as $table) {
             $clearTable = false;
@@ -165,19 +165,19 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
             }
         }
 
-        $this->output->writeln('<info>Starting cleanup of database ' . $database . '...');
+        $this->output->writeln('<p>Starting cleanup of database "' . $database . '"</p>');
 
-        DatabaseConnection::exec('USE `' . $database . '`');
+        DatabaseConnection::switchDatabase(DatabaseConnection::sanitizeSqlDatabase($database));
 
         foreach ($cleanupTableList as $table) {
-            $query = 'TRUNCATE `' . $table . '`';
+            $query = 'TRUNCATE ' . DatabaseConnection::sanitizeSqlTable($table);
             DatabaseConnection::exec($query);
 
             if ($this->output->isVerbose()) {
-                $this->output->writeln('<comment>  -> Truncating table ' . $table . '</comment>');
+                $this->output->writeln('<p>Truncating table ' . $table . '</p>');
             }
         }
 
-        $this->output->writeln('<info>  -> finished</info>');
+        $this->output->writeln('<p>finished</p>');
     }
 }

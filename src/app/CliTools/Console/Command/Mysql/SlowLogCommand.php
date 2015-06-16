@@ -26,31 +26,32 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class SlowLogCommand extends \CliTools\Console\Command\AbstractCommand {
+class SlowLogCommand extends AbstractCommand {
 
     /**
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:slowlog')
-             ->setDescription('Enable and show slow query log')
-             ->addArgument(
-                 'grep',
-                 InputArgument::OPTIONAL,
-                 'Grep'
-             )
+        $this
+            ->setName('mysql:slowlog')
+            ->setDescription('Enable and show slow query log')
+            ->addArgument(
+                'grep',
+                InputArgument::OPTIONAL,
+                'Grep'
+            )
             ->addOption(
                 'time',
                 't',
                 InputOption::VALUE_REQUIRED,
                 'Slow query time (default 1 second)'
             )
-             ->addOption(
-                 'no-index',
-                 'i',
-                 InputOption::VALUE_NONE,
-                 'Enable log queries without indexes log'
-             );
+            ->addOption(
+                'no-index',
+                'i',
+                InputOption::VALUE_NONE,
+                'Enable log queries without indexes log'
+            );
     }
 
     /**
@@ -80,11 +81,13 @@ class SlowLogCommand extends \CliTools\Console\Command\AbstractCommand {
         $debugLogLocation = $this->getApplication()->getConfigValue('db', 'debug_log_dir');
         $debugLogDir      = dirname($debugLogLocation);
 
+        $output->writeln('<h2>Starting MySQL slow query log</h2>');
+
         // Create directory if not exists
         if (!is_dir($debugLogDir)) {
             if (!mkdir($debugLogDir, 0777, true)) {
-                $output->writeln('<error>Could not create "' . $debugLogDir . '" directory</error>');
-                exit(1);
+                $output->writeln('<p-error>Could not create "' . $debugLogDir . '" directory</p-error>');
+                throw new \CliTools\Exception\StopException(1);
             }
         }
 
@@ -100,22 +103,22 @@ class SlowLogCommand extends \CliTools\Console\Command\AbstractCommand {
 
         if (!empty($logFileRow['Value'])) {
             // Enable slow log
-            $output->writeln('<comment>Enabling slow log</comment>');
+            $output->writeln('<p>Enabling slow log</p>');
             $query = 'SET GLOBAL slow_query_log = \'ON\'';
             DatabaseConnection::exec($query);
 
             // Enable slow log
-            $output->writeln('<comment>Set long_query_time to ' . (int)abs($slowLogQueryTime) . ' seconds</comment>');
+            $output->writeln('<p>Set long_query_time to ' . (int)abs($slowLogQueryTime) . ' seconds</p>');
             $query = 'SET GLOBAL long_query_time = ' . (int)abs($slowLogQueryTime);
             DatabaseConnection::exec($query);
 
             // Enable log queries without indexes log
             if ($logNonIndexedQueries) {
-                $output->writeln('<comment>Enabling logging of queries without using indexes</comment>');
+                $output->writeln('<p>Enabling logging of queries without using indexes</p>');
                 $query = 'SET GLOBAL log_queries_not_using_indexes = \'ON\'';
                 DatabaseConnection::exec($query);
             } else {
-                $output->writeln('<comment>Disabling logging of queries without using indexes</comment>');
+                $output->writeln('<p>Disabling logging of queries without using indexes</p>');
                 $query = 'SET GLOBAL log_queries_not_using_indexes = \'OFF\'';
                 DatabaseConnection::exec($query);
             }
@@ -123,7 +126,7 @@ class SlowLogCommand extends \CliTools\Console\Command\AbstractCommand {
             // Setup teardown cleanup
             $tearDownFunc = function () use ($output, $logNonIndexedQueries) {
                 // Disable general log
-                $output->writeln('<comment>Disable slow log</comment>');
+                $output->writeln('<p>Disable slow log</p>');
                 $query = 'SET GLOBAL slow_query_log = \'OFF\'';
                 DatabaseConnection::exec($query);
 
@@ -154,7 +157,7 @@ class SlowLogCommand extends \CliTools\Console\Command\AbstractCommand {
 
             return 0;
         } else {
-            $output->writeln('<error>MySQL general_log_file not set</error>');
+            $output->writeln('<p-error>MySQL general_log_file not set</p-error>');
 
             return 1;
         }

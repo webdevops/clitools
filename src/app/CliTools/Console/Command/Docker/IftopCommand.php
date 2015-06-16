@@ -22,7 +22,7 @@ namespace CliTools\Console\Command\Docker;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 
 class IftopCommand extends \CliTools\Console\Command\AbstractCommand {
 
@@ -30,8 +30,9 @@ class IftopCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:iftop')
-             ->setDescription('Exec iftop for Docker');
+        $this
+            ->setName('docker:iftop')
+            ->setDescription('Exec iftop for Docker');
     }
 
     /**

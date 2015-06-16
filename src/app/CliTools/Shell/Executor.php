@@ -21,8 +21,7 @@ namespace CliTools\Console\Shell;
  */
 
 use CliTools\Exception\CommandExecutionException;
-use CliTools\Console\Builder\CommandBuilder;
-use CliTools\Console\Builder\CommandBuilderInterface;
+use CliTools\Shell\CommandBuilder\CommandBuilderInterface;
 use CliTools\Utility\ConsoleUtility;
 
 class Executor {
@@ -63,6 +62,13 @@ class Executor {
      * @var bool
      */
     protected $strictMode = true;
+
+    /**
+     * Finisher callback list
+     *
+     * @var array<callable>
+     */
+    protected $finishers = array();
 
     // ##########################################
     // Methods
@@ -152,6 +158,15 @@ class Executor {
         return $this;
     }
 
+    /**
+     * Clear state
+     */
+    public function clear() {
+        $this->output = null;
+        $this->returnCode = null;
+        $this->finishers = array();
+    }
+
 
     /**
      * Execute command
@@ -166,6 +181,8 @@ class Executor {
 
         exec($this->command->build(), $this->output, $this->returnCode);
 
+        $this->runFinishers();
+
         if ($this->strictMode && $this->returnCode !== 0) {
             throw $this->generateException('Process ' . $this->command->getCommand() . ' did not finished successfully');
         }
@@ -176,10 +193,11 @@ class Executor {
     /**
      * Execute interactive
      *
+     * @param array $opts Option array
      * @return $this
      * @throws \Exception
      */
-    public function execInteractive() {
+    public function execInteractive(array $opts = null) {
         $this->checkCommand();
 
         ConsoleUtility::verboseWriteln('EXEC::INTERACTIVE', $this->command->build());
@@ -193,9 +211,34 @@ class Executor {
         $process = proc_open($this->command->build(), $descriptorSpec, $pipes);
 
         if (is_resource($process)) {
-            $this->returnCode = proc_close($process);
+            if (!empty($opts['startupCallback']) && is_callable($opts['startupCallback'])) {
+                $opts['startupCallback']($process);
+            }
 
-            if ($this->strictMode && $this->returnCode !== 0) {
+            do {
+                if (is_resource($process)) {
+                    $status = proc_get_status($process);
+                    if (!empty($status) && !empty($opts['runningCallback']) && is_callable($opts['runningCallback'])) {
+                        $opts['runningCallback']($process, $status);
+                    }
+                } else {
+                    break;
+                }
+                usleep(100 * 1000);
+            } while (!empty($status) && is_array($status) && $status['running'] === true);
+
+            if (is_resource($process)) {
+                proc_close($process);
+            }
+
+            $this->returnCode = $status['exitcode'];
+
+            $this->runFinishers();
+
+            if ($status['signaled'] === true && $status['exitcode'] === -1) {
+                // user may hit CTRL+C
+                ConsoleUtility::getOutput()->writeln('<comment>Processed stopped by signal</comment>');
+            } elseif ($this->strictMode && $this->returnCode !== 0) {
                 throw $this->generateException('Process ' . $this->command->getCommand() . ' did not finished successfully');
             }
         } else {
@@ -242,5 +285,25 @@ class Executor {
         }
 
         return $e;
+    }
+
+    /**
+     * Add finisher callback (will run after command execution)
+     *
+     * @param callable $callback
+     */
+    public function addFinisherCallback(callable $callback) {
+        $this->finishers[] = $callback;
+    }
+
+    /**
+     * Run finisher commands
+     */
+    public function runFinishers() {
+        foreach ($this->finishers as $call) {
+            if (is_callable($call)) {
+                $call($this);
+            }
+        }
     }
 }

@@ -22,7 +22,7 @@ namespace CliTools\Console\Command\Docker;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 
 class ComposeCommand extends AbstractCommand implements \CliTools\Console\Filter\AnyParameterFilterInterface {
 
@@ -30,8 +30,9 @@ class ComposeCommand extends AbstractCommand implements \CliTools\Console\Filter
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:compose')
-             ->setDescription('Run general docker-compose command in docker container');
+        $this
+            ->setName('docker:compose')
+            ->setDescription('Run general docker-compose command in docker container');
     }
 
     /**
@@ -50,6 +51,8 @@ class ComposeCommand extends AbstractCommand implements \CliTools\Console\Filter
         if (!empty($paramList)) {
             $command->setArgumentList($paramList);
         }
+
+        $this->setTerminalTitle('docker-compose', $paramList);
 
         $ret = $this->executeDockerCompose($command);
 

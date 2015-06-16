@@ -28,13 +28,16 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ListCommand extends \CliTools\Console\Command\AbstractCommand {
+class ListCommand extends AbstractCommand {
 
     /**
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:list')
+        parent::configure();
+
+        $this
+            ->setName('mysql:list')
             ->setDescription('List all databases')
             ->addOption(
                 'sort-name', null,
@@ -72,10 +75,7 @@ class ListCommand extends \CliTools\Console\Command\AbstractCommand {
     public function execute(InputInterface $input, OutputInterface $output) {
 
         // Get list of databases
-        $query        = 'SELECT SCHEMA_NAME
-                    FROM information_schema.SCHEMATA';
-        $databaseList = DatabaseConnection::getCol($query);
-
+        $databaseList = DatabaseConnection::databaseList();
         if (!empty($databaseList)) {
 
             // ########################
@@ -84,11 +84,6 @@ class ListCommand extends \CliTools\Console\Command\AbstractCommand {
 
             $databaseRowList = array();
             foreach ($databaseList as $database) {
-                // Skip internal mysql databases
-                if (in_array(strtolower($database), array('mysql', 'information_schema', 'performance_schema'))) {
-                    continue;
-                }
-
                 // Get all tables
                 $query      = 'SELECT COUNT(*) AS count
                             FROM information_schema.tables
@@ -227,7 +222,7 @@ class ListCommand extends \CliTools\Console\Command\AbstractCommand {
 
             $table->render();
         } else {
-            $output->writeln('<comment>No databases found</comment>');
+            $output->writeln('<p-error>No databases found</p-error>');
         }
 
         return 0;

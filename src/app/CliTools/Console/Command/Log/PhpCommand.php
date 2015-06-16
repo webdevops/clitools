@@ -30,7 +30,8 @@ class PhpCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('log:php')
+        $this
+            ->setName('log:php')
             ->setAliases(array('php:log'))
             ->setDescription('Show up php log')
             ->addArgument(
@@ -54,6 +55,8 @@ class PhpCommand extends \CliTools\Console\Command\AbstractCommand {
         if ($input->hasArgument('grep')) {
             $grep = $input->getArgument('grep');
         }
+
+        $output->writeln('<h2>Starting php log tail</h2>');
 
         // Show log
         $logList = array(

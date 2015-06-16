@@ -21,7 +21,7 @@ namespace CliTools\Console\Command\System;
  */
 
 use CliTools\Utility\FormatUtility;
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputInterface;
@@ -33,7 +33,8 @@ class OpenFilesCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('system:openfiles')
+        $this
+            ->setName('system:openfiles')
             ->setDescription('List swap usage');
     }
 

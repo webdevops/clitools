@@ -20,7 +20,7 @@ namespace CliTools\Utility;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 
 abstract class UnixUtility {
 
@@ -49,13 +49,13 @@ abstract class UnixUtility {
     /**
      * Get CPU Count
      *
-     * @return string
+     * @return integer
      */
     public static function cpuCount() {
         $command = new CommandBuilder('nproc');
         $ret = $command->execute()->getOutputString();
 
-        $ret = trim($ret);
+        $ret = (int)trim($ret);
 
         return $ret;
     }
@@ -63,7 +63,7 @@ abstract class UnixUtility {
     /**
      * Get Memory Count
      *
-     * @return string
+     * @return integer
      */
     public static function memorySize() {
         $command = new CommandBuilder('cat', '/proc/meminfo');
@@ -112,7 +112,7 @@ abstract class UnixUtility {
     /**
      * Get mount info list
      *
-     * @return string
+     * @return array
      */
     public static function mountInfoList() {
         $command = new CommandBuilder('df', '-a --type=ext3 --type=ext4 --type vmhgfs --type vboxsf --portability');
@@ -205,12 +205,12 @@ abstract class UnixUtility {
      * @param  string $message Message
      */
     public static function sendWallMessage($message) {
-        $commandWall = new CommandBuilder('wall');
-        $commandWall->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_NULL);
+        $wall = new CommandBuilder('wall');
+        $wall->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_NULL);
 
         $command = new CommandBuilder('echo');
         $command->addArgument($message)
-                ->addPipeCommand($commandWall);
+                ->addPipeCommand($wall);
         $command->execute();
     }
 
@@ -255,5 +255,74 @@ abstract class UnixUtility {
         }
 
         return false;
+    }
+
+    /**
+     * Search directory upwards for a file
+     *
+     * @param string|array $file Filename
+     * @param string       $path Path
+     * @return boolean|string
+     */
+    public static function findFileInDirectortyTree($file, $path = null) {
+        $ret = false;
+
+        $fileList = (array)$file;
+
+        // Set path to current path (if not specified)
+        if ($path === null) {
+            $path = getcwd();
+        }
+
+        if (!empty($path) && $path !== '/') {
+            // Check if file exists in path
+            foreach ($fileList as $file) {
+                if (file_exists($path . '/' . $file)) {
+                    // File found
+                    $ret = $path . '/' . $file;
+                    break;
+                }
+            }
+
+            if ($ret === false) {
+                // go up in directory
+                $path .= '/../';
+                $path = realpath($path);
+                $ret  = self::findFileInDirectortyTree($fileList, $path);
+            }
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Reload tty
+     */
+    public static function reloadTtyBanner($ttyName) {
+        // Check if we can reload tty
+        try {
+            $who = new CommandBuilder('who');
+            $who->addPipeCommand( new CommandBuilder('grep', '%s', array($ttyName)));
+            $who->execute();
+
+            // if there is no exception -> there is a logged in user
+        } catch (\Exception $e) {
+            // if there is an exception -> there is NO logged in user
+
+            try {
+                $ps = new CommandBuilder('ps', 'h -o pid,comm,args -C getty');
+                $ps->addPipeCommand( new CommandBuilder('grep', '%s', array($ttyName)));
+                $output = $ps->execute()->getOutput();
+
+                if (!empty($output)) {
+                    $outputLine      = trim(reset($output));
+                    $outputLineParts = preg_split('/[\s]+/', $outputLine);
+                    list($pid)       = $outputLineParts;
+
+                    posix_kill($pid, SIGHUP);
+                }
+
+            }  catch (\Exception $e) {}
+        }
     }
 }

@@ -24,7 +24,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\RemoteCommandBuilder;
+use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
 
 class ShellCommand extends AbstractCommand {
 
@@ -32,7 +32,8 @@ class ShellCommand extends AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('docker:shell')
+        $this
+            ->setName('docker:shell')
             ->setDescription('Enter shell in docker container')
             ->addArgument(
                 'container',
@@ -69,6 +70,8 @@ class ShellCommand extends AbstractCommand {
             // Use docker env
             $cliUser = $this->getDockerEnv($container, 'CLI_USER');
         }
+
+        $this->setTerminalTitle('docker', 'shell', $container);
 
         $command = new RemoteCommandBuilder('bash');
 

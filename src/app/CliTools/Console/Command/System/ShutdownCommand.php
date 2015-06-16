@@ -22,7 +22,7 @@ namespace CliTools\Console\Command\System;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 
 class ShutdownCommand extends \CliTools\Console\Command\AbstractCommand {
 
@@ -30,7 +30,8 @@ class ShutdownCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('system:shutdown')
+        $this
+            ->setName('system:shutdown')
             ->setAliases(array('shutdown'))
             ->setDescription('Shutdown system');
     }

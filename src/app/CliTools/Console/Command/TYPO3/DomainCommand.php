@@ -21,6 +21,7 @@ namespace CliTools\Console\Command\TYPO3;
  */
 
 use CliTools\Database\DatabaseConnection;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -31,12 +32,37 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('typo3:domain')
+        $this
+            ->setName('typo3:domain')
             ->setDescription('Add common development domains to database')
             ->addArgument(
                 'db',
                 InputArgument::OPTIONAL,
                 'Database name'
+            )
+            ->addOption(
+                'baseurl',
+                null,
+                InputOption::VALUE_NONE,
+                'Also set config.baseURL setting'
+            )
+            ->addOption(
+                'list',
+                null,
+                InputOption::VALUE_NONE,
+                'List only databases'
+            )
+            ->addOption(
+                'remove',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Remove domain (with wildcard support)'
+            )
+            ->addOption(
+                'duplicate',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Add duplication domains (will duplicate all domains in system, eg. for vagrant share)'
             );
     }
 
@@ -54,6 +80,8 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
         // ##################
         $dbName = $input->getArgument('db');
 
+        $output->writeln('<h2>Updating TYPO3 domain entries</h2>');
+
         // ##############
         // Loop through databases
         // ##############
@@ -62,134 +90,168 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
             // ##############
             // All databases
             // ##############
-
-            // Get list of databases
-            $query        = 'SELECT SCHEMA_NAME
-                    FROM information_schema.SCHEMATA';
-            $databaseList = DatabaseConnection::getCol($query);
+            $databaseList = DatabaseConnection::databaseList();
 
             foreach ($databaseList as $dbName) {
-                // Skip internal mysql databases
-                if (in_array(strtolower($dbName), array('mysql', 'information_schema', 'performance_schema'))) {
-                    continue;
-                }
-
                 // Check if database is TYPO3 instance
-                $query           = 'SELECT COUNT(*) as count
+                $query = 'SELECT COUNT(*) as count
                             FROM information_schema.tables
                            WHERE table_schema = ' . DatabaseConnection::quote($dbName) . '
                              AND table_name = \'sys_domain\'';
                 $isTypo3Database = DatabaseConnection::getOne($query);
 
                 if ($isTypo3Database) {
-                    $this->setupDevelopmentDomainsForDatabase($dbName);
+                    $this->runTaskForDomain($dbName);
                 }
             }
         } else {
             // ##############
             // One databases
             // ##############
-            $this->setupDevelopmentDomainsForDatabase($dbName);
+            $this->runTaskForDomain($dbName);
         }
+    }
 
-        return 0;
+    /**
+     * Run tasks for one domain
+     */
+    protected function runTaskForDomain($dbName) {
+        DatabaseConnection::switchDatabase($dbName);
+
+        if ($this->input->getOption('list')) {
+            // Show domain list (and skip all other tasks)
+            $this->showDomainList($dbName);
+        } else {
+            // Remove domains (eg. for cleanup)
+            if ($this->input->getOption('remove')) {
+                $this->removeDomains($this->input->getOption('remove'));
+            }
+
+            // Set development domains
+            $this->manipulateDomains();
+
+            // Add sharing domains
+            if ($this->input->getOption('baseurl')) {
+                $this->updateBaseUrlConfig();
+            }
+
+            // Add sharing domains
+            if ($this->input->getOption('duplicate')) {
+                $this->addDuplicateDomains($this->input->getOption('duplicate'));
+            }
+
+            // Show domain list
+            $this->showDomainList($dbName);
+        }
+    }
+
+    /**
+     * Remove domains
+     */
+    protected function removeDomains($pattern) {
+        $pattern = str_replace('*', '%', $pattern);
+
+        $query = 'DELETE FROM sys_domain WHERE domainName LIKE %s';
+        $query = sprintf($query, DatabaseConnection::quote($pattern));
+        DatabaseConnection::exec($query);
+    }
+
+    /**
+     * Update baseURL config
+     */
+    protected function updateBaseUrlConfig() {
+        $query = 'SELECT st.uid as template_id,
+                         st.config as template_config,
+                         (SELECT sd.domainName
+                            FROM sys_domain sd
+                           WHERE sd.pid = st.pid
+                        ORDER BY sd.forced DESC,
+                                 sd.sorting ASC
+                           LIMIT 1) as domain_name
+                    FROM sys_template st
+                   WHERE st.root = 1
+                     AND st.deleted  = 0
+                  HAVING domain_name IS NOT NULL';
+        $templateIdList = DatabaseConnection::getAll($query);
+
+        foreach ($templateIdList as $row) {
+            $templateId   = $row['template_id'];
+            $domainName   = $row['domain_name'];
+            $templateConf = $row['template_config'];
+
+            // Remove old baseURL entries (no duplciates)
+            $templateConf = preg_replace('/^config.baseURL = .*$/m', '', $templateConf);
+            $templateConf = trim($templateConf);
+
+            // Add new baseURL
+            $templateConf .= "\n" . 'config.baseURL = http://' . $domainName .'/';
+
+            $query = 'UPDATE sys_template SET config = %s WHERE uid = %s';
+            $query = sprintf($query, DatabaseConnection::quote($templateConf), (int)$templateId);
+            DatabaseConnection::exec($query);
+        }
+    }
+
+    /**
+     * Add share domains (eg. for vagrantshare)
+     *
+     * @param string $suffix Domain suffix
+     */
+    protected function addDuplicateDomains($suffix) {
+        $devDomain = '.' . $this->getApplication()->getConfigValue('config', 'domain_dev');
+
+        $query = 'SELECT * FROM sys_domain';
+        $domainList = DatabaseConnection::getAll($query);
+
+        foreach ($domainList as $domain) {
+            unset($domain['uid']);
+
+            $domainName = $domain['domainName'];
+
+            // remove development suffix
+            $domainName = preg_replace('/' . preg_quote($devDomain). '$/', '', $domainName);
+
+            // add share domain
+            $domainName .= '.' . ltrim($suffix, '.');
+
+            $domain['domainName'] = $domainName;
+
+            DatabaseConnection::insert('sys_domain', $domain);
+        }
+    }
+
+    /**
+     * Show list of domains
+     *
+     * @param string $dbName Domain name
+     */
+    protected function showDomainList($dbName) {
+        $query = 'SELECT domainName FROM sys_domain ORDER BY domainName ASC';
+        $domainList = DatabaseConnection::getCol($query);
+
+        $this->output->writeln('<p>Domain list of "' . $dbName . '":</p>');
+
+        foreach ($domainList as $domain) {
+            $this->output->writeln('<p>  ' . $domain . '</p>');
+        }
+        $this->output->writeln('');
     }
 
     /**
      * Set development domains for TYPO3 database
      *
-     * @param  string $database Database
-     *
      * @return void
      */
-    protected function setupDevelopmentDomainsForDatabase($database) {
+    protected function manipulateDomains() {
+        $devDomain    = '.' . $this->getApplication()->getConfigValue('config', 'domain_dev');
+        $domainLength = strlen($devDomain);
 
         // ##################
-        // Build domain
+        // Fix domains
         // ##################
-        $domain = null;
-
-        if (preg_match('/^([^_]+)_([^_]+).*/i', $database, $matches)) {
-            $domain = $matches[2] . '.' . $matches[1];
-        } else {
-            return false;
-        }
-
-        // ##################
-        // Check if multi site
-        // ##################
-        $isMultiSite = false;
-
-        $query            = 'SELECT uid
-                    FROM ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.pages
-                   WHERE is_siteroot = 1
-                     AND deleted = 0';
-        $rootPageSiteList = DatabaseConnection::getCol($query);
-
-        if (count($rootPageSiteList) >= 2) {
-            $isMultiSite = true;
-        }
-
-        // ##################
-        // Disable all other domains
-        // ##################
-        $query = 'UPDATE ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.sys_domain
-                     SET hidden = 1';
+        $query = 'UPDATE sys_domain
+                     SET domainName = CONCAT(domainName, ' . DatabaseConnection::quote($devDomain) . ')
+                   WHERE RIGHT(domainName, ' . $domainLength . ') <> ' . DatabaseConnection::quote($devDomain);
         DatabaseConnection::exec($query);
-
-
-        // Get development domains from config
-        $tldList = (array)$this->getApplication()->getConfigValue('config', 'domain_dev', array());
-
-        foreach ($tldList as $tld) {
-            $fullDomain = $domain . '.' . $tld;
-
-            // ##############
-            //  Loop through root pages
-            // ##############
-            foreach ($rootPageSiteList as $rootPageUid) {
-                $rootPageDomain = $fullDomain;
-
-                // Add rootpage id to domain if TYPO3 instance is multi page
-                // eg. 123.dev.foobar.dev
-                if ($isMultiSite) {
-                    $rootPageDomain = $rootPageUid . '.' . $rootPageDomain;
-                }
-
-                // Check if we have already an entry
-                $query       = 'SELECT uid
-                            FROM ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.sys_domain
-                           WHERE pid = ' . (int)$rootPageUid . '
-                             AND domainName = ' . DatabaseConnection::quote($rootPageDomain);
-                $sysDomainId = DatabaseConnection::getOne($query);
-
-                // Add/Update domain
-                $query = 'INSERT INTO ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.sys_domain
-                                      (uid, pid, tstamp, crdate, cruser_id, hidden, domainName, sorting, forced)
-                               VALUES (
-                                   ' . (int)$sysDomainId . ',
-                                   ' . (int)$rootPageUid . ',
-                                   ' . time() . ',
-                                   ' . time() . ',
-                                   1,
-                                   0,
-                                   ' . DatabaseConnection::quote($rootPageDomain) . ',
-                                   1,
-                                   1
-                               ) ON DUPLICATE KEY UPDATE
-                                    pid        = VALUES(pid),
-                                    hidden     = VALUES(hidden),
-                                    domainName = VALUES(domainName),
-                                    sorting    = VALUES(sorting),
-                                    forced     = VALUES(forced)';
-                DatabaseConnection::exec($query);
-
-                if ($sysDomainId) {
-                    $this->output->writeln('<comment>Domain "' . $rootPageDomain . '" updated to "' . $database . '"</comment>');
-                } else {
-                    $this->output->writeln('<info>Domain "' . $rootPageDomain . '" added to "' . $database . '"</info>');
-                }
-            }
-        }
     }
 }

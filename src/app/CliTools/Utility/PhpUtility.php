@@ -23,14 +23,76 @@ namespace CliTools\Utility;
 class PhpUtility {
 
     /**
+     * Get content of file
+     *
+     * @param  string $file Filename
+     * @return string
+     */
+    public static function fileGetContents($file) {
+        if (!is_file($file) || !is_readable($file)) {
+            throw new \RuntimeException('Could not read "' . $file . '"');
+        }
+
+        return file_get_contents($file);
+    }
+
+    /**
+     * Get content of file (array)
+     *
+     * @param  string $file Filename
+     * @return array
+     */
+    public static function fileGetContentsArray($file) {
+        $content = self::fileGetContents($file);
+        $content = str_replace("/r/n", "/n", $content);
+
+        $ret = explode("/n", $content);
+
+        return $ret;
+    }
+
+    /**
+     * Get content of file
+     *
+     * @param string $file    Filename
+     * @param string $content Content
+     */
+    public static function filePutContents($file, $content) {
+        if (file_put_contents($file, $content) === false) {
+            throw new \RuntimeException('Could not write "' . $file . '"');
+        }
+    }
+
+    /**
      * Change current working directory
      *
      * @param string $path Target path
      * @throws \RuntimeException
      */
     public static function chdir($path) {
-        if (!chdir($path)) {
+        if (!is_dir($path) || !chdir($path)) {
             throw new \RuntimeException('Could not change working directory to "' . $path . '"');
+        }
+    }
+
+    /**
+     * Create new directory
+     *
+     * @param string    $path      Directory
+     * @param integer   $mode      Perms
+     * @param boolean   $recursive Creation of nested directories
+     * @param resource  $context   Context
+     * @throws \RuntimeException
+     */
+    public static function mkdir($path, $mode = 0777, $recursive = false, $context = null) {
+        if ($context !== null) {
+            $res = mkdir($path, $mode, $recursive, $context);
+        } else {
+            $res = mkdir($path, $mode, $recursive);
+        }
+
+        if (!$res) {
+            throw new \RuntimeException('Could not create directory "' . $path . '"');
         }
     }
 
@@ -44,5 +106,65 @@ class PhpUtility {
         if (!unlink($path)) {
             throw new \RuntimeException('Could not change working directory to "' . $path . '"');
         }
+    }
+
+    /**
+     * Fetch content from url using curl
+     *
+     * @param string   $url      Url
+     * @param callable $progress Progress callback
+     *
+     * @return mixed
+     */
+    public static function curlFetch($url, callable $progress = null) {
+        $curlHandle = curl_init();
+        curl_setopt($curlHandle, CURLOPT_URL, $url);
+        curl_setopt($curlHandle, CURLOPT_VERBOSE, 0);
+        curl_setopt($curlHandle, CURLOPT_HEADER, 0);
+        curl_setopt($curlHandle, CURLOPT_SSL_VERIFYPEER, 1);
+        curl_setopt($curlHandle, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curlHandle, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($curlHandle, CURLOPT_USERAGENT, 'CliTools ' . CLITOOLS_COMMAND_VERSION . '(https://github.com/mblaschke/vagrant-clitools)');
+
+        if($progress) {
+            curl_setopt($curlHandle, CURLOPT_NOPROGRESS, false);
+            curl_setopt($curlHandle, CURLOPT_PROGRESSFUNCTION, $progress);
+        }
+
+        $ret = curl_exec($curlHandle);
+        if (curl_errno($curlHandle) || empty($ret)) {
+            throw new \RuntimeException('Could not fetch url "' . $url . '", error: ' . curl_error($curlHandle));
+        }
+        curl_close($curlHandle);
+
+        return $ret;
+    }
+
+
+    /**
+     * Get MIME type for file
+     *
+     * @param string $file Path to file
+     *
+     * @return string
+     */
+    public static function getMimeType($file) {
+        // Get mime type from file
+        $finfo  = finfo_open(FILEINFO_MIME_TYPE);
+        $ret    = finfo_file($finfo, $file);
+        finfo_close($finfo);
+
+        if ($ret === 'application/octet-stream') {
+            $finfo        = finfo_open();
+            $dumpFileInfo = finfo_file($finfo, $file);
+            finfo_close($finfo);
+
+            if (strpos($dumpFileInfo, 'LZMA compressed data') !== false) {
+                $ret = 'application/x-lzma';
+            }
+        }
+
+        return $ret;
     }
 }

@@ -30,7 +30,8 @@ class ApacheCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('log:apache')
+        $this
+            ->setName('log:apache')
             ->setAliases(array('apache:log'))
             ->setDescription('Show up apache log')
             ->addArgument(
@@ -55,6 +56,7 @@ class ApacheCommand extends \CliTools\Console\Command\AbstractCommand {
             $grep = $input->getArgument('grep');
         }
 
+        $output->writeln('<h2>Starting apache log tail</h2>');
 
         // Show log
         $logList = array(

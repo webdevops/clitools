@@ -20,7 +20,7 @@ namespace CliTools\Console\Command;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Console\Builder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -90,20 +90,27 @@ abstract class AbstractTraceCommand extends AbstractCommand {
         $command->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_ALL_STDOUT);
 
 
+        $output->writeln('<h2>Starting process stracing</h2>');
+
         if (empty($pid)) {
             list($pidList, $processList) = $this->buildProcessList();
 
             if ($input->getOption('all')) {
                 $pid = 'all';
             } else {
-                $question = new ChoiceQuestion('Please choose process for tracing', $processList);
+                try {
+                    $question = new ChoiceQuestion('Please choose process for tracing', $processList);
+                    $question->setMaxAttempts(1);
 
-                $questionDialog = new QuestionHelper();
+                    $questionDialog = new QuestionHelper();
 
-                $pid = $questionDialog->ask($input, $output, $question);
+                    $pid = $questionDialog->ask($input, $output, $question);
+                } catch(\InvalidArgumentException $e) {
+                    // Invalid value, just stop here
+                    throw new \CliTools\Exception\StopException(1);
+                }
             }
         }
-
 
         if (!empty($pid)) {
             switch ($pid) {
@@ -157,7 +164,7 @@ abstract class AbstractTraceCommand extends AbstractCommand {
         $currentPid = posix_getpid();
 
         $processList = array(
-            'all processes' => 'all',
+            'all' => 'all processes',
         );
 
         $command = new CommandBuilder('ps');
@@ -183,8 +190,8 @@ abstract class AbstractTraceCommand extends AbstractCommand {
                 continue;
             }
 
-            $pidList[]         = (int)$pid;
-            $processList[$cmd] = (int)$pid;
+            $pidList[]              = (int)$pid;
+            $processList[(int)$pid] = $cmd;
         }
 
         return array($pidList, $processList);

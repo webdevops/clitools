@@ -25,13 +25,16 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DropCommand extends \CliTools\Console\Command\AbstractCommand {
+class DropCommand extends AbstractCommand {
 
     /**
      * Configure command
      */
     protected function configure() {
-        $this->setName('mysql:drop')
+        parent::configure();
+
+        $this
+            ->setName('mysql:drop')
             ->setDescription('Drop database')
             ->addArgument(
                 'db',
@@ -51,11 +54,11 @@ class DropCommand extends \CliTools\Console\Command\AbstractCommand {
     public function execute(InputInterface $input, OutputInterface $output) {
         $database = $input->getArgument('db');
 
-        $output->writeln('<comment>Dropping Database "' . $database . '"...</comment>');
+        $output->writeln('<h2>Dropping Database "' . $database . '"...</h2>');
         $query = 'DROP DATABASE IF EXISTS ' . DatabaseConnection::sanitizeSqlDatabase($database);
         DatabaseConnection::exec($query);
 
-        $output->writeln('<info>Database "' . $database . '" dropped</info>');
+        $output->writeln('<p>Database dropped</p>');
 
         return 0;
     }

@@ -30,7 +30,8 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
      * Configure command
      */
     protected function configure() {
-        $this->setName('log:debug')
+        $this
+            ->setName('log:debug')
             ->setAliases(array('debug'))
             ->setDescription('Show up debugging log')
             ->addArgument(
@@ -55,6 +56,7 @@ class DebugCommand extends \CliTools\Console\Command\AbstractCommand {
             $grep = $input->getArgument('grep');
         }
 
+        $output->writeln('<h2>Starting debug log tail</h2>');
 
         // Show log
         $logList = array(
