@@ -8,17 +8,23 @@ You can easly create new docker instances (from my or a custom docker boilerplat
 and Makefile running.
 
 ```bash
-# Startup new docker boilerplate into foobar directory
+# Create new docker boilerplate into foobar directory
 ct docker:create foobar
 
-# Startup new custom docker boilerplate 
+# Create and start new docker boilerplate into foobar directory
+ct docker:create foobar --up
+
+# Create new custom docker boilerplate 
 ct docker:create foobar --docker=git...
 
-# Startup new docker boilerplate with code repository
+# Create new docker boilerplate with code repository
 ct docker:create foobar --code=git...
 
-# Startup new docker boilerplate with code repository and makefile run
+# Create new docker boilerplate with code repository and makefile run
 ct docker:create foobar --code=git... --make=build
+
+# Create and start new docker boilerplate with code repository and makefile run
+ct docker:create foobar --code=git... --make=build --up
 ```
 
 ## Docker startup

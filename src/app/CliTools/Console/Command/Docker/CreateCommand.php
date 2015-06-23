@@ -60,6 +60,12 @@ class CreateCommand extends AbstractCommand {
                 'm',
                 InputOption::VALUE_REQUIRED,
                 'Makefile command'
+            )
+            ->addOption(
+                'up',
+                null,
+                InputOption::VALUE_NONE,
+                'Build and start docker containers'
             );
     }
 
@@ -119,9 +125,11 @@ class CreateCommand extends AbstractCommand {
         $this->startInteractiveEditor($path . '/docker-env.yml');
 
         // Start docker
-        $output->writeln('<h2>Build and start docker containers</h2>');
-        PhpUtility::chdir($currDir);
-        $this->startDockerInstance($path);
+        if ($this->input->getOption('up')) {
+            $output->writeln('<h2>Build and start docker containers</h2>');
+            PhpUtility::chdir($currDir);
+            $this->startDockerInstance($path);
+        }
 
         return 0;
     }
