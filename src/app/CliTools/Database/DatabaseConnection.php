@@ -593,7 +593,7 @@ class DatabaseConnection {
         // Rule: Database, table, and column names cannot end with space characters.
         $field = rtrim($field);
 
-        return '`' . self::sanitizeSqlIdentifier($field) . '`';
+        return '`' . $field . '`';
     }
 
     /**
