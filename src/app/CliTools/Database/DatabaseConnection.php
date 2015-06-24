@@ -588,7 +588,12 @@ class DatabaseConnection {
      * @return  string
      */
     public static function sanitizeSqlField($field) {
-        return preg_replace('/[^_a-zA-Z0-9\.]/', '', $field);
+        $field = preg_replace('/[\0\\\\\/]/', '', $field);
+
+        // Rule: Database, table, and column names cannot end with space characters.
+        $field = rtrim($field);
+
+        return '`' . self::sanitizeSqlIdentifier($field) . '`';
     }
 
     /**
@@ -599,7 +604,7 @@ class DatabaseConnection {
      * @return string
      */
     public static function sanitizeSqlTable($table) {
-        return '`' . preg_replace('/[^_a-zA-Z0-9]/', '', $table) . '`';
+        return '`' . self::sanitizeSqlIdentifier($table) . '`';
     }
 
     /**
@@ -610,7 +615,23 @@ class DatabaseConnection {
      * @return string
      */
     public static function sanitizeSqlDatabase($database) {
-        return '`' . preg_replace('/[^_a-zA-Z0-9]/', '', $database) . '`';
+        return '`' . self::sanitizeSqlIdentifier($database) . '`';
+    }
+
+    /**
+     * Sanitize sql identifier
+     *
+     * @param  string $database SQL Database
+     *
+     * @return string
+     */
+    public static function sanitizeSqlIdentifier($value) {
+        $ret = preg_replace('/[\0\\\\\/\.]/', '', $value);
+
+        // Rule: Database, table, and column names cannot end with space characters.
+        $ret = rtrim($ret);
+
+        return $ret;
     }
 
     /**
