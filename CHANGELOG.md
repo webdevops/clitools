@@ -1,6 +1,12 @@
 CliTools Changelog
 ==================
 
+2.1.0 - 2015-07-08
+------------------
+- Added option `docker:create --up` for automatic startup
+- Fixed bugs
+- SLOC: 6,014
+
 2.0.0 - 2015-06-16
 ------------------
 - Added GitHub based `self-update`
