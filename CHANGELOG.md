@@ -4,6 +4,7 @@ CliTools Changelog
 2.1.1 - UPCOMING
 ------------------
 - Fixed `php:composer` global command usage
+- Fixed `system:startup` terminal title in /etc/issue
 - Updated to Symfony 2.7.2
 - SLOC: 6,050
 

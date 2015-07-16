@@ -28,6 +28,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements \CliTools\Console\Filter\OnlyRootFilterInterface {
 
     /**
+     * Enable automatic terminal title
+     *
+     * @var bool
+     */
+    protected $automaticTerminalTitle = false;
+
+    /**
      * Configure command
      */
     protected function configure() {

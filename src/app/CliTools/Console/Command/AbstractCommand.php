@@ -51,6 +51,13 @@ abstract class AbstractCommand extends Command {
     protected $output;
 
     /**
+     * Enable automatic terminal title
+     *
+     * @var bool
+     */
+    protected $automaticTerminalTitle = true;
+
+    /**
      * Initializes the command just after the input has been validated.
      *
      * This is mainly useful when a lot of commands extends one main command
@@ -65,8 +72,10 @@ abstract class AbstractCommand extends Command {
 
         ConsoleUtility::initialize($input, $output);
 
-        // Set default terminal title
-        $this->setTerminalTitle(explode(':', $this->getName()));
+        if ($this->automaticTerminalTitle) {
+            // Set default terminal title
+            $this->setTerminalTitle(explode(':', $this->getName()));
+        }
     }
 
     /**
