@@ -1,6 +1,13 @@
 CliTools Changelog
 ==================
 
+2.1.1 - 2015-07-17
+------------------
+- Fixed `php:composer` global command usage
+- Fixed `system:startup` terminal title in /etc/issue
+- Updated to Symfony 2.7.2
+- SLOC: 6,050
+
 2.1.0 - 2015-07-08
 ------------------
 - Added option `docker:create --up` for automatic startup

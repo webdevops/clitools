@@ -46,32 +46,81 @@ class ComposerCommand extends \CliTools\Console\Command\AbstractCommand implemen
      * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output) {
-        $composerCmd = $this->getApplication()->getConfigValue('bin', 'composer');
-
         $paramList = $this->getFullParameterList();
-        $composerJsonPath = UnixUtility::findFileInDirectortyTree('composer.json');
 
-        if (!empty($composerJsonPath)) {
-            $path = dirname($composerJsonPath);
-            $this->output->writeln('<comment>Found composer.json directory: ' . $path . '</comment>');
+        if ($this->checkIfComposerJsonIsNeeded($paramList)) {
+            $composerJsonPath = UnixUtility::findFileInDirectortyTree('composer.json');
 
-            // Switch to directory of docker-compose.yml
-            PhpUtility::chdir($path);
+            if (!empty($composerJsonPath)) {
+                $path = dirname($composerJsonPath);
+                $this->output->writeln('<comment>Found composer.json directory: ' . $path . '</comment>');
+                // Switch to directory of docker-compose.yml
+                PhpUtility::chdir($path);
 
-            $command = new CommandBuilder();
-            $command->parse($composerCmd);
-
-            if (!empty($paramList)) {
-                $command->setArgumentList($paramList);
+                return $this->runComposer($paramList);
+            } else {
+                $this->output->writeln('<error>No composer.json found in tree</error>');
+                return 1;
             }
-
-            $command->executeInteractive();
         } else {
-            $this->output->writeln('<error>No composer.json found in tree</error>');
+            return $this->runComposer($paramList);
+        }
+    }
 
-            return 1;
+    /**
+     * Check if composer.json is needed for command
+     *
+     * @param array $paramList Parameter list for composer
+     *
+     * @return int|null|void
+     */
+    protected function checkIfComposerJsonIsNeeded(array $paramList) {
+        if (empty($paramList)) {
+            // no params -> show help
+            return false;
         }
 
-        return 0;
+        $commandList = array(
+            'archive',
+            'dump-autoload',
+            'dumpautoload',
+            'info',
+            'install',
+            'remove',
+            'require',
+            'run-script',
+            'status',
+            'suggests',
+            'update',
+            'validate',
+        );
+
+        foreach ($commandList as $command) {
+            if (in_array($command, $paramList, true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Run composer command
+     *
+     * @param array $paramList Parameter list for composer
+     *
+     * @return int|null|void
+     */
+    protected function runComposer(array $paramList) {
+        $composerCmd = $this->getApplication()->getConfigValue('bin', 'composer');
+
+        $command = new CommandBuilder();
+        $command->parse($composerCmd);
+
+        if (!empty($paramList)) {
+            $command->setArgumentList($paramList);
+        }
+
+        $command->executeInteractive();
     }
 }
