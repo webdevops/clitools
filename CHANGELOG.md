@@ -1,7 +1,7 @@
 CliTools Changelog
 ==================
 
-2.1.1 - UPCOMING
+2.1.1 - 2015-07-17
 ------------------
 - Fixed `php:composer` global command usage
 - Fixed `system:startup` terminal title in /etc/issue
