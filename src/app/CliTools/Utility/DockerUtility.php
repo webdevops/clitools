@@ -21,7 +21,7 @@ namespace CliTools\Utility;
  */
 
 use CliTools\Shell\CommandBuilder\CommandBuilder;
-use CliTools\Console\Shell\Executor;
+use CliTools\Shell\Executor;
 
 class DockerUtility {
 

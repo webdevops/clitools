@@ -20,7 +20,7 @@ namespace CliTools\Shell\CommandBuilder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Console\Shell\Executor;
+use CliTools\Shell\Executor;
 
 interface CommandBuilderInterface {
     /**
@@ -245,28 +245,28 @@ interface CommandBuilderInterface {
     /**
      * Get executor
      *
-     * @return \CliTools\Console\Shell\Executor
+     * @return \CliTools\Shell\Executor
      */
     public function getExecutor();
 
     /**
      * Set executor
      *
-     * @param \CliTools\Console\Shell\Executor $executor
+     * @param \CliTools\Shell\Executor $executor
      */
-    public function setExecutor(\CliTools\Console\Shell\Executor $executor);
+    public function setExecutor(\CliTools\Shell\Executor $executor);
 
     /**
      * Execute command
      *
-     * @return \CliTools\Console\Shell\Executor
+     * @return \CliTools\Shell\Executor
      */
     public function execute();
 
     /**
      * Execute command
      *
-     * @return \CliTools\Console\Shell\Executor
+     * @return \CliTools\Shell\Executor
      */
     public function executeInteractive();
 
