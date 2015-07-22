@@ -1,8 +1,9 @@
 CliTools Changelog
 ==================
 
-2.1.2 - 2015-07-17
+2.1.2 - 2015-07-22
 ------------------
+- Fixed smaller issues
 - Rollback to Symfony 2.7.1
 
 2.1.1 - 2015-07-17
