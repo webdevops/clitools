@@ -1,6 +1,6 @@
 <?php
 
-namespace CliTools\Console\Shell;
+namespace CliTools\Shell;
 
 /*
  * CliTools Command

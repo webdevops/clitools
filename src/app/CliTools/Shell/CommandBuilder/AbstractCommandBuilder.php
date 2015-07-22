@@ -20,7 +20,7 @@ namespace CliTools\Shell\CommandBuilder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Console\Shell\Executor;
+use CliTools\Shell\Executor;
 
 class AbstractCommandBuilder implements CommandBuilderInterface {
 
