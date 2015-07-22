@@ -8,3 +8,6 @@ install:
 
 autoload:
 	sh -c "cd src ; composer dump-autoload --optimize --no-dev"
+
+sloccount:
+	sloccount src/app/ src/command.php
