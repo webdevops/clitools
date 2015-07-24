@@ -20,14 +20,16 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-abstract class AbstractRemoteSyncCommand extends AbstractCommand {
+abstract class AbstractRemoteSyncCommand extends AbstractCommand
+{
 
     /**
      * Validate configuration
      *
      * @return boolean
      */
-    protected function validateConfiguration() {
+    protected function validateConfiguration()
+    {
         $ret = parent::validateConfiguration();
 
         $output = $this->output;

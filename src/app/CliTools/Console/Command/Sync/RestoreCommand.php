@@ -20,23 +20,25 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class RestoreCommand extends AbstractShareCommand {
+class RestoreCommand extends AbstractShareCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
+    protected function configure()
+    {
         parent::configure();
 
-        $this
-            ->setName('sync:restore')
-            ->setDescription('Restore files and database from share');
+        $this->setName('sync:restore')
+             ->setDescription('Restore files and database from share');
     }
 
     /**
      * Startup task
      */
-    protected function startup() {
+    protected function startup()
+    {
         $this->output->writeln('<h2>Starting share restore</h2>');
         parent::startup();
     }
@@ -44,7 +46,8 @@ class RestoreCommand extends AbstractShareCommand {
     /**
      * Restore task
      */
-    protected function runMain() {
+    protected function runMain()
+    {
         // ##################
         // Option specific runners
         // ##################
@@ -77,9 +80,10 @@ class RestoreCommand extends AbstractShareCommand {
     /**
      * Sync files with rsync
      */
-    protected function runTaskRsync() {
-        $source  = $this->getRsyncPathFromConfig() . self::PATH_DATA;
-        $target  = $this->getRsyncWorkingPath();
+    protected function runTaskRsync()
+    {
+        $source = $this->getRsyncPathFromConfig() . self::PATH_DATA;
+        $target = $this->getRsyncWorkingPath();
 
         $command = $this->createRsyncCommandWithConfiguration($source, $target, 'rsync');
         $command->executeInteractive();
@@ -88,7 +92,8 @@ class RestoreCommand extends AbstractShareCommand {
     /**
      * Sync files with mysql
      */
-    protected function runTaskMysql() {
+    protected function runTaskMysql()
+    {
         $source  = $this->getRsyncPathFromConfig() . self::PATH_DUMP;
         $target  = $this->tempDir;
         $command = $this->createRsyncCommand($source, $target);
@@ -106,7 +111,8 @@ class RestoreCommand extends AbstractShareCommand {
             if (!empty($database)) {
                 $this->output->writeln('<h1>Restoring database ' . $database . '</h1>');
 
-                $this->createMysqlRestoreCommand($database, $item->getPathname())->executeInteractive();
+                $this->createMysqlRestoreCommand($database, $item->getPathname())
+                     ->executeInteractive();
             }
         }
     }

@@ -20,17 +20,24 @@ namespace CliTools\Shell\CommandBuilder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class MysqlCommandBuilder extends CommandBuilder {
+class MysqlCommandBuilder extends CommandBuilder
+{
 
     /**
      * Initalized command
      */
-    protected function initialize() {
-        $this
-            ->addArgumentTemplate('--user=%s', DatabaseConnection::getDbUsername())
-            ->addArgumentTemplate('--password=%s', DatabaseConnection::getDbPassword())
-            ->addArgumentTemplate('--host=%s', DatabaseConnection::getDbHostname())
-            ->addArgumentTemplate('--port=%s', DatabaseConnection::getDbPort());
+    protected function initialize()
+    {
+        $this->addArgumentTemplate('--user=%s', DatabaseConnection::getDbUsername())
+             ->addArgumentTemplate(
+                 '--password=%s',
+                 DatabaseConnection::getDbPassword()
+             )
+             ->addArgumentTemplate('--host=%s', DatabaseConnection::getDbHostname())
+             ->addArgumentTemplate(
+                 '--port=%s',
+                 DatabaseConnection::getDbPort()
+             );
     }
 
 }

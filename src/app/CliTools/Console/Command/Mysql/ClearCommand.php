@@ -25,23 +25,26 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ClearCommand extends AbstractCommand {
+class ClearCommand extends AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
+    protected function configure()
+    {
         parent::configure();
 
-        $this
-            ->setName('mysql:clear')
-            ->setAliases(array('mysql:create'))
-            ->setDescription('Clear (recreate) database')
-            ->addArgument(
-                'db',
-                InputArgument::REQUIRED,
-                'Database name'
-            );
+        $this->setName('mysql:clear')
+             ->setAliases(array('mysql:create'))
+             ->setDescription(
+                 'Clear (recreate) database'
+             )
+             ->addArgument(
+                 'db',
+                 InputArgument::REQUIRED,
+                 'Database name'
+             );
     }
 
     /**
@@ -52,7 +55,8 @@ class ClearCommand extends AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $database = $input->getArgument('db');
 
         $output->writeln('<h2>Clearing database "' . $database . '"</h2>');

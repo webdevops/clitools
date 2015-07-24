@@ -27,36 +27,37 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
+class BeUserCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('typo3:beuser')
-            ->setDescription('Add backend admin user to database')
-            ->addArgument(
-                'database',
-                InputArgument::OPTIONAL,
-                'Database name'
-            )
-            ->addArgument(
-                'user',
-                InputArgument::OPTIONAL,
-                'Username'
-            )
-            ->addArgument(
-                'password',
-                InputArgument::OPTIONAL,
-                'Password'
-            )
-            ->addOption(
-                'plain',
-                null,
-                InputOption::VALUE_NONE,
-                'Do not crypt password (non salted password)'
-            );
+    protected function configure()
+    {
+        $this->setName('typo3:beuser')
+             ->setDescription('Add backend admin user to database')
+             ->addArgument(
+                 'database',
+                 InputArgument::OPTIONAL,
+                 'Database name'
+             )
+             ->addArgument(
+                 'user',
+                 InputArgument::OPTIONAL,
+                 'Username'
+             )
+             ->addArgument(
+                 'password',
+                 InputArgument::OPTIONAL,
+                 'Password'
+             )
+             ->addOption(
+                 'plain',
+                 null,
+                 InputOption::VALUE_NONE,
+                 'Do not crypt password (non salted password)'
+             );
     }
 
     /**
@@ -67,7 +68,8 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         // ##################
         // Init
         // ##################
@@ -125,7 +127,7 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
             $dbFound = false;
             foreach ($databaseList as $dbName) {
                 // Check if database is TYPO3 instance
-                $query = 'SELECT COUNT(*) as count
+                $query           = 'SELECT COUNT(*) as count
                             FROM information_schema.tables
                            WHERE table_schema = ' . DatabaseConnection::quote($dbName) . '
                              AND table_name = \'be_users\'';
@@ -157,7 +159,8 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand {
      * @param string $username Username
      * @param string $password Password (salted/hashed)
      */
-    protected function setTypo3UserForDatabase($database, $username, $password) {
+    protected function setTypo3UserForDatabase($database, $username, $password)
+    {
         // ##################
         // Update/insert user
         // ##################

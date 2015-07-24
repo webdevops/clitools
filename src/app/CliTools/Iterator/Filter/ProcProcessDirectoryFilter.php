@@ -20,14 +20,16 @@ namespace CliTools\Iterator\Filter;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class ProcProcessDirectoryFilter extends DirectoryFilter {
+class ProcProcessDirectoryFilter extends DirectoryFilter
+{
 
     /**
      * Filter process directories in /proc/
      *
      * @return bool
      */
-    public function accept() {
+    public function accept()
+    {
         if (!parent::accept()) {
             return false;
         }

@@ -20,26 +20,29 @@ namespace CliTools\Console\Command\TYPO3;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\Typo3Utility;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Utility\Typo3Utility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class SchedulerCommand extends \CliTools\Console\Command\AbstractCommand {
+class SchedulerCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('typo3:scheduler')
-            ->setDescription('Run scheduler on all (or one specific) TYPO3 instances')
-            ->addArgument(
-                'path',
-                InputArgument::OPTIONAL,
-                'Path to TYPO3 instance'
-);
+    protected function configure()
+    {
+        $this->setName('typo3:scheduler')
+             ->setDescription(
+                 'Run scheduler on all (or one specific) TYPO3 instances'
+             )
+             ->addArgument(
+                 'path',
+                 InputArgument::OPTIONAL,
+                 'Path to TYPO3 instance'
+             );
     }
 
     /**
@@ -50,11 +53,13 @@ class SchedulerCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         // ####################
         // Init
         // ####################
-        $basePath = $this->getApplication()->getConfigValue('config', 'www_base_path', '/var/www/');
+        $basePath = $this->getApplication()
+                         ->getConfigValue('config', 'www_base_path', '/var/www/');
         $maxDepth = 3;
 
         $basePath = Typo3Utility::guessBestTypo3BasePath($basePath, $input, 'path');
@@ -69,8 +74,8 @@ class SchedulerCommand extends \CliTools\Console\Command\AbstractCommand {
             try {
                 $command = new CommandBuilder('php');
                 $command->addArgument('/typo3/cli_dispatch.phpsh')
-                    ->addArgument('scheduler')
-                    ->executeInteractive();
+                        ->addArgument('scheduler')
+                        ->executeInteractive();
             } catch (\Exception $e) {
                 $output->writeln('<error>Failed TYPO3 scheduler on ' . $dirPath . '</error>');
             }

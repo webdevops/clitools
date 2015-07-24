@@ -21,49 +21,50 @@ namespace CliTools\Console\Command\TYPO3;
  */
 
 use CliTools\Database\DatabaseConnection;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
+class DomainCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('typo3:domain')
-            ->setDescription('Add common development domains to database')
-            ->addArgument(
-                'db',
-                InputArgument::OPTIONAL,
-                'Database name'
-            )
-            ->addOption(
-                'baseurl',
-                null,
-                InputOption::VALUE_NONE,
-                'Also set config.baseURL setting'
-            )
-            ->addOption(
-                'list',
-                null,
-                InputOption::VALUE_NONE,
-                'List only databases'
-            )
-            ->addOption(
-                'remove',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Remove domain (with wildcard support)'
-            )
-            ->addOption(
-                'duplicate',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Add duplication domains (will duplicate all domains in system, eg. for vagrant share)'
-            );
+    protected function configure()
+    {
+        $this->setName('typo3:domain')
+             ->setDescription('Add common development domains to database')
+             ->addArgument(
+                 'db',
+                 InputArgument::OPTIONAL,
+                 'Database name'
+             )
+             ->addOption(
+                 'baseurl',
+                 null,
+                 InputOption::VALUE_NONE,
+                 'Also set config.baseURL setting'
+             )
+             ->addOption(
+                 'list',
+                 null,
+                 InputOption::VALUE_NONE,
+                 'List only databases'
+             )
+             ->addOption(
+                 'remove',
+                 null,
+                 InputOption::VALUE_REQUIRED,
+                 'Remove domain (with wildcard support)'
+             )
+             ->addOption(
+                 'duplicate',
+                 null,
+                 InputOption::VALUE_REQUIRED,
+                 'Add duplication domains (will duplicate all domains in system, eg. for vagrant share)'
+             );
     }
 
     /**
@@ -74,7 +75,8 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         // ##################
         // Init
         // ##################
@@ -94,7 +96,7 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
 
             foreach ($databaseList as $dbName) {
                 // Check if database is TYPO3 instance
-                $query = 'SELECT COUNT(*) as count
+                $query           = 'SELECT COUNT(*) as count
                             FROM information_schema.tables
                            WHERE table_schema = ' . DatabaseConnection::quote($dbName) . '
                              AND table_name = \'sys_domain\'';
@@ -115,7 +117,8 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
     /**
      * Run tasks for one domain
      */
-    protected function runTaskForDomain($dbName) {
+    protected function runTaskForDomain($dbName)
+    {
         DatabaseConnection::switchDatabase($dbName);
 
         if ($this->input->getOption('list')) {
@@ -148,7 +151,8 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
     /**
      * Remove domains
      */
-    protected function removeDomains($pattern) {
+    protected function removeDomains($pattern)
+    {
         $pattern = str_replace('*', '%', $pattern);
 
         $query = 'DELETE FROM sys_domain WHERE domainName LIKE %s';
@@ -159,8 +163,9 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
     /**
      * Update baseURL config
      */
-    protected function updateBaseUrlConfig() {
-        $query = 'SELECT st.uid as template_id,
+    protected function updateBaseUrlConfig()
+    {
+        $query          = 'SELECT st.uid as template_id,
                          st.config as template_config,
                          (SELECT sd.domainName
                             FROM sys_domain sd
@@ -184,7 +189,7 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
             $templateConf = trim($templateConf);
 
             // Add new baseURL
-            $templateConf .= "\n" . 'config.baseURL = http://' . $domainName .'/';
+            $templateConf .= "\n" . 'config.baseURL = http://' . $domainName . '/';
 
             $query = 'UPDATE sys_template SET config = %s WHERE uid = %s';
             $query = sprintf($query, DatabaseConnection::quote($templateConf), (int)$templateId);
@@ -197,10 +202,12 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param string $suffix Domain suffix
      */
-    protected function addDuplicateDomains($suffix) {
-        $devDomain = '.' . $this->getApplication()->getConfigValue('config', 'domain_dev');
+    protected function addDuplicateDomains($suffix)
+    {
+        $devDomain = '.' . $this->getApplication()
+                                ->getConfigValue('config', 'domain_dev');
 
-        $query = 'SELECT * FROM sys_domain';
+        $query      = 'SELECT * FROM sys_domain';
         $domainList = DatabaseConnection::getAll($query);
 
         foreach ($domainList as $domain) {
@@ -209,7 +216,7 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
             $domainName = $domain['domainName'];
 
             // remove development suffix
-            $domainName = preg_replace('/' . preg_quote($devDomain). '$/', '', $domainName);
+            $domainName = preg_replace('/' . preg_quote($devDomain) . '$/', '', $domainName);
 
             // add share domain
             $domainName .= '.' . ltrim($suffix, '.');
@@ -225,8 +232,9 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param string $dbName Domain name
      */
-    protected function showDomainList($dbName) {
-        $query = 'SELECT domainName FROM sys_domain ORDER BY domainName ASC';
+    protected function showDomainList($dbName)
+    {
+        $query      = 'SELECT domainName FROM sys_domain ORDER BY domainName ASC';
         $domainList = DatabaseConnection::getCol($query);
 
         $this->output->writeln('<p>Domain list of "' . $dbName . '":</p>');
@@ -242,8 +250,10 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return void
      */
-    protected function manipulateDomains() {
-        $devDomain    = '.' . $this->getApplication()->getConfigValue('config', 'domain_dev');
+    protected function manipulateDomains()
+    {
+        $devDomain    = '.' . $this->getApplication()
+                                   ->getConfigValue('config', 'domain_dev');
         $domainLength = strlen($devDomain);
 
         // ##################

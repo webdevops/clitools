@@ -20,21 +20,23 @@ namespace CliTools\Console\Command\Common;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\UnixUtility;
-use CliTools\Utility\PhpUtility;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Utility\PhpUtility;
+use CliTools\Utility\UnixUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class MakeCommand extends \CliTools\Console\Command\AbstractCommand implements \CliTools\Console\Filter\AnyParameterFilterInterface {
+class MakeCommand extends \CliTools\Console\Command\AbstractCommand implements
+    \CliTools\Console\Filter\AnyParameterFilterInterface
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('make')
-            ->setDescription('Search Makefile updir and start makefile');
+    protected function configure()
+    {
+        $this->setName('make')
+             ->setDescription('Search Makefile updir and start makefile');
     }
 
     /**
@@ -45,9 +47,10 @@ class MakeCommand extends \CliTools\Console\Command\AbstractCommand implements \
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $paramList = $this->getFullParameterList();
-        $path = UnixUtility::findFileInDirectortyTree('Makefile');
+        $path      = UnixUtility::findFileInDirectortyTree('Makefile');
 
         if (!empty($path)) {
             $path = dirname($path);

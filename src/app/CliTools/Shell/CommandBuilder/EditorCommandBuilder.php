@@ -20,14 +20,16 @@ namespace CliTools\Shell\CommandBuilder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class EditorCommandBuilder extends CommandBuilder {
+class EditorCommandBuilder extends CommandBuilder
+{
 
     /**
      * Initalized command
      *
      * @throws \RuntimeException
      */
-    protected function initialize() {
+    protected function initialize()
+    {
         parent::initialize();
 
         $editorCmd = getenv('EDITOR');

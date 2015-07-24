@@ -25,37 +25,38 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand {
+abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->addOption(
-                'host',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'MySQL host'
-            )
-            ->addOption(
-                'port',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'MySQL port'
-            )
-            ->addOption(
-                'user',
-                'u',
-                InputOption::VALUE_REQUIRED,
-                'MySQL user'
-            )
-            ->addOption(
-                'password',
-                'p',
-                InputOption::VALUE_REQUIRED,
-                'MySQL host'
-            );
+    protected function configure()
+    {
+        $this->addOption(
+            'host',
+            null,
+            InputOption::VALUE_REQUIRED,
+            'MySQL host'
+        )
+             ->addOption(
+                 'port',
+                 null,
+                 InputOption::VALUE_REQUIRED,
+                 'MySQL port'
+             )
+             ->addOption(
+                 'user',
+                 'u',
+                 InputOption::VALUE_REQUIRED,
+                 'MySQL user'
+             )
+             ->addOption(
+                 'password',
+                 'p',
+                 InputOption::VALUE_REQUIRED,
+                 'MySQL host'
+             );
     }
 
     /**
@@ -67,7 +68,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @param InputInterface  $input  An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
      */
-    protected function initialize(InputInterface $input, OutputInterface $output) {
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
         parent::initialize($input, $output);
 
         $dsn      = null;
@@ -103,7 +105,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $password = $this->input->getOption('password');
         }
 
-        if ($dsn !== null || $user !== null || $password  !== null) {
+        if ($dsn !== null || $user !== null || $password !== null) {
             DatabaseConnection::setDsn($dsn, $user, $password);
         }
     }

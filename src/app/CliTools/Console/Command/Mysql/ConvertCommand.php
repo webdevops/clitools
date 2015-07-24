@@ -22,44 +22,45 @@ namespace CliTools\Console\Command\Mysql;
 
 use CliTools\Database\DatabaseConnection;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ConvertCommand extends AbstractCommand {
+class ConvertCommand extends AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
+    protected function configure()
+    {
         parent::configure();
 
-        $this
-            ->setName('mysql:convert')
-            ->setDescription('Convert charset/collation of a database')
-            ->addArgument(
-                'database',
-                InputArgument::REQUIRED,
-                'Database name'
-            )
-             ->addOption(
-                'charset',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Charset (default: utf8)'
+        $this->setName('mysql:convert')
+             ->setDescription('Convert charset/collation of a database')
+             ->addArgument(
+                 'database',
+                 InputArgument::REQUIRED,
+                 'Database name'
              )
-            ->addOption(
-                'collation',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Collation (default: utf8_general_ci)'
-            )
-            ->addOption(
-                'stdout',
-                null,
-                InputOption::VALUE_NONE,
-                'Only print sql statements, do not execute it'
-            );
+             ->addOption(
+                 'charset',
+                 null,
+                 InputOption::VALUE_REQUIRED,
+                 'Charset (default: utf8)'
+             )
+             ->addOption(
+                 'collation',
+                 null,
+                 InputOption::VALUE_REQUIRED,
+                 'Collation (default: utf8_general_ci)'
+             )
+             ->addOption(
+                 'stdout',
+                 null,
+                 InputOption::VALUE_NONE,
+                 'Only print sql statements, do not execute it'
+             );
     }
 
     /**
@@ -70,7 +71,8 @@ class ConvertCommand extends AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $charset   = 'utf8';
         $collation = 'utf8_general_ci';
         $stdout    = false;
@@ -94,7 +96,8 @@ class ConvertCommand extends AbstractCommand {
         // ##################
 
         $query = 'ALTER DATABASE %s CHARACTER SET %s COLLATE %s';
-        $query = sprintf($query,
+        $query = sprintf(
+            $query,
             DatabaseConnection::sanitizeSqlDatabase($database),
             DatabaseConnection::quote($charset),
             DatabaseConnection::quote($collation)
@@ -117,7 +120,8 @@ class ConvertCommand extends AbstractCommand {
         foreach ($tableList as $table) {
             // Build statement
             $query = 'ALTER TABLE %s.%s CONVERT TO CHARACTER SET %s COLLATE %s';
-            $query = sprintf($query,
+            $query = sprintf(
+                $query,
                 DatabaseConnection::sanitizeSqlDatabase($database),
                 DatabaseConnection::sanitizeSqlTable($table),
                 DatabaseConnection::quote($charset),

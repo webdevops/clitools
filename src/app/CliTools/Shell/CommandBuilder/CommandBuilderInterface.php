@@ -20,9 +20,8 @@ namespace CliTools\Shell\CommandBuilder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Shell\Executor;
-
-interface CommandBuilderInterface {
+interface CommandBuilderInterface
+{
     /**
      * @return string
      */

@@ -20,7 +20,8 @@ namespace CliTools\Reader;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class ConfigReader implements \ArrayAccess {
+class ConfigReader implements \ArrayAccess
+{
 
     /**
      * Data storage
@@ -34,7 +35,8 @@ class ConfigReader implements \ArrayAccess {
      *
      * @param array $data Data configuration
      */
-    public function __construct(array $data = null) {
+    public function __construct(array $data = null)
+    {
         if ($data !== null) {
             $this->setData($data);
         }
@@ -45,7 +47,8 @@ class ConfigReader implements \ArrayAccess {
      *
      * @param array $data Data configuration
      */
-    public function setData(array $data) {
+    public function setData(array $data)
+    {
         $this->data = $data;
     }
 
@@ -53,9 +56,11 @@ class ConfigReader implements \ArrayAccess {
      * Get value from specific node (dotted array notation)
      *
      * @param string|null $path Path to node (eg. foo.bar.baz)
+     *
      * @return mixed|null
      */
-    public function get($path = null) {
+    public function get($path = null)
+    {
         return $this->getNode($path);
     }
 
@@ -63,9 +68,11 @@ class ConfigReader implements \ArrayAccess {
      * Get array value from specific node (dotted array notation)
      *
      * @param string|null $path Path to node (eg. foo.bar.baz)
+     *
      * @return array|null
      */
-    public function getArray($path = null) {
+    public function getArray($path = null)
+    {
         $ret = $this->getNode($path);
 
         if (!is_array($ret)) {
@@ -79,9 +86,11 @@ class ConfigReader implements \ArrayAccess {
      * Get list of keys from specific node (dotted array notation)
      *
      * @param string|null $path Path to node (eg. foo.bar.baz)
+     *
      * @return array|null
      */
-    public function getList($path = null) {
+    public function getList($path = null)
+    {
         $ret = $this->getNode($path);
 
         if (is_array($ret)) {
@@ -99,7 +108,8 @@ class ConfigReader implements \ArrayAccess {
      * @param string $path  Path to node (eg. foo.bar.baz)
      * @param mixed  $value Value to set
      */
-    public function set($path, $value) {
+    public function set($path, $value)
+    {
         $node =& $this->getNode($path);
         $node = $value;
     }
@@ -107,9 +117,10 @@ class ConfigReader implements \ArrayAccess {
     /**
      * Clear value at specific node (dotted array notation)
      *
-     * @param null|string $path  Path to node (eg. foo.bar.baz)
+     * @param null|string $path Path to node (eg. foo.bar.baz)
      */
-    public function clear($path = null) {
+    public function clear($path = null)
+    {
         $node =& $this->getNode($path);
         $node = null;
     }
@@ -118,9 +129,11 @@ class ConfigReader implements \ArrayAccess {
      * Check if specific node exists
      *
      * @param null|string $path Path to node (eg. foo.bar.baz)
+     *
      * @return bool
      */
-    public function exists($path = null) {
+    public function exists($path = null)
+    {
         return ($this->getNode($path) !== null);
     }
 
@@ -128,9 +141,11 @@ class ConfigReader implements \ArrayAccess {
      * Get node by reference
      *
      * @param string|null $path Path to node (eg. foo.bar.baz)
+     *
      * @return mixed|null
      */
-    protected function &getNode($path) {
+    protected function &getNode($path)
+    {
         $data = &$this->data;
 
         if ($path !== null) {
@@ -159,7 +174,8 @@ class ConfigReader implements \ArrayAccess {
      * @param string $offset Array key
      * @param mixed  $value  Value
      */
-    public function offsetSet($offset, $value) {
+    public function offsetSet($offset, $value)
+    {
         if ($offset === null) {
             $this->data[] = $value;
         } else {
@@ -171,9 +187,11 @@ class ConfigReader implements \ArrayAccess {
      * Array accessor: Check if offset exists
      *
      * @param string $offset Array key
+     *
      * @return boolean
      */
-    public function offsetExists($offset) {
+    public function offsetExists($offset)
+    {
         return isset($this->data[$offset]);
     }
 
@@ -182,7 +200,8 @@ class ConfigReader implements \ArrayAccess {
      *
      * @param string $offset Array key
      */
-    public function offsetUnset($offset) {
+    public function offsetUnset($offset)
+    {
         unset($this->data[$offset]);
     }
 
@@ -190,9 +209,11 @@ class ConfigReader implements \ArrayAccess {
      * Array accessor: Get value at offset
      *
      * @param string $offset Array key
+     *
      * @return mixed
      */
-    public function offsetGet($offset) {
+    public function offsetGet($offset)
+    {
         return isset($this->data[$offset]) ? $this->data[$offset] : null;
     }
 

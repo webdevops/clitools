@@ -20,7 +20,8 @@ namespace CliTools\Utility;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class FilterUtility {
+class FilterUtility
+{
 
     /**
      * Filter mysql table list by filter
@@ -30,7 +31,8 @@ class FilterUtility {
      *
      * @return array
      */
-    public static function mysqlTableFilter(array $tables, array $filters) {
+    public static function mysqlTableFilter(array $tables, array $filters)
+    {
         $ret = array();
 
         foreach ($tables as $table) {
@@ -54,7 +56,8 @@ class FilterUtility {
      *
      * @return array
      */
-    public static function mysqlIgnoredTableFilter(array $tables, array $filters, $database = null) {
+    public static function mysqlIgnoredTableFilter(array $tables, array $filters, $database = null)
+    {
         $ret = array();
 
         foreach ($tables as $table) {

@@ -20,53 +20,54 @@ namespace CliTools\Console\Command\Docker;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\PhpUtility;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
-use CliTools\Shell\CommandBuilder\SelfCommandBuilder;
 use CliTools\Shell\CommandBuilder\EditorCommandBuilder;
+use CliTools\Shell\CommandBuilder\SelfCommandBuilder;
+use CliTools\Utility\PhpUtility;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CreateCommand extends AbstractCommand {
+class CreateCommand extends AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('docker:create')
-            ->setDescription('Create new docker boilerplate')
-            ->addArgument(
-                'path',
-                InputArgument::REQUIRED,
-                'Directory for new docker boilerplate instance'
-            )
-            ->addOption(
-                'docker',
-                'd',
-                InputOption::VALUE_REQUIRED,
-                'Docker Boilerplate repository'
-            )
-            ->addOption(
-                'code',
-                'c',
-                InputOption::VALUE_REQUIRED,
-                'Code repository'
-            )
-            ->addOption(
-                'make',
-                'm',
-                InputOption::VALUE_REQUIRED,
-                'Makefile command'
-            )
-            ->addOption(
-                'up',
-                null,
-                InputOption::VALUE_NONE,
-                'Build and start docker containers'
-            );
+    protected function configure()
+    {
+        $this->setName('docker:create')
+             ->setDescription('Create new docker boilerplate')
+             ->addArgument(
+                 'path',
+                 InputArgument::REQUIRED,
+                 'Directory for new docker boilerplate instance'
+             )
+             ->addOption(
+                 'docker',
+                 'd',
+                 InputOption::VALUE_REQUIRED,
+                 'Docker Boilerplate repository'
+             )
+             ->addOption(
+                 'code',
+                 'c',
+                 InputOption::VALUE_REQUIRED,
+                 'Code repository'
+             )
+             ->addOption(
+                 'make',
+                 'm',
+                 InputOption::VALUE_REQUIRED,
+                 'Makefile command'
+             )
+             ->addOption(
+                 'up',
+                 null,
+                 InputOption::VALUE_NONE,
+                 'Build and start docker containers'
+             );
     }
 
     /**
@@ -77,7 +78,8 @@ class CreateCommand extends AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $currDir = getcwd();
 
         $path = $input->getArgument('path');
@@ -87,7 +89,8 @@ class CreateCommand extends AbstractCommand {
             $boilerplateRepo = $this->input->getOption('docker');
         } else {
             // Boilerplate from config
-            $boilerplateRepo = $this->getApplication()->getConfigValue('docker', 'boilerplate');
+            $boilerplateRepo = $this->getApplication()
+                                    ->getConfigValue('docker', 'boilerplate');
         }
 
         $output->writeln('<h2>Creating new docker boilerplate instance in "' . $path . '"</h2>');
@@ -139,7 +142,8 @@ class CreateCommand extends AbstractCommand {
      *
      * @param string $path Path to file
      */
-    protected function startInteractiveEditor($path) {
+    protected function startInteractiveEditor($path)
+    {
         if (file_exists($path)) {
             // Start editor with file (if $EDITOR is set)
             try {
@@ -147,12 +151,11 @@ class CreateCommand extends AbstractCommand {
 
                 $this->setTerminalTitle('Edit', basename($path));
 
-                $this->output->writeln('<h2>Starting interactive EDITOR for file ' .$path . '</h2>');
+                $this->output->writeln('<h2>Starting interactive EDITOR for file ' . $path . '</h2>');
                 sleep(1);
 
-                $editor
-                    ->addArgument($path)
-                    ->executeInteractive();
+                $editor->addArgument($path)
+                       ->executeInteractive();
             } catch (\Exception $e) {
                 $this->addFinishMessage('<p-error>' . $e->getMessage() . '</p-error>');
             }
@@ -165,10 +168,11 @@ class CreateCommand extends AbstractCommand {
      * @param string $path Path
      * @param string $repo Repository
      */
-    protected function createDockerInstance($path, $repo) {
+    protected function createDockerInstance($path, $repo)
+    {
         $this->setTerminalTitle('Cloning docker');
 
-        $command = new CommandBuilder('git','clone --branch=master --recursive %s %s', array($repo, $path));
+        $command = new CommandBuilder('git', 'clone --branch=master --recursive %s %s', array($repo, $path));
         $command->executeInteractive();
     }
 
@@ -178,7 +182,8 @@ class CreateCommand extends AbstractCommand {
      * @param string $path Path
      * @param string $repo Repository
      */
-    protected function initCode($path, $repo) {
+    protected function initCode($path, $repo)
+    {
         $this->setTerminalTitle('Cloning code');
 
         $path .= '/code';
@@ -193,13 +198,12 @@ class CreateCommand extends AbstractCommand {
 
             // Remove code directory
             $command = new CommandBuilder('rmdir');
-            $command
-                ->addArgumentSeparator()
-                ->addArgument($path)
-                ->executeInteractive();
+            $command->addArgumentSeparator()
+                    ->addArgument($path)
+                    ->executeInteractive();
         }
 
-        $command = new CommandBuilder('git','clone --branch=master --recursive %s %s', array($repo, $path));
+        $command = new CommandBuilder('git', 'clone --branch=master --recursive %s %s', array($repo, $path));
         $command->executeInteractive();
     }
 
@@ -209,7 +213,8 @@ class CreateCommand extends AbstractCommand {
      *
      * @param string $path Path
      */
-    protected function initDocumentRoot($path) {
+    protected function initDocumentRoot($path)
+    {
         $codePath      = $path . '/code';
         $dockerEnvFile = $path . '/docker-env.yml';
 
@@ -226,12 +231,16 @@ class CreateCommand extends AbstractCommand {
             $documentRoot = 'code/web';
         }
 
-        if ($documentRoot && is_file($dockerEnvFile) ) {
+        if ($documentRoot && is_file($dockerEnvFile)) {
             $dockerEnv = PhpUtility::fileGetContentsArray($dockerEnvFile);
 
             unset($line);
             foreach ($dockerEnv as &$line) {
-                $line = preg_replace('/^[\s]*DOCUMENT_ROOT[\s]*=code\/?[\s]*$/ms', 'DOCUMENT_ROOT=' . $documentRoot, $line);
+                $line = preg_replace(
+                    '/^[\s]*DOCUMENT_ROOT[\s]*=code\/?[\s]*$/ms',
+                    'DOCUMENT_ROOT=' . $documentRoot,
+                    $line
+                );
             }
             unset($line);
 
@@ -247,20 +256,20 @@ class CreateCommand extends AbstractCommand {
      * @param string $path        Path of code
      * @param string $makeCommand Makefile command
      */
-    protected function runMakefile($path, $makeCommand) {
+    protected function runMakefile($path, $makeCommand)
+    {
         $this->setTerminalTitle('Run make');
 
         $path .= '/code';
 
         $this->output->writeln('<comment>Running make with command "' . $makeCommand . '"</comment>');
         try {
-        PhpUtility::chdir($path);
+            PhpUtility::chdir($path);
 
-        // Remove code directory
-        $command = new CommandBuilder('make');
-        $command
-            ->addArgument($makeCommand)
-            ->executeInteractive();
+            // Remove code directory
+            $command = new CommandBuilder('make');
+            $command->addArgument($makeCommand)
+                    ->executeInteractive();
         } catch (\Exception $e) {
             $this->addFinishMessage('<p-error>Make command failed: ' . $e->getMessage() . '</p-error>');
         }
@@ -271,7 +280,8 @@ class CreateCommand extends AbstractCommand {
      *
      * @param string $path Path
      */
-    protected function startDockerInstance($path) {
+    protected function startDockerInstance($path)
+    {
         $this->setTerminalTitle('Start docker');
 
         $this->output->writeln('<comment>Building docker containers "' . $path . '"</comment>');

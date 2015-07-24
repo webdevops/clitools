@@ -20,21 +20,23 @@ namespace CliTools\Console\Command\Php;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\UnixUtility;
-use CliTools\Utility\PhpUtility;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Utility\PhpUtility;
+use CliTools\Utility\UnixUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ComposerCommand extends \CliTools\Console\Command\AbstractCommand implements \CliTools\Console\Filter\AnyParameterFilterInterface {
+class ComposerCommand extends \CliTools\Console\Command\AbstractCommand implements
+    \CliTools\Console\Filter\AnyParameterFilterInterface
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('php:composer')
-            ->setDescription('Search composer.json updir and start composer');
+    protected function configure()
+    {
+        $this->setName('php:composer')
+             ->setDescription('Search composer.json updir and start composer');
     }
 
     /**
@@ -45,7 +47,8 @@ class ComposerCommand extends \CliTools\Console\Command\AbstractCommand implemen
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $paramList = $this->getFullParameterList();
 
         if ($this->checkIfComposerJsonIsNeeded($paramList)) {
@@ -60,6 +63,7 @@ class ComposerCommand extends \CliTools\Console\Command\AbstractCommand implemen
                 return $this->runComposer($paramList);
             } else {
                 $this->output->writeln('<error>No composer.json found in tree</error>');
+
                 return 1;
             }
         } else {
@@ -74,7 +78,8 @@ class ComposerCommand extends \CliTools\Console\Command\AbstractCommand implemen
      *
      * @return int|null|void
      */
-    protected function checkIfComposerJsonIsNeeded(array $paramList) {
+    protected function checkIfComposerJsonIsNeeded(array $paramList)
+    {
         if (empty($paramList)) {
             // no params -> show help
             return false;
@@ -111,8 +116,10 @@ class ComposerCommand extends \CliTools\Console\Command\AbstractCommand implemen
      *
      * @return int|null|void
      */
-    protected function runComposer(array $paramList) {
-        $composerCmd = $this->getApplication()->getConfigValue('bin', 'composer');
+    protected function runComposer(array $paramList)
+    {
+        $composerCmd = $this->getApplication()
+                            ->getConfigValue('bin', 'composer');
 
         $command = new CommandBuilder();
         $command->parse($composerCmd);

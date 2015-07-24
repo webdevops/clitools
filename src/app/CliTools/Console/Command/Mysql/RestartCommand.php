@@ -20,19 +20,20 @@ namespace CliTools\Console\Command\Mysql;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Shell\CommandBuilder\CommandBuilder;
 
-class RestartCommand extends AbstractCommand {
+class RestartCommand extends AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('mysql:restart')
-            ->setDescription('Restart MySQL');
+    protected function configure()
+    {
+        $this->setName('mysql:restart')
+             ->setDescription('Restart MySQL');
     }
 
     /**
@@ -43,7 +44,8 @@ class RestartCommand extends AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $this->elevateProcess($input, $output);
 
         $command = new CommandBuilder('service', 'mysql restart');

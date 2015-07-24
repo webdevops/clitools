@@ -22,41 +22,42 @@ namespace CliTools\Console\Command\Mysql;
 
 use CliTools\Database\DatabaseConnection;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
-use CliTools\Shell\CommandBuilder\MysqlCommandBuilder;
 use CliTools\Shell\CommandBuilder\CommandBuilderInterface;
+use CliTools\Shell\CommandBuilder\MysqlCommandBuilder;
 use CliTools\Utility\FilterUtility;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BackupCommand extends AbstractCommand {
+class BackupCommand extends AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
+    protected function configure()
+    {
         parent::configure();
 
-        $this
-            ->setName('mysql:backup')
-            ->setDescription('Backup database')
-            ->addArgument(
+        $this->setName('mysql:backup')
+             ->setDescription('Backup database')
+             ->addArgument(
                  'db',
                  InputArgument::REQUIRED,
                  'Database name'
-            )
-            ->addArgument(
+             )
+             ->addArgument(
                  'file',
                  InputArgument::REQUIRED,
                  'File (mysql dump)'
-            )
-            ->addOption(
-                'filter',
-                'f',
-                InputOption::VALUE_REQUIRED,
-                'Filter (eg. typo3)'
-            );
+             )
+             ->addOption(
+                 'filter',
+                 'f',
+                 InputOption::VALUE_REQUIRED,
+                 'Filter (eg. typo3)'
+             );
     }
 
     /**
@@ -67,7 +68,8 @@ class BackupCommand extends AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $database = $input->getArgument('db');
         $dumpFile = $input->getArgument('file');
         $filter   = $input->getOption('filter');
@@ -108,7 +110,7 @@ class BackupCommand extends AbstractCommand {
                 $output->writeln('<p>Using LZMA compression</p>');
                 $commandCompressor = new CommandBuilder('xz');
                 $commandCompressor->addArgument('--compress')
-                    ->addArgument('--stdout');
+                                  ->addArgument('--stdout');
                 break;
         }
 
@@ -140,11 +142,13 @@ class BackupCommand extends AbstractCommand {
      *
      * @return CommandBuilderInterface
      */
-    protected function addFilterArguments(CommandBuilderInterface $commandDump, $database, $filter) {
+    protected function addFilterArguments(CommandBuilderInterface $commandDump, $database, $filter)
+    {
         $command = $commandDump;
 
         // get filter
-        $filterList = $this->getApplication()->getConfigValue('mysql-backup-filter', $filter);
+        $filterList = $this->getApplication()
+                           ->getConfigValue('mysql-backup-filter', $filter);
 
         if (empty($filterList)) {
             throw new \RuntimeException('MySQL dump filters "' . $filter . '" not available"');
@@ -170,9 +174,8 @@ class BackupCommand extends AbstractCommand {
 
         // Combine both commands to one
         $command = new \CliTools\Shell\CommandBuilder\OutputCombineCommandBuilder();
-        $command
-            ->addCommandForCombinedOutput($commandStructure)
-            ->addCommandForCombinedOutput($commandData);
+        $command->addCommandForCombinedOutput($commandStructure)
+                ->addCommandForCombinedOutput($commandData);
 
         return $command;
     }

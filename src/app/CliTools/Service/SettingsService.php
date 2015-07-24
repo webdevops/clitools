@@ -20,7 +20,8 @@ namespace CliTools\Service;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class SettingsService {
+class SettingsService
+{
 
     /**
      * Path to settings file
@@ -39,7 +40,8 @@ class SettingsService {
     /**
      * Constructor
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->settingsPath = getenv('HOME') . '/.clitools.state';
         $this->load();
     }
@@ -47,10 +49,11 @@ class SettingsService {
     /**
      * Set value
      *
-     * @param string $key    Setting key
-     * @param mixed  $value  Value
+     * @param string $key   Setting key
+     * @param mixed  $value Value
      */
-    public function set($key, $value) {
+    public function set($key, $value)
+    {
         $this->values[$key] = $value;
     }
 
@@ -61,7 +64,8 @@ class SettingsService {
      *
      * @return null|mixed
      */
-    public function get($key) {
+    public function get($key)
+    {
         $ret = null;
 
         if (array_key_exists($key, $this->values)) {
@@ -74,9 +78,10 @@ class SettingsService {
     /**
      * Load settings from .clitool.state file
      */
-    public function load() {
+    public function load()
+    {
         if (file_exists($this->settingsPath)) {
-            $content = file_get_contents($this->settingsPath);
+            $content      = file_get_contents($this->settingsPath);
             $this->values = json_decode($content, true);
         }
     }
@@ -84,7 +89,8 @@ class SettingsService {
     /**
      * Store settings to .clitool.state file
      */
-    public function store() {
+    public function store()
+    {
         file_put_contents($this->settingsPath, json_encode($this->values));
     }
 }
