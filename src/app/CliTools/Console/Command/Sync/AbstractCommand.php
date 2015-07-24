@@ -929,9 +929,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     protected function createLocalMySqlCommand($database = null)
     {
         $command = new RemoteCommandBuilder('mysql');
-        $command// batch mode
-        ->addArgument('-B')// skip column names
-        ->addArgument('-N');
+        $command
+            // batch mode
+            ->addArgument('-B')
+            // skip column names
+            ->addArgument('-N');
 
         // Add username
         if (DatabaseConnection::getDbUsername()) {
