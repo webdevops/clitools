@@ -790,7 +790,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         PhpUtility::filePutContents($rsyncFilter, implode("\n", $list));
 
-        $command->addArgumentTemplate('--files-from=%s', $rsyncFilter);
+        $command->addArgumentTemplate('--include-from=%s', $rsyncFilter);
 
         // cleanup rsync file
         $command->getExecutor()
