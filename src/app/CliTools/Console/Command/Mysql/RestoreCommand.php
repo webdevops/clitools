@@ -26,6 +26,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\MysqlCommandBuilder;
 
 class RestoreCommand extends AbstractCommand {
 
@@ -89,16 +90,7 @@ class RestoreCommand extends AbstractCommand {
         putenv('MYSQL_PWD=' . DatabaseConnection::getDbPassword());
 
 
-        $commandMysql = new CommandBuilder('mysql','--user=%s %s --one-database', array(DatabaseConnection::getDbUsername(), $database));
-
-        // Set server connection details
-        if ($input->getOption('host')) {
-            $commandMysql->addArgumentTemplate('-h %s', $input->getOption('host'));
-        }
-
-        if ($input->getOption('port')) {
-            $commandMysql->addArgumentTemplate('-P %s', $input->getOption('port'));
-        }
+        $commandMysql = new MysqlCommandBuilder('mysql', '%s --one-database', array($database));
 
         $commandFile = new CommandBuilder();
         $commandFile->addArgument($dumpFile);

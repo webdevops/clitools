@@ -22,6 +22,7 @@ namespace CliTools\Console\Command\Mysql;
 
 use CliTools\Database\DatabaseConnection;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\MysqlCommandBuilder;
 use CliTools\Shell\CommandBuilder\CommandBuilderInterface;
 use CliTools\Utility\FilterUtility;
 use Symfony\Component\Console\Input\InputArgument;
@@ -111,16 +112,7 @@ class BackupCommand extends AbstractCommand {
                 break;
         }
 
-        $command = new CommandBuilder('mysqldump','--user=%s %s --single-transaction', array(DatabaseConnection::getDbUsername(), $database));
-
-        // Set server connection details
-        if ($input->getOption('host')) {
-            $command->addArgumentTemplate('-h %s', $input->getOption('host'));
-        }
-
-        if ($input->getOption('port')) {
-            $command->addArgumentTemplate('-P %s', $input->getOption('port'));
-        }
+        $command = new MysqlCommandBuilder('mysqldump', '--single-transaction %s', array($database));
 
         if (!empty($filter)) {
             $command = $this->addFilterArguments($command, $database, $filter);
