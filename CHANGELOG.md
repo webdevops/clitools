@@ -1,6 +1,10 @@
 CliTools Changelog
 ==================
 
+2.1.3 - 2015-07-22
+------------------
+- Changed github repository to webdevops organisation
+
 2.1.2 - 2015-07-22
 ------------------
 - Fixed smaller issues
