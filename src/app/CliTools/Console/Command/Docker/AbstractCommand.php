@@ -24,7 +24,8 @@ use CliTools\Shell\CommandBuilder\CommandBuilder;
 use CliTools\Shell\CommandBuilder\CommandBuilderInterface;
 use CliTools\Utility\PhpUtility;
 
-abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand {
+abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Docker path
@@ -38,7 +39,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @return bool|null|string
      */
-    protected function getDockerPath() {
+    protected function getDockerPath()
+    {
         if ($this->dockerPath === null) {
             $composePath = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
 
@@ -59,16 +61,19 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @return string|bool|null
      */
-    protected function getDockerEnv($containerName, $envName) {
+    protected function getDockerEnv($containerName, $envName)
+    {
         $ret = null;
 
         if (empty($containerName)) {
             $this->output->writeln('<p-error>No container specified</p-error>');
+
             return false;
         }
 
         if (empty($envName)) {
             $this->output->writeln('<p-error>No environment name specified</p-error>');
+
             return false;
         }
 
@@ -86,7 +91,9 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $conf = \CliTools\Utility\DockerUtility::getDockerConfiguration($dockerContainerName);
 
             if (empty($conf)) {
-                throw new \RuntimeException('Could not read docker configuration from container  "' . $dockerContainerName . '"');
+                throw new \RuntimeException(
+                    'Could not read docker configuration from container  "' . $dockerContainerName . '"'
+                );
             }
 
             if (!empty($conf->Config->Env[$envName])) {
@@ -105,14 +112,17 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @return int|null|void
      */
-    protected function executeDockerExec($containerName, CommandBuilderInterface $command) {
+    protected function executeDockerExec($containerName, CommandBuilderInterface $command)
+    {
         if (empty($containerName)) {
             $this->output->writeln('<p-error>No container specified</p-error>');
+
             return 1;
         }
 
         if (!$command->isExecuteable()) {
             $this->output->writeln('<p-error>No command specified or not executeable</p-error>');
+
             return 1;
         }
 
@@ -126,7 +136,10 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             // Switch to directory of docker-compose.yml
             PhpUtility::chdir($path);
 
-            $this->output->writeln('<info>Executing "' . $command->getCommand() . '" in docker container "' . $dockerContainerName . '" ...</info>');
+            $this->output->writeln(
+                '<info>Executing "' . $command->getCommand(
+                ) . '" in docker container "' . $dockerContainerName . '" ...</info>'
+            );
 
             $dockerCommand = new CommandBuilder('docker', 'exec -ti %s', array($dockerContainerName));
             $dockerCommand->append($command, false);
@@ -143,11 +156,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Execute docker compose run
      *
-     * @param  null|CommandBuilderInterface $command   Command
+     * @param  null|CommandBuilderInterface $command Command
      *
      * @return int|null|void
      */
-    protected function executeDockerCompose(CommandBuilderInterface $command = null) {
+    protected function executeDockerCompose(CommandBuilderInterface $command = null)
+    {
         // Search updir for docker-compose.yml
         $path = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
 
@@ -172,12 +186,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Execute docker compose run
      *
-     * @param  string          $containerName Container name
-     * @param  CommandBuilderInterface  $command       Command
+     * @param  string                  $containerName Container name
+     * @param  CommandBuilderInterface $command       Command
      *
      * @return int|null|void
      */
-    protected function executeDockerComposeRun($containerName, CommandBuilderInterface $command) {
+    protected function executeDockerComposeRun($containerName, CommandBuilderInterface $command)
+    {
         // Search updir for docker-compose.yml
         $path = $this->getDockerPath();
 
@@ -185,7 +200,10 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             // Switch to directory of docker-compose.yml
             PhpUtility::chdir($path);
 
-            $this->output->writeln('<info>Executing "' . $command->getCommand() . '" in docker container "' . $containerName . '" ...</info>');
+            $this->output->writeln(
+                '<info>Executing "' . $command->getCommand(
+                ) . '" in docker container "' . $containerName . '" ...</info>'
+            );
 
             $dockerCommand = new CommandBuilder('docker-compose', 'run --rm %s', array($containerName));
             $dockerCommand->append($command, false);

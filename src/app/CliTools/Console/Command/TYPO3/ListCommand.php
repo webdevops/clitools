@@ -26,20 +26,21 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ListCommand extends \CliTools\Console\Command\AbstractCommand {
+class ListCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('typo3:list')
-            ->setDescription('List all TYPO3 instances')
-            ->addArgument(
-                'path',
-                InputArgument::OPTIONAL,
-                'Path to TYPO3 instance'
-            );
+    protected function configure()
+    {
+        $this->setName('typo3:list')
+             ->setDescription('List all TYPO3 instances')
+             ->addArgument(
+                 'path',
+                 InputArgument::OPTIONAL,
+                 'Path to TYPO3 instance'
+             );
     }
 
     /**
@@ -50,12 +51,14 @@ class ListCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         // ####################
         // Init
         // ####################
-        $basePath        = $this->getApplication()->getConfigValue('config', 'www_base_path', '/var/www/');
-        $maxDepth        = 3;
+        $basePath = $this->getApplication()
+                         ->getConfigValue('config', 'www_base_path', '/var/www/');
+        $maxDepth = 3;
 
         $basePath = Typo3Utility::guessBestTypo3BasePath($basePath, $input, 'path');
 

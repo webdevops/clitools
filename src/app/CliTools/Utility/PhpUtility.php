@@ -20,15 +20,18 @@ namespace CliTools\Utility;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class PhpUtility {
+class PhpUtility
+{
 
     /**
      * Get content of file
      *
      * @param  string $file Filename
+     *
      * @return string
      */
-    public static function fileGetContents($file) {
+    public static function fileGetContents($file)
+    {
         if (!is_file($file) || !is_readable($file)) {
             throw new \RuntimeException('Could not read "' . $file . '"');
         }
@@ -40,9 +43,11 @@ class PhpUtility {
      * Get content of file (array)
      *
      * @param  string $file Filename
+     *
      * @return array
      */
-    public static function fileGetContentsArray($file) {
+    public static function fileGetContentsArray($file)
+    {
         $content = self::fileGetContents($file);
         $content = str_replace("/r/n", "/n", $content);
 
@@ -57,7 +62,8 @@ class PhpUtility {
      * @param string $file    Filename
      * @param string $content Content
      */
-    public static function filePutContents($file, $content) {
+    public static function filePutContents($file, $content)
+    {
         if (file_put_contents($file, $content) === false) {
             throw new \RuntimeException('Could not write "' . $file . '"');
         }
@@ -67,9 +73,11 @@ class PhpUtility {
      * Change current working directory
      *
      * @param string $path Target path
+     *
      * @throws \RuntimeException
      */
-    public static function chdir($path) {
+    public static function chdir($path)
+    {
         if (!is_dir($path) || !chdir($path)) {
             throw new \RuntimeException('Could not change working directory to "' . $path . '"');
         }
@@ -78,13 +86,15 @@ class PhpUtility {
     /**
      * Create new directory
      *
-     * @param string    $path      Directory
-     * @param integer   $mode      Perms
-     * @param boolean   $recursive Creation of nested directories
-     * @param resource  $context   Context
+     * @param string   $path      Directory
+     * @param integer  $mode      Perms
+     * @param boolean  $recursive Creation of nested directories
+     * @param resource $context   Context
+     *
      * @throws \RuntimeException
      */
-    public static function mkdir($path, $mode = 0777, $recursive = false, $context = null) {
+    public static function mkdir($path, $mode = 0777, $recursive = false, $context = null)
+    {
         if ($context !== null) {
             $res = mkdir($path, $mode, $recursive, $context);
         } else {
@@ -100,9 +110,11 @@ class PhpUtility {
      * Remove file
      *
      * @param string $path Path to file
+     *
      * @throws \RuntimeException
      */
-    public static function unlink($path) {
+    public static function unlink($path)
+    {
         if (!unlink($path)) {
             throw new \RuntimeException('Could not change working directory to "' . $path . '"');
         }
@@ -116,7 +128,8 @@ class PhpUtility {
      *
      * @return mixed
      */
-    public static function curlFetch($url, callable $progress = null) {
+    public static function curlFetch($url, callable $progress = null)
+    {
         $curlHandle = curl_init();
         curl_setopt($curlHandle, CURLOPT_URL, $url);
         curl_setopt($curlHandle, CURLOPT_VERBOSE, 0);
@@ -125,9 +138,13 @@ class PhpUtility {
         curl_setopt($curlHandle, CURLOPT_SSL_VERIFYHOST, 2);
         curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curlHandle, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($curlHandle, CURLOPT_USERAGENT, 'CliTools ' . CLITOOLS_COMMAND_VERSION . '(https://github.com/mblaschke/vagrant-clitools)');
+        curl_setopt(
+            $curlHandle,
+            CURLOPT_USERAGENT,
+            'CliTools ' . CLITOOLS_COMMAND_VERSION . '(https://github.com/webdevops/clitools)'
+        );
 
-        if($progress) {
+        if ($progress) {
             curl_setopt($curlHandle, CURLOPT_NOPROGRESS, false);
             curl_setopt($curlHandle, CURLOPT_PROGRESSFUNCTION, $progress);
         }
@@ -149,10 +166,11 @@ class PhpUtility {
      *
      * @return string
      */
-    public static function getMimeType($file) {
+    public static function getMimeType($file)
+    {
         // Get mime type from file
-        $finfo  = finfo_open(FILEINFO_MIME_TYPE);
-        $ret    = finfo_file($finfo, $file);
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $ret   = finfo_file($finfo, $file);
         finfo_close($finfo);
 
         if ($ret === 'application/octet-stream') {

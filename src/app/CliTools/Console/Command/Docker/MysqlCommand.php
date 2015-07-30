@@ -20,19 +20,20 @@ namespace CliTools\Console\Command\Docker;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
 
-class MysqlCommand extends AbstractCommand {
+class MysqlCommand extends AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('docker:mysql')
-            ->setDescription('Enter mysql in docker container');
+    protected function configure()
+    {
+        $this->setName('docker:mysql')
+             ->setDescription('Enter mysql in docker container');
     }
 
     /**
@@ -43,8 +44,10 @@ class MysqlCommand extends AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
-        $container = $this->getApplication()->getConfigValue('docker', 'container');
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
+        $container = $this->getApplication()
+                          ->getConfigValue('docker', 'container');
 
         $command = new RemoteCommandBuilder('mysql');
 

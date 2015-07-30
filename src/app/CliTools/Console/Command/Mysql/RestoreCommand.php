@@ -21,33 +21,35 @@ namespace CliTools\Console\Command\Mysql;
  */
 
 use CliTools\Database\DatabaseConnection;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\MysqlCommandBuilder;
 use CliTools\Utility\PhpUtility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Shell\CommandBuilder\CommandBuilder;
 
-class RestoreCommand extends AbstractCommand {
+class RestoreCommand extends AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
+    protected function configure()
+    {
         parent::configure();
 
-        $this
-            ->setName('mysql:restore')
-            ->setDescription('Restore database')
-            ->addArgument(
-                'db',
-                InputArgument::REQUIRED,
-                'Database name'
-            )
-            ->addArgument(
-                'file',
-                InputArgument::REQUIRED,
-                'File (mysql dump)'
-            );
+        $this->setName('mysql:restore')
+             ->setDescription('Restore database')
+             ->addArgument(
+                 'db',
+                 InputArgument::REQUIRED,
+                 'Database name'
+             )
+             ->addArgument(
+                 'file',
+                 InputArgument::REQUIRED,
+                 'File (mysql dump)'
+             );
     }
 
     /**
@@ -58,7 +60,8 @@ class RestoreCommand extends AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $database = $input->getArgument('db');
         $dumpFile = $input->getArgument('file');
 
@@ -89,16 +92,7 @@ class RestoreCommand extends AbstractCommand {
         putenv('MYSQL_PWD=' . DatabaseConnection::getDbPassword());
 
 
-        $commandMysql = new CommandBuilder('mysql','--user=%s %s --one-database', array(DatabaseConnection::getDbUsername(), $database));
-
-        // Set server connection details
-        if ($input->getOption('host')) {
-            $commandMysql->addArgumentTemplate('-h %s', $input->getOption('host'));
-        }
-
-        if ($input->getOption('port')) {
-            $commandMysql->addArgumentTemplate('-P %s', $input->getOption('port'));
-        }
+        $commandMysql = new MysqlCommandBuilder('mysql', '%s --one-database', array($database));
 
         $commandFile = new CommandBuilder();
         $commandFile->addArgument($dumpFile);
@@ -118,7 +112,7 @@ class RestoreCommand extends AbstractCommand {
 
             case 'application/x-lzma':
             case 'application/x-xz':
-            $output->writeln('<p>Using LZMA decompression</p>');
+                $output->writeln('<p>Using LZMA decompression</p>');
                 $commandFile->setCommand('xzcat');
                 break;
 

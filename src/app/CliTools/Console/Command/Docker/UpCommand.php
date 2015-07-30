@@ -20,19 +20,20 @@ namespace CliTools\Console\Command\Docker;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Shell\CommandBuilder\CommandBuilder;
 
-class UpCommand extends AbstractCommand {
+class UpCommand extends AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('docker:up')
-            ->setDescription('Start docker container (with fast switching)');
+    protected function configure()
+    {
+        $this->setName('docker:up')
+             ->setDescription('Start docker container (with fast switching)');
     }
 
     /**
@@ -43,10 +44,13 @@ class UpCommand extends AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
 
         $dockerPath     = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
-        $lastDockerPath = $this->getApplication()->getSettingsService()->get('docker.up.last');
+        $lastDockerPath = $this->getApplication()
+                               ->getSettingsService()
+                               ->get('docker.up.last');
 
         if (!empty($dockerPath)) {
             $dockerPath = dirname($dockerPath);
@@ -57,7 +61,7 @@ class UpCommand extends AbstractCommand {
         // Stop last docker instance
         if ($dockerPath && $lastDockerPath) {
             // Only stop if instance is another one
-            if($dockerPath !== $lastDockerPath) {
+            if ($dockerPath !== $lastDockerPath) {
                 $this->stopContainersFromPrevRun($lastDockerPath);
             }
         }
@@ -65,11 +69,13 @@ class UpCommand extends AbstractCommand {
         // Start current docker containers
         $this->output->writeln('<p>Start docker containers in "' . $dockerPath . '"</p>');
         $command = new CommandBuilder(null, 'up -d');
-        $ret = $this->executeDockerCompose($command);
+        $ret     = $this->executeDockerCompose($command);
 
         // Store docker path in settings (last docker startup)
         if ($dockerPath) {
-            $this->getApplication()->getSettingsService()->set('docker.up.last', $dockerPath);
+            $this->getApplication()
+                 ->getSettingsService()
+                 ->set('docker.up.last', $dockerPath);
         }
 
         return $ret;
@@ -80,7 +86,8 @@ class UpCommand extends AbstractCommand {
      *
      * @param string $path Path
      */
-    protected function stopContainersFromPrevRun($path) {
+    protected function stopContainersFromPrevRun($path)
+    {
         $currentPath = getcwd();
 
         try {
@@ -95,6 +102,7 @@ class UpCommand extends AbstractCommand {
 
             // Jump back
             \CliTools\Utility\PhpUtility::chdir($currentPath);
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
     }
 }

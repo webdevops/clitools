@@ -26,25 +26,29 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class InstallerCommand extends \CliTools\Console\Command\AbstractCommand {
+class InstallerCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('typo3:installer')
-            ->setDescription('Enable installer on all (or one specific) TYPO3 instances')
-            ->addArgument(
-                'path',
-                InputArgument::OPTIONAL,
-                'Path to TYPO3 instance'
-            )->addOption(
-                'remove',
-                'r',
-                InputOption::VALUE_NONE,
-                'Remove installer file'
-            );
+    protected function configure()
+    {
+        $this->setName('typo3:installer')
+             ->setDescription(
+                 'Enable installer on all (or one specific) TYPO3 instances'
+             )
+             ->addArgument(
+                 'path',
+                 InputArgument::OPTIONAL,
+                 'Path to TYPO3 instance'
+             )
+             ->addOption(
+                 'remove',
+                 'r',
+                 InputOption::VALUE_NONE,
+                 'Remove installer file'
+             );
     }
 
     /**
@@ -55,11 +59,13 @@ class InstallerCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         // ####################
         // Init
         // ####################
-        $basePath        = $this->getApplication()->getConfigValue('config', 'www_base_path', '/var/www/');
+        $basePath        = $this->getApplication()
+                                ->getConfigValue('config', 'www_base_path', '/var/www/');
         $maxDepth        = 3;
         $enableInstaller = true;
 

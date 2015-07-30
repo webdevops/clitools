@@ -24,15 +24,16 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class EnvCommand extends \CliTools\Console\Command\AbstractCommand {
+class EnvCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('system:env')
-            ->setDescription('List environment variables');
+    protected function configure()
+    {
+        $this->setName('system:env')
+             ->setDescription('List environment variables');
     }
 
     /**
@@ -43,7 +44,8 @@ class EnvCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
 
         $envNameList = array(
             'USER',

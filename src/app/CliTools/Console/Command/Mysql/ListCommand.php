@@ -28,40 +28,42 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ListCommand extends AbstractCommand {
+class ListCommand extends AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
+    protected function configure()
+    {
         parent::configure();
 
-        $this
-            ->setName('mysql:list')
-            ->setDescription('List all databases')
-            ->addOption(
-                'sort-name', null,
-                InputOption::VALUE_NONE,
-                'Sort output by table count'
-            )
-            ->addOption(
-                'sort-data',
-                null,
-                InputOption::VALUE_NONE,
-                'Sort output by data size'
-            )
-            ->addOption(
-                'sort-index',
-                null,
-                InputOption::VALUE_NONE,
-                'Sort output by index size'
-            )
-            ->addOption(
-                'sort-total',
-                null,
-                InputOption::VALUE_NONE,
-                'Sort output by total size'
-            );
+        $this->setName('mysql:list')
+             ->setDescription('List all databases')
+             ->addOption(
+                 'sort-name',
+                 null,
+                 InputOption::VALUE_NONE,
+                 'Sort output by table count'
+             )
+             ->addOption(
+                 'sort-data',
+                 null,
+                 InputOption::VALUE_NONE,
+                 'Sort output by data size'
+             )
+             ->addOption(
+                 'sort-index',
+                 null,
+                 InputOption::VALUE_NONE,
+                 'Sort output by index size'
+             )
+             ->addOption(
+                 'sort-total',
+                 null,
+                 InputOption::VALUE_NONE,
+                 'Sort output by total size'
+             );
     }
 
     /**
@@ -72,7 +74,8 @@ class ListCommand extends AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
 
         // Get list of databases
         $databaseList = DatabaseConnection::databaseList();
@@ -123,36 +126,51 @@ class ListCommand extends AbstractCommand {
             // ########################
 
             // Sort: default by name (natural sort)
-            uasort($databaseRowList, function ($a, $b) {
-                return strnatcmp($a['name'], $b['name']);
-            });
+            uasort(
+                $databaseRowList,
+                function ($a, $b) {
+                    return strnatcmp($a['name'], $b['name']);
+                }
+            );
 
             // Sort: by table names
             if ($input->getOption('sort-name')) {
-                uasort($databaseRowList, function ($a, $b) {
-                    return $a['table_count'] < $b['table_count'];
-                });
+                uasort(
+                    $databaseRowList,
+                    function ($a, $b) {
+                        return $a['table_count'] < $b['table_count'];
+                    }
+                );
             }
 
             // Sort: by data size
             if ($input->getOption('sort-data')) {
-                uasort($databaseRowList, function ($a, $b) {
-                    return $a['data_size'] < $b['data_size'];
-                });
+                uasort(
+                    $databaseRowList,
+                    function ($a, $b) {
+                        return $a['data_size'] < $b['data_size'];
+                    }
+                );
             }
 
             // Sort: by index size
             if ($input->getOption('sort-index')) {
-                uasort($databaseRowList, function ($a, $b) {
-                    return $a['index_size'] < $b['index_size'];
-                });
+                uasort(
+                    $databaseRowList,
+                    function ($a, $b) {
+                        return $a['index_size'] < $b['index_size'];
+                    }
+                );
             }
 
             // Sort: by total size
             if ($input->getOption('sort-total')) {
-                uasort($databaseRowList, function ($a, $b) {
-                    return $a['total_size'] < $b['total_size'];
-                });
+                uasort(
+                    $databaseRowList,
+                    function ($a, $b) {
+                        return $a['total_size'] < $b['total_size'];
+                    }
+                );
             }
 
             // ########################

@@ -20,19 +20,20 @@ namespace CliTools\Console\Command\Php;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Shell\CommandBuilder\CommandBuilder;
 
-class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
+class RestartCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('php:restart')
-            ->setDescription('Restart PHP FPM');
+    protected function configure()
+    {
+        $this->setName('php:restart')
+             ->setDescription('Restart PHP FPM');
     }
 
     /**
@@ -43,7 +44,8 @@ class RestartCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $this->elevateProcess($input, $output);
 
         $command = new CommandBuilder('service', 'php5-fpm restart');

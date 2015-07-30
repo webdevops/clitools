@@ -23,7 +23,8 @@ namespace CliTools\Utility;
 use CliTools\Iterator\Filter\Typo3RecursiveDirectoryFilter;
 use Symfony\Component\Console\Input\InputInterface;
 
-class Typo3Utility {
+class Typo3Utility
+{
 
     const PASSWORD_TYPE_MD5_SALTED = 'md5_salted';
     const PASSWORD_TYPE_MD5        = 'md5';
@@ -36,7 +37,8 @@ class Typo3Utility {
      *
      * @return    null|string
      */
-    public static function generatePassword($password, $type = null) {
+    public static function generatePassword($password, $type = null)
+    {
         $ret = null;
 
         if ($type === null) {
@@ -77,7 +79,8 @@ class Typo3Utility {
      * @return null|string
      * @throws \RuntimeException
      */
-    public static function guessBestTypo3BasePath($basePath, $input = null, $inputArgName = null) {
+    public static function guessBestTypo3BasePath($basePath, $input = null, $inputArgName = null)
+    {
         $ret = null;
 
         $userPath = null;
@@ -121,7 +124,8 @@ class Typo3Utility {
      *
      * @return array
      */
-    public static function getTypo3InstancePathList($basePath, $maxDepth = 3) {
+    public static function getTypo3InstancePathList($basePath, $maxDepth = 3)
+    {
         $ret = array();
 
         // ####################

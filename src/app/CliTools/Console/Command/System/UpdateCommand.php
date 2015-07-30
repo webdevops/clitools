@@ -22,20 +22,20 @@ namespace CliTools\Console\Command\System;
 
 use CliTools\Service\SelfUpdateService;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
-use CliTools\Shell\CommandBuilder\SelfCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
+class UpdateCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('system:update')
-            ->setAliases(array('update'))
-            ->setDescription('Update system');
+    protected function configure()
+    {
+        $this->setName('system:update')
+             ->setAliases(array('update'))
+             ->setDescription('Update system');
     }
 
     /**
@@ -46,8 +46,11 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
-        if (!$this->getApplication()->isRunningAsRoot()) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
+        if (!$this->getApplication()
+                  ->isRunningAsRoot()
+        ) {
             $this->userUpdate($input, $output);
         }
 
@@ -66,13 +69,15 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    protected function userUpdate(InputInterface $input, OutputInterface $output) {
+    protected function userUpdate(InputInterface $input, OutputInterface $output)
+    {
         // GIT pulls and other stuff
 
         // ##################
         // SSH Git repo update
         // ##################
-        $reposDirectory = $this->getApplication()->getConfigValue('config', 'ssh_conf_path', '/opt/conf/ssh');
+        $reposDirectory = $this->getApplication()
+                               ->getConfigValue('config', 'ssh_conf_path', '/opt/conf/ssh');
 
         if (is_dir($reposDirectory) && is_dir($reposDirectory . '/.git')) {
             // SSH Git repo exists, update now
@@ -107,7 +112,8 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    protected function systemUpdate(InputInterface $input, OutputInterface $output) {
+    protected function systemUpdate(InputInterface $input, OutputInterface $output)
+    {
         $errorMsgList = array();
 
         // ##################
@@ -204,8 +210,10 @@ class UpdateCommand extends \CliTools\Console\Command\AbstractCommand {
      * @param OutputInterface $output Output
      * @param string          $msg    Message
      */
-    protected function outputBlock($output, $msg) {
-        list($termWidth) = $this->getApplication()->getTerminalDimensions();
+    protected function outputBlock($output, $msg)
+    {
+        list($termWidth) = $this->getApplication()
+                                ->getTerminalDimensions();
         $separator = '<info>' . str_repeat('-', $termWidth) . '</info>';
 
         $msg = str_repeat(' ', $termWidth - strlen($msg) - 10) . $msg;

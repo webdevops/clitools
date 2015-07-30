@@ -20,24 +20,25 @@ namespace CliTools\Console\Command\Common;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class FixRightsCommand extends \CliTools\Console\Command\AbstractCommand {
+class FixRightsCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('fix-rights')
-            ->setDescription('Fix rights of multiple directories and files')
-            ->addArgument(
-                'path',
-                InputArgument::REQUIRED | InputArgument::IS_ARRAY,
-                'Path (multiple)'
-            );
+    protected function configure()
+    {
+        $this->setName('fix-rights')
+             ->setDescription('Fix rights of multiple directories and files')
+             ->addArgument(
+                 'path',
+                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
+                 'Path (multiple)'
+             );
     }
 
     /**
@@ -48,7 +49,8 @@ class FixRightsCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $pathList = $this->input->getArgument('path');
 
         $this->checkPathList($pathList);
@@ -75,7 +77,8 @@ class FixRightsCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param \SplFileInfo $file
      */
-    protected function setRights(\SplFileInfo $file) {
+    protected function setRights(\SplFileInfo $file)
+    {
         $isDir = false;
 
         if ($file->isDir()) {
@@ -113,9 +116,11 @@ class FixRightsCommand extends \CliTools\Console\Command\AbstractCommand {
      * Check path list
      *
      * @param $pathList
+     *
      * @throws \RuntimeException
      */
-    protected function checkPathList($pathList) {
+    protected function checkPathList($pathList)
+    {
         foreach ($pathList as $path) {
             if (!file_exists($path)) {
                 throw new \RuntimeException('Path "' . $path . '" does not exists or is not writeable');

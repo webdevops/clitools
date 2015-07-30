@@ -20,12 +20,14 @@ namespace CliTools\Console\Command\System;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\UnixUtility;
 use CliTools\Shell\CommandBuilder\SelfCommandBuilder;
+use CliTools\Utility\UnixUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implements \CliTools\Console\Filter\OnlyRootFilterInterface {
+class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implements
+    \CliTools\Console\Filter\OnlyRootFilterInterface
+{
 
     /**
      * List of warning messages
@@ -37,10 +39,10 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('system:crontask')
-            ->setDescription('System cron task');
+    protected function configure()
+    {
+        $this->setName('system:crontask')
+             ->setDescription('System cron task');
     }
 
     /**
@@ -51,10 +53,13 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $this->setupBanner();
 
-        if ($this->getApplication()->getConfigValue('syscheck', 'enabled', true)) {
+        if ($this->getApplication()
+                 ->getConfigValue('syscheck', 'enabled', true)
+        ) {
             $this->systemCheck();
         }
 
@@ -64,10 +69,12 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
     /**
      * Setup banner
      */
-    protected function setupBanner() {
+    protected function setupBanner()
+    {
         $command = new SelfCommandBuilder();
         $command->addArgument('system:banner');
-        $output = $command->execute()->getOutputString();
+        $output = $command->execute()
+                          ->getOutputString();
 
         // escape special chars for /etc/issue
         $outputIssue = addcslashes($output, '\\');
@@ -81,17 +88,22 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
     /**
      * Check system health
      */
-    protected function systemCheck() {
+    protected function systemCheck()
+    {
         $this->systemCheckDiskUsage();
 
         if (!empty($this->sysCheckMessageList)) {
-            if ($this->getApplication()->getConfigValue('syscheck', 'growl', 0)) {
+            if ($this->getApplication()
+                     ->getConfigValue('syscheck', 'growl', 0)
+            ) {
                 // Growl notification
                 $message = 'WARNING:' . "\n\n" . implode("\n", $this->sysCheckMessageList);
                 $this->sendGrowlMessage('CliTools :: System Check Warnings', $message);
             }
 
-            if ($this->getApplication()->getConfigValue('syscheck', 'wall', 0)) {
+            if ($this->getApplication()
+                     ->getConfigValue('syscheck', 'wall', 0)
+            ) {
                 // Local wall message
                 $msgPrefix = ' - ';
                 $message   = ' -- CliTools :: System Check Warnings --' . "\n\n";
@@ -108,11 +120,14 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
      * @param string $title   Notification title
      * @param string $message Notification message
      */
-    protected function sendGrowlMessage($title, $message) {
+    protected function sendGrowlMessage($title, $message)
+    {
         require CLITOOLS_ROOT_FS . '/vendor/jamiebicknell/Growl-GNTP/growl.gntp.php';
 
-        $growlServer   = (string)$this->getApplication()->getConfigValue('growl', 'server', null);
-        $growlPassword = (string)$this->getApplication()->getConfigValue('growl', 'password', null);
+        $growlServer   = (string)$this->getApplication()
+                                      ->getConfigValue('growl', 'server', null);
+        $growlPassword = (string)$this->getApplication()
+                                      ->getConfigValue('growl', 'password', null);
 
         if (!empty($growlServer)) {
             $growl = new \Growl($growlServer, $growlPassword);
@@ -129,8 +144,12 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
     /**
      * Check system disk usage
      */
-    protected function systemCheckDiskUsage() {
-        $diskUsageLimit = abs($this->getApplication()->getConfigValue('syscheck', 'diskusage', 0));
+    protected function systemCheckDiskUsage()
+    {
+        $diskUsageLimit = abs(
+            $this->getApplication()
+                 ->getConfigValue('syscheck', 'diskusage', 0)
+        );
 
         if (!empty($diskUsageLimit)) {
             $mountInfoList = UnixUtility::mountInfoList();
@@ -143,7 +162,10 @@ class CrontaskCommand extends \CliTools\Console\Command\AbstractCommand implemen
                 );
 
                 if ($usageInt >= $diskUsageLimit) {
-                    $this->sysCheckMessageList[] = 'Mount "' . $mount . '" exceeds limit of ' . $diskUsageLimit . '% (' . implode(', ', $statsLine) . ')';
+                    $this->sysCheckMessageList[] = 'Mount "' . $mount . '" exceeds limit of ' . $diskUsageLimit . '% (' . implode(
+                            ', ',
+                            $statsLine
+                        ) . ')';
                 }
             }
         }

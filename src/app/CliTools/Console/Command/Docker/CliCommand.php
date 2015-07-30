@@ -24,15 +24,18 @@ use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\AnyParameterFilterInterface {
+class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\AnyParameterFilterInterface
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('docker:cli')
-            ->setDescription('Run cli command in docker container (defined by CLI_SCRIPT and CLI_USER as docker environment variable)');
+    protected function configure()
+    {
+        $this->setName('docker:cli')
+             ->setDescription(
+                 'Run cli command in docker container (defined by CLI_SCRIPT and CLI_USER as docker environment variable)'
+             );
     }
 
     /**
@@ -43,12 +46,15 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $ret = 0;
 
         $paramList = $this->getFullParameterList();
-        $container = $this->getApplication()->getConfigValue('docker', 'container');
-        $cliMethod = $this->getApplication()->getConfigValue('docker', 'climethod');
+        $container = $this->getApplication()
+                          ->getConfigValue('docker', 'container');
+        $cliMethod = $this->getApplication()
+                          ->getConfigValue('docker', 'climethod');
 
         switch ($cliMethod) {
             ###########################
@@ -59,7 +65,10 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
                 $cliUser   = $this->getDockerEnv($container, 'CLI_USER');
 
                 if (empty($cliScript)) {
-                    $output->writeln('<p-error>Docker container "' . $container . '" doesn\'t have environment variable "CLI_SCRIPT"</p-error>');
+                    $output->writeln(
+                        '<p-error>Docker container "' . $container . '" doesn\'t have environment variable "CLI_SCRIPT"</p-error>'
+                    );
+
                     return 1;
                 }
 
@@ -89,7 +98,7 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
                 break;
 
             default:
-                $output->writeln('<p-error>CliMethod "' . $cliMethod .'" not defined</p-error>');
+                $output->writeln('<p-error>CliMethod "' . $cliMethod . '" not defined</p-error>');
                 $ret = 1;
                 break;
         }

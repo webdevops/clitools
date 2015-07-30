@@ -25,21 +25,24 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DebugCommand extends AbstractCommand {
+class DebugCommand extends AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('mysql:debug')
-            ->setAliases(array('mysql:querylog'))
-            ->setDescription('Debug mysql connections')
-            ->addArgument(
-                'grep',
-                InputArgument::OPTIONAL,
-                'Grep'
-            );
+    protected function configure()
+    {
+        $this->setName('mysql:debug')
+             ->setAliases(array('mysql:querylog'))
+             ->setDescription(
+                 'Debug mysql connections'
+             )
+             ->addArgument(
+                 'grep',
+                 InputArgument::OPTIONAL,
+                 'Grep'
+             );
     }
 
     /**
@@ -50,10 +53,12 @@ class DebugCommand extends AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $this->elevateProcess($input, $output);
 
-        $debugLogLocation = $this->getApplication()->getConfigValue('db', 'debug_log_dir');
+        $debugLogLocation = $this->getApplication()
+                                 ->getConfigValue('db', 'debug_log_dir');
         $debugLogDir      = dirname($debugLogLocation);
 
         $output->writeln('<h2>Starting MySQL general query log</h2>');
@@ -91,7 +96,8 @@ class DebugCommand extends AbstractCommand {
                 $query = 'SET GLOBAL general_log = \'OFF\'';
                 DatabaseConnection::exec($query);
             };
-            $this->getApplication()->registerTearDown($tearDownFunc);
+            $this->getApplication()
+                 ->registerTearDown($tearDownFunc);
 
             // Read grep value
             $grep = null;

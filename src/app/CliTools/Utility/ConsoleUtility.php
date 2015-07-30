@@ -20,12 +20,13 @@ namespace CliTools\Utility;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\Question;
 
-abstract class ConsoleUtility {
+abstract class ConsoleUtility
+{
 
     /**
      * Input
@@ -50,7 +51,8 @@ abstract class ConsoleUtility {
      * @param InputInterface  $input  An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
      */
-    public static function initialize(InputInterface $input, OutputInterface $output) {
+    public static function initialize(InputInterface $input, OutputInterface $output)
+    {
         self::$input  = $input;
         self::$output = $output;
     }
@@ -60,7 +62,8 @@ abstract class ConsoleUtility {
      *
      * @return InputInterface
      */
-    public static function input() {
+    public static function input()
+    {
         return self::$input;
     }
 
@@ -69,7 +72,8 @@ abstract class ConsoleUtility {
      *
      * @return OutputInterface
      */
-    public static function getOutput() {
+    public static function getOutput()
+    {
         return self::$output;
     }
 
@@ -79,7 +83,8 @@ abstract class ConsoleUtility {
      * @param string $area Area
      * @param string $line Line
      */
-    public static function verboseWriteln($area, $line) {
+    public static function verboseWriteln($area, $line)
+    {
         if (self::$output->isVerbose()) {
 
             // Special stuff if line is exception
@@ -114,18 +119,19 @@ abstract class ConsoleUtility {
     /**
      * Ask question with yes/no detection
      *
-     * @param string $question  Question
-     * @param string $default   Default
+     * @param string $question Question
+     * @param string $default  Default
      *
      * @return bool
      */
-    public static function questionYesNo($message, $default) {
+    public static function questionYesNo($message, $default)
+    {
         $ret = false;
 
         while (1) {
-            $question = new Question('<question> >>> ' . $message . '</question> [yes/no] ', $default);
+            $question       = new Question('<question> >>> ' . $message . '</question> [yes/no] ', $default);
             $questionDialog = new QuestionHelper();
-            $answer = $questionDialog->ask(self::$input, self::$output, $question);
+            $answer         = $questionDialog->ask(self::$input, self::$output, $question);
 
             if (stripos($answer, 'n') === 0) {
                 $ret = false;

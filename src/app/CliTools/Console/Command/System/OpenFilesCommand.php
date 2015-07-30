@@ -20,22 +20,23 @@ namespace CliTools\Console\Command\System;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\FormatUtility;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Utility\FormatUtility;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class OpenFilesCommand extends \CliTools\Console\Command\AbstractCommand {
+class OpenFilesCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('system:openfiles')
-            ->setDescription('List swap usage');
+    protected function configure()
+    {
+        $this->setName('system:openfiles')
+             ->setDescription('List swap usage');
     }
 
     /**
@@ -46,19 +47,25 @@ class OpenFilesCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $this->elevateProcess($input, $output);
 
         $procList       = array();
         $openFilesTotal = 0;
 
         $command = new CommandBuilder('lsof', '-n');
-        $command->addPipeCommand( new CommandBuilder('grep', '-oE \'^[a-z]+\'') )
-            ->addPipeCommand( new CommandBuilder('sort') )
-            ->addPipeCommand( new CommandBuilder('uniq', '-c') )
-            ->addPipeCommand( new CommandBuilder('sort', '-n'))
-            ->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_NO_STDERR);
-        $execOutput = $command->execute()->getOutput();
+        $command->addPipeCommand(new CommandBuilder('grep', '-oE \'^[a-z]+\''))
+                ->addPipeCommand(
+                    new CommandBuilder('sort')
+                )
+                ->addPipeCommand(new CommandBuilder('uniq', '-c'))
+                ->addPipeCommand(
+                    new CommandBuilder('sort', '-n')
+                )
+                ->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_NO_STDERR);
+        $execOutput = $command->execute()
+                              ->getOutput();
 
         foreach ($execOutput as $execOutputLine) {
             // get open files and proc name from output

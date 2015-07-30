@@ -20,25 +20,26 @@ namespace CliTools\Console\Command\Docker;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
 
-class RootCommand extends AbstractCommand {
+class RootCommand extends AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('docker:root')
-            ->setDescription('Enter shell as root in docker container')
-            ->addArgument(
-                'container',
-                InputArgument::OPTIONAL,
-                'Container'
-            );
+    protected function configure()
+    {
+        $this->setName('docker:root')
+             ->setDescription('Enter shell as root in docker container')
+             ->addArgument(
+                 'container',
+                 InputArgument::OPTIONAL,
+                 'Container'
+             );
     }
 
     /**
@@ -49,8 +50,10 @@ class RootCommand extends AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
-        $container = $this->getApplication()->getConfigValue('docker', 'container');
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
+        $container = $this->getApplication()
+                          ->getConfigValue('docker', 'container');
 
         if ($input->getArgument('container')) {
             $container = $input->getArgument('container');
@@ -59,7 +62,7 @@ class RootCommand extends AbstractCommand {
         $this->setTerminalTitle('docker', 'root', $container);
 
         $command = new RemoteCommandBuilder('bash');
-        $ret = $this->executeDockerExec($container, $command);
+        $ret     = $this->executeDockerExec($container, $command);
 
         return $ret;
     }

@@ -20,6 +20,7 @@ namespace CliTools\Shell\CommandBuilder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class RemoteCommandBuilder extends CommandBuilder {
+class RemoteCommandBuilder extends CommandBuilder
+{
 
 }

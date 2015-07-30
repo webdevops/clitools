@@ -24,21 +24,24 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ApacheCommand extends \CliTools\Console\Command\AbstractCommand {
+class ApacheCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('log:apache')
-            ->setAliases(array('apache:log'))
-            ->setDescription('Show up apache log')
-            ->addArgument(
-                'grep',
-                InputArgument::OPTIONAL,
-                'Grep'
-            );
+    protected function configure()
+    {
+        $this->setName('log:apache')
+             ->setAliases(array('apache:log'))
+             ->setDescription(
+                 'Show up apache log'
+             )
+             ->addArgument(
+                 'grep',
+                 InputArgument::OPTIONAL,
+                 'Grep'
+             );
     }
 
     /**
@@ -49,7 +52,8 @@ class ApacheCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         // Read grep value
         $grep = null;
         if ($input->hasArgument('grep')) {

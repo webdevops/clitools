@@ -28,7 +28,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 
-abstract class AbstractTraceCommand extends AbstractCommand {
+abstract class AbstractTraceCommand extends AbstractCommand
+{
 
     /**
      * Process names for strace'ing
@@ -40,12 +41,13 @@ abstract class AbstractTraceCommand extends AbstractCommand {
     /**
      * Configure command
      */
-    protected function configure() {
+    protected function configure()
+    {
         $this->addArgument(
-                 'grep',
-                 InputArgument::OPTIONAL,
-                 'Grep'
-             )
+            'grep',
+            InputArgument::OPTIONAL,
+            'Grep'
+        )
              ->addOption(
                  'all',
                  null,
@@ -80,11 +82,12 @@ abstract class AbstractTraceCommand extends AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $this->elevateProcess($input, $output);
 
-        $pid        = null;
-        $grep       = $input->getArgument('grep');
+        $pid  = null;
+        $grep = $input->getArgument('grep');
 
         $command = new CommandBuilder('strace', '-f');
         $command->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_ALL_STDOUT);
@@ -105,7 +108,7 @@ abstract class AbstractTraceCommand extends AbstractCommand {
                     $questionDialog = new QuestionHelper();
 
                     $pid = $questionDialog->ask($input, $output, $question);
-                } catch(\InvalidArgumentException $e) {
+                } catch (\InvalidArgumentException $e) {
                     // Invalid value, just stop here
                     throw new \CliTools\Exception\StopException(1);
                 }
@@ -160,7 +163,8 @@ abstract class AbstractTraceCommand extends AbstractCommand {
      *
      * @return array
      */
-    protected function buildProcessList() {
+    protected function buildProcessList()
+    {
         $currentPid = posix_getpid();
 
         $processList = array(
@@ -169,8 +173,12 @@ abstract class AbstractTraceCommand extends AbstractCommand {
 
         $command = new CommandBuilder('ps');
         $command->addArgumentRaw('h -o pid,comm,args')
-            ->addArgumentTemplate('-C %s', implode(',', $this->traceProcessNameList));
-        $cmdOutput = $command->execute()->getOutput();
+                ->addArgumentTemplate(
+                    '-C %s',
+                    implode(',', $this->traceProcessNameList)
+                );
+        $cmdOutput = $command->execute()
+                             ->getOutput();
 
         $pidList = array();
         foreach ($cmdOutput as $outputLine) {

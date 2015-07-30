@@ -20,27 +20,28 @@ namespace CliTools\Console\Command\Docker;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Shell\CommandBuilder\CommandBuilder;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Helper\QuestionHelper;
-use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Shell\CommandBuilder\CommandBuilder;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 
-class SniffCommand extends AbstractCommand {
+class SniffCommand extends AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('docker:sniff')
-            ->setDescription('Start network sniffing with docker')
-            ->addArgument(
-                'protocol',
-                InputArgument::OPTIONAL,
-                'Protocol'
-            );
+    protected function configure()
+    {
+        $this->setName('docker:sniff')
+             ->setDescription('Start network sniffing with docker')
+             ->addArgument(
+                 'protocol',
+                 InputArgument::OPTIONAL,
+                 'Protocol'
+             );
     }
 
     /**
@@ -51,14 +52,16 @@ class SniffCommand extends AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $this->elevateProcess($input, $output);
 
-        $dockerInterface = $this->getApplication()->getConfigValue('docker', 'interface');
+        $dockerInterface = $this->getApplication()
+                                ->getConfigValue('docker', 'interface');
 
         $output->writeln('<h2>Starting network sniffing</h2>');
 
-        $protocol   = $this->getProtocol();
+        $protocol = $this->getProtocol();
 
         $command = new CommandBuilder();
 
@@ -113,7 +116,9 @@ class SniffCommand extends AbstractCommand {
             case 'http':
                 $output->writeln('<p>Using protocol "http"</p>');
                 $command->setCommand('tshark');
-                $command->addArgumentRaw('tcp port 80 or tcp port 443 -2 -V -R "http.request" -Tfields -e ip.dst -e http.request.method -e http.request.full_uri');
+                $command->addArgumentRaw(
+                    'tcp port 80 or tcp port 443 -2 -V -R "http.request" -Tfields -e ip.dst -e http.request.method -e http.request.full_uri'
+                );
                 break;
 
             // ##############
@@ -144,7 +149,9 @@ class SniffCommand extends AbstractCommand {
             case 'elasticsearch':
                 $output->writeln('<p>Using protocol "elasticsearch"</p>');
                 $command->setCommand('tcpdump');
-                $command->addArgumentRaw('-A -nn -s 0 \'tcp dst port 9200 and (((ip[2:2] - ((ip[0]&0xf)<<2)) - ((tcp[12]&0xf0)>>2)) != 0)\'');
+                $command->addArgumentRaw(
+                    '-A -nn -s 0 \'tcp dst port 9200 and (((ip[2:2] - ((ip[0]&0xf)<<2)) - ((tcp[12]&0xf0)>>2)) != 0)\''
+                );
                 break;
 
             // ##############
@@ -199,10 +206,13 @@ class SniffCommand extends AbstractCommand {
             // ##############
             default:
                 $output->writeln('<p-error>Protocol not supported:</p-error>');
-                $output->writeln('<p-error>  OSI layer 7: http, solr, elasticsearch, memcache, redis, smtp, mysql, dns</p-error>');
+                $output->writeln(
+                    '<p-error>  OSI layer 7: http, solr, elasticsearch, memcache, redis, smtp, mysql, dns</p-error>'
+                );
                 $output->writeln('<p-error>  OSI layer 4: tcp</p-error>');
                 $output->writeln('<p-error>  OSI layer 3: icmp</p-error>');
                 $output->writeln('<p-error>  OSI layer 2: arp</p-error>');
+
                 return 1;
                 break;
         }
@@ -224,7 +234,7 @@ class SniffCommand extends AbstractCommand {
                 break;
         }
 
-        $this->setTerminalTitle('sniffer', $protocol, '(' .  $command->getCommand() .')');
+        $this->setTerminalTitle('sniffer', $protocol, '(' . $command->getCommand() . ')');
 
         $command->executeInteractive();
 
@@ -237,10 +247,11 @@ class SniffCommand extends AbstractCommand {
      *
      * @return string
      */
-    protected function getProtocol() {
+    protected function getProtocol()
+    {
         $ret = null;
 
-        if(!$this->input->getArgument('protocol')) {
+        if (!$this->input->getArgument('protocol')) {
             $protocolList = array(
                 'http'          => 'HTTP (requests only)',
                 'http-full'     => 'HTTP (full)',
@@ -253,7 +264,7 @@ class SniffCommand extends AbstractCommand {
                 'dns'           => 'DNS',
                 'tcp'           => 'TCP',
                 'icmp'          => 'ICMP',
-                'arp'          => 'ARP',
+                'arp'           => 'ARP',
             );
 
             try {
@@ -263,7 +274,7 @@ class SniffCommand extends AbstractCommand {
                 $questionDialog = new QuestionHelper();
 
                 $ret = $questionDialog->ask($this->input, $this->output, $question);
-            } catch(\InvalidArgumentException $e) {
+            } catch (\InvalidArgumentException $e) {
                 // Invalid server context, just stop here
                 throw new \CliTools\Exception\StopException(1);
             }

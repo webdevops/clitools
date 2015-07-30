@@ -22,25 +22,27 @@ namespace CliTools\Console\Command\Sync;
 
 use CliTools\Database\DatabaseConnection;
 
-class ServerCommand extends AbstractRemoteSyncCommand {
+class ServerCommand extends AbstractRemoteSyncCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
+    protected function configure()
+    {
         parent::configure();
 
         $this->confArea = 'sync';
 
-        $this
-            ->setName('sync:server')
-            ->setDescription('Sync files and database from server');
+        $this->setName('sync:server')
+             ->setDescription('Sync files and database from server');
     }
 
     /**
      * Startup task
      */
-    protected function startup() {
+    protected function startup()
+    {
         $this->output->writeln('<h2>Starting server synchronization</h2>');
         parent::startup();
     }
@@ -50,7 +52,8 @@ class ServerCommand extends AbstractRemoteSyncCommand {
      *
      * @return boolean
      */
-    protected function validateConfiguration() {
+    protected function validateConfiguration()
+    {
         $ret = parent::validateConfiguration();
 
         $output = $this->output;
@@ -73,7 +76,8 @@ class ServerCommand extends AbstractRemoteSyncCommand {
     /**
      * Backup task
      */
-    protected function runMain() {
+    protected function runMain()
+    {
         // ##################
         // Option specific runners
         // ##################
@@ -113,7 +117,8 @@ class ServerCommand extends AbstractRemoteSyncCommand {
     /**
      * Sync files with rsync
      */
-    protected function runTaskRsync() {
+    protected function runTaskRsync()
+    {
         // ##################
         // Restore dirs
         // ##################
@@ -127,7 +132,8 @@ class ServerCommand extends AbstractRemoteSyncCommand {
     /**
      * Sync database
      */
-    protected function runTaskDatabase() {
+    protected function runTaskDatabase()
+    {
         // ##################
         // Sync databases
         // ##################
@@ -155,7 +161,11 @@ class ServerCommand extends AbstractRemoteSyncCommand {
             $mysqldump = $this->createRemoteMySqlDumpCommand($foreignDatabase);
 
             if ($this->contextConfig->exists('mysql.filter')) {
-                $mysqldump = $this->addMysqlDumpFilterArguments($mysqldump, $foreignDatabase, $this->contextConfig->get('mysql.filter'));
+                $mysqldump = $this->addMysqlDumpFilterArguments(
+                    $mysqldump,
+                    $foreignDatabase,
+                    $this->contextConfig->get('mysql.filter')
+                );
             }
 
             $command = $this->wrapRemoteCommand($mysqldump);
@@ -168,7 +178,8 @@ class ServerCommand extends AbstractRemoteSyncCommand {
             // ##########
             $this->output->writeln('<p>Restoring database "' . $localDatabase . '"</p>');
 
-            $this->createMysqlRestoreCommand($localDatabase, $dumpFile)->executeInteractive();
+            $this->createMysqlRestoreCommand($localDatabase, $dumpFile)
+                 ->executeInteractive();
         }
     }
 

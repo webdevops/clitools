@@ -20,14 +20,16 @@ namespace CliTools\Iterator\Filter;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class DirectoryFilter extends \FilterIterator {
+class DirectoryFilter extends \FilterIterator
+{
 
     /**
      * Filter for directories
      *
      * @return bool
      */
-    public function accept() {
+    public function accept()
+    {
         /** @var \DirectoryIterator $dirEntry */
         $dirEntry = $this->current();
 

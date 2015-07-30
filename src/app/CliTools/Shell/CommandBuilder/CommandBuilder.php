@@ -20,6 +20,7 @@ namespace CliTools\Shell\CommandBuilder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class CommandBuilder extends AbstractCommandBuilder {
+class CommandBuilder extends AbstractCommandBuilder
+{
 
 }

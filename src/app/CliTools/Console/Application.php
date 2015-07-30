@@ -20,14 +20,15 @@ namespace CliTools\Console;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Console\Formatter\OutputFormatterStyle;
 use CliTools\Database\DatabaseConnection;
 use CliTools\Service\SettingsService;
-use CliTools\Console\Formatter\OutputFormatterStyle;
+use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\ArgvInput;
 
-class Application extends \Symfony\Component\Console\Application {
+class Application extends \Symfony\Component\Console\Application
+{
 
     /**
      * Configuration
@@ -40,7 +41,7 @@ class Application extends \Symfony\Component\Console\Application {
             'class'  => array(),
             'ignore' => array(),
         ),
-        '_files' => array(),
+        '_files'   => array(),
     );
 
     /**
@@ -67,7 +68,8 @@ class Application extends \Symfony\Component\Console\Application {
      *
      * @param string $file Config file (.ini)
      */
-    public function loadConfig($file) {
+    public function loadConfig($file)
+    {
         if (is_readable($file)) {
             $parsedConfig = parse_ini_file($file, true);
             $this->config = array_replace_recursive($this->config, $parsedConfig);
@@ -85,7 +87,8 @@ class Application extends \Symfony\Component\Console\Application {
      *
      * @return null
      */
-    public function getConfigValue($area, $confKey, $defaultValue = null) {
+    public function getConfigValue($area, $confKey, $defaultValue = null)
+    {
         $ret = $defaultValue;
 
         if (isset($this->config[$area][$confKey])) {
@@ -98,7 +101,8 @@ class Application extends \Symfony\Component\Console\Application {
     /**
      * Initialize
      */
-    public function initialize() {
+    public function initialize()
+    {
         $this->initializeErrorHandler();
         $this->initializeChecks();
         $this->initializeConfiguration();
@@ -110,14 +114,16 @@ class Application extends \Symfony\Component\Console\Application {
      *
      * @param callable $func
      */
-    public function registerTearDown(callable $func) {
+    public function registerTearDown(callable $func)
+    {
         $this->tearDownFuncList[] = $func;
     }
 
     /**
      * Call teardown callbacks
      */
-    public function callTearDown() {
+    public function callTearDown()
+    {
         foreach ($this->tearDownFuncList as $func) {
             call_user_func($func);
         }
@@ -137,7 +143,8 @@ class Application extends \Symfony\Component\Console\Application {
      * @return int 0 if everything went fine, or an error code
      * @throws \Exception
      */
-    public function doRun(InputInterface $input, OutputInterface $output) {
+    public function doRun(InputInterface $input, OutputInterface $output)
+    {
         $ret = 0;
 
         try {
@@ -151,7 +158,8 @@ class Application extends \Symfony\Component\Console\Application {
             if (!empty($command) && $command instanceof \CliTools\Console\Filter\AnyParameterFilterInterface) {
                 // Remove all paramters and fake input without any paramters
                 // prevent eg. --help message
-                $argCount = $command->getDefinition()->getArgumentRequiredCount();
+                $argCount = $command->getDefinition()
+                                    ->getArgumentRequiredCount();
 
                 $argvFiltered = array_splice($_SERVER['argv'], 0, 2 + $argCount);
 
@@ -162,7 +170,7 @@ class Application extends \Symfony\Component\Console\Application {
             } else {
                 $ret = parent::doRun($input, $output);
             }
-        } catch(\CliTools\Exception\StopException $e) {
+        } catch (\CliTools\Exception\StopException $e) {
             $this->callTearDown();
             $ret = (int)$e->getMessage();
         } catch (\Exception $e) {
@@ -182,36 +190,42 @@ class Application extends \Symfony\Component\Console\Application {
      * @param InputInterface  $input  An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
      */
-    protected function configureIO(InputInterface $input, OutputInterface $output) {
+    protected function configureIO(InputInterface $input, OutputInterface $output)
+    {
         parent::configureIO($input, $output);
 
         $style = new OutputFormatterStyle();
         $style->setApplication($this);
         $style->setWrap('-', '-');
-        $output->getFormatter()->setStyle('h1', $style);
+        $output->getFormatter()
+               ->setStyle('h1', $style);
 
         $style = new OutputFormatterStyle();
         $style->setPaddingOutside(' ===> ');
-        $output->getFormatter()->setStyle('h2', $style);
+        $output->getFormatter()
+               ->setStyle('h2', $style);
 
         $style = new OutputFormatterStyle();
         $style->setPaddingOutside('   -  ');
-        $output->getFormatter()->setStyle('p', $style);
+        $output->getFormatter()
+               ->setStyle('p', $style);
 
         $style = new OutputFormatterStyle('white', 'red');
         $style->setPadding(' [EE] ');
-        $output->getFormatter()->setStyle('p-error', $style);
+        $output->getFormatter()
+               ->setStyle('p-error', $style);
     }
 
     /**
      * Initialize POSIX trap
      */
-    protected function initializePosixTrap() {
+    protected function initializePosixTrap()
+    {
         declare(ticks = 1);
 
         $me = $this;
 
-        $signalHandler = function ($signal) use($me) {
+        $signalHandler = function ($signal) use ($me) {
             $me->callTearDown();
 
             // Prevent terminal messup
@@ -225,7 +239,8 @@ class Application extends \Symfony\Component\Console\Application {
     /**
      * Init error handler
      */
-    protected function initializeErrorHandler() {
+    protected function initializeErrorHandler()
+    {
         $errorHandler = function ($errno, $errstr, $errfile, $errline) {
             $msg = array(
                 'Message: ' . $errstr,
@@ -244,7 +259,8 @@ class Application extends \Symfony\Component\Console\Application {
     /**
      * PHP Checks
      */
-    protected function initializeChecks() {
+    protected function initializeChecks()
+    {
         if (!function_exists('pcntl_signal')) {
             echo ' [ERROR] PHP-Module pcnt not loaded';
             exit(1);
@@ -254,7 +270,8 @@ class Application extends \Symfony\Component\Console\Application {
     /**
      * Initialize configuration
      */
-    protected function initializeConfiguration() {
+    protected function initializeConfiguration()
+    {
         $isRunningAsRoot = $this->isRunningAsRoot();
 
         //#########################
@@ -289,7 +306,10 @@ class Application extends \Symfony\Component\Console\Application {
             foreach ($this->config['commands']['class'] as $class) {
                 if ($this->checkCommandClass($class)) {
                     // check OnlyRoot filter
-                    if (!$isRunningAsRoot && is_subclass_of($class, '\CliTools\Console\Filter\OnlyRootFilterInterface')
+                    if (!$isRunningAsRoot && is_subclass_of(
+                            $class,
+                            '\CliTools\Console\Filter\OnlyRootFilterInterface'
+                        )
                     ) {
                         // class only useable for root
                         continue;
@@ -308,7 +328,8 @@ class Application extends \Symfony\Component\Console\Application {
      *
      * @return bool
      */
-    protected function checkCommandClass($class) {
+    protected function checkCommandClass($class)
+    {
         // Ignores (deprecated)
         foreach ($this->config['commands']['ignore'] as $exclude) {
 
@@ -320,7 +341,6 @@ class Application extends \Symfony\Component\Console\Application {
                 if (preg_match($regExp, $class)) {
                     return false;
                 }
-
             } elseif ($class === $exclude) {
                 // direct ignore
                 return false;
@@ -338,7 +358,6 @@ class Application extends \Symfony\Component\Console\Application {
                 if (preg_match($regExp, $class)) {
                     return false;
                 }
-
             } elseif ($class === $exclude) {
                 // direct ignore
                 return false;
@@ -358,7 +377,8 @@ class Application extends \Symfony\Component\Console\Application {
      *
      * @return bool
      */
-    public function isRunningAsRoot() {
+    public function isRunningAsRoot()
+    {
         $currentUid = (int)posix_getuid();
 
         return $currentUid === 0;
@@ -369,10 +389,12 @@ class Application extends \Symfony\Component\Console\Application {
      *
      * @return SettingsService
      */
-    public function getSettingsService() {
+    public function getSettingsService()
+    {
         if ($this->settingsService === null) {
             $this->settingsService = new SettingsService();
         }
+
         return $this->settingsService;
     }
 
@@ -381,7 +403,8 @@ class Application extends \Symfony\Component\Console\Application {
      *
      * @param string $title Title
      */
-    public function setTerminalTitle($title) {
+    public function setTerminalTitle($title)
+    {
         // DECSLPP.
         echo "\033]0;" . 'ct: ' . $title . "\033\\";
     }

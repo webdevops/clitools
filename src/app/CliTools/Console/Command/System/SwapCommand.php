@@ -27,15 +27,16 @@ use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
+class SwapCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('system:swap')
-            ->setDescription('List swap usage');
+    protected function configure()
+    {
+        $this->setName('system:swap')
+             ->setDescription('List swap usage');
     }
 
     /**
@@ -46,7 +47,8 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $this->elevateProcess($input, $output);
 
         $dirIterator = new \DirectoryIterator('/proc');
@@ -83,9 +85,12 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
         // Sort
         // ########################
 
-        uasort($procList, function ($a, $b) {
-            return $a['swap'] > $b['swap'];
-        });
+        uasort(
+            $procList,
+            function ($a, $b) {
+                return $a['swap'] > $b['swap'];
+            }
+        );
 
         // ########################
         // Output
@@ -122,7 +127,8 @@ class SwapCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null
      */
-    protected function getProcessSwap($processStatsPath) {
+    protected function getProcessSwap($processStatsPath)
+    {
         $ret       = 0;
         $smapsFile = $processStatsPath . '/smaps';
 

@@ -20,20 +20,21 @@ namespace CliTools\Console\Command\System;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Shell\CommandBuilder\CommandBuilder;
 
-class ShutdownCommand extends \CliTools\Console\Command\AbstractCommand {
+class ShutdownCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('system:shutdown')
-            ->setAliases(array('shutdown'))
-            ->setDescription('Shutdown system');
+    protected function configure()
+    {
+        $this->setName('system:shutdown')
+             ->setAliases(array('shutdown'))
+             ->setDescription('Shutdown system');
     }
 
     /**
@@ -44,7 +45,8 @@ class ShutdownCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $this->elevateProcess($input, $output);
 
         $command = new CommandBuilder('shutdown', '-h now');

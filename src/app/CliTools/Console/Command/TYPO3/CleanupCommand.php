@@ -25,20 +25,21 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
+class CleanupCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('typo3:cleanup')
-            ->setDescription('Cleanup caches, logs and indexed search')
-            ->addArgument(
-                'db',
-                InputArgument::REQUIRED,
-                'Database name'
-            );
+    protected function configure()
+    {
+        $this->setName('typo3:cleanup')
+             ->setDescription('Cleanup caches, logs and indexed search')
+             ->addArgument(
+                 'db',
+                 InputArgument::REQUIRED,
+                 'Database name'
+             );
     }
 
     /**
@@ -49,7 +50,8 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         // ##################
         // Init
         // ##################
@@ -103,7 +105,8 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @param string $database Database
      */
-    protected function cleanupTypo3Database($database) {
+    protected function cleanupTypo3Database($database)
+    {
         $cleanupTableList = array();
 
         // Check if database is TYPO3 instance

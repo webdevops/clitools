@@ -20,7 +20,8 @@ namespace CliTools\Console\Command\Apache;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TraceCommand extends \CliTools\Console\Command\AbstractTraceCommand {
+class TraceCommand extends \CliTools\Console\Command\AbstractTraceCommand
+{
 
     /**
      * Process names for strace'ing
@@ -32,10 +33,10 @@ class TraceCommand extends \CliTools\Console\Command\AbstractTraceCommand {
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('apache:trace')
-            ->setDescription('Debug Apache processes with strace');
+    protected function configure()
+    {
+        $this->setName('apache:trace')
+             ->setDescription('Debug Apache processes with strace');
 
         parent::configure();
     }

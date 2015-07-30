@@ -22,7 +22,8 @@ namespace CliTools\Utility;
 
 use CliTools\Shell\CommandBuilder\CommandBuilder;
 
-abstract class UnixUtility {
+abstract class UnixUtility
+{
 
     /**
      * Path list
@@ -36,10 +37,12 @@ abstract class UnixUtility {
      *
      * @return string
      */
-    public static function lsbSystemDescription() {
+    public static function lsbSystemDescription()
+    {
         $command = new CommandBuilder('lsb_release', '-d');
-        $command->addPipeCommand( new CommandBuilder('cut', '-f 2 -d ":"') );
-        $ret = $command->execute()->getOutputString();
+        $command->addPipeCommand(new CommandBuilder('cut', '-f 2 -d ":"'));
+        $ret = $command->execute()
+                       ->getOutputString();
 
         $ret = trim($ret);
 
@@ -51,9 +54,11 @@ abstract class UnixUtility {
      *
      * @return integer
      */
-    public static function cpuCount() {
+    public static function cpuCount()
+    {
         $command = new CommandBuilder('nproc');
-        $ret = $command->execute()->getOutputString();
+        $ret     = $command->execute()
+                           ->getOutputString();
 
         $ret = (int)trim($ret);
 
@@ -65,10 +70,12 @@ abstract class UnixUtility {
      *
      * @return integer
      */
-    public static function memorySize() {
+    public static function memorySize()
+    {
         $command = new CommandBuilder('cat', '/proc/meminfo');
-        $command->addPipeCommand( new CommandBuilder('awk', '\'match($1,"MemTotal") == 1 {print $2}\'') );
-        $ret = $command->execute()->getOutputString();
+        $command->addPipeCommand(new CommandBuilder('awk', '\'match($1,"MemTotal") == 1 {print $2}\''));
+        $ret = $command->execute()
+                       ->getOutputString();
 
         // in bytes
         $ret = (int)trim($ret) * 1024;
@@ -81,9 +88,11 @@ abstract class UnixUtility {
      *
      * @return string
      */
-    public static function kernelVersion() {
+    public static function kernelVersion()
+    {
         $command = new CommandBuilder('uname', '-r');
-        $ret = $command->execute()->getOutputString();
+        $ret     = $command->execute()
+                           ->getOutputString();
 
         $ret = trim($ret);
 
@@ -95,11 +104,13 @@ abstract class UnixUtility {
      *
      * @return string
      */
-    public static function dockerVersion() {
+    public static function dockerVersion()
+    {
         $ret = '';
         try {
             $command = new CommandBuilder('docker', '--version');
-            $ret = $command->execute()->getOutputString();
+            $ret     = $command->execute()
+                               ->getOutputString();
 
             $ret = trim($ret);
         } catch (\Exception $e) {
@@ -114,11 +125,15 @@ abstract class UnixUtility {
      *
      * @return array
      */
-    public static function mountInfoList() {
+    public static function mountInfoList()
+    {
         $command = new CommandBuilder('df', '-a --type=ext3 --type=ext4 --type vmhgfs --type vboxsf --portability');
-        $command->addPipeCommand( new CommandBuilder('tail', '--lines=+2') )
-                ->addPipeCommand( new CommandBuilder('awk', '\'{ print $6 " " $3 " " $4 " " $5 }\'') );
-        $execOutput = $command->execute()->getOutput();
+        $command->addPipeCommand(new CommandBuilder('tail', '--lines=+2'))
+                ->addPipeCommand(
+                    new CommandBuilder('awk', '\'{ print $6 " " $3 " " $4 " " $5 }\'')
+                );
+        $execOutput = $command->execute()
+                              ->getOutput();
 
         $ret = array();
         foreach ($execOutput as $line) {
@@ -139,7 +154,8 @@ abstract class UnixUtility {
      *
      * @return array
      */
-    public static function networkInterfaceList($regExp) {
+    public static function networkInterfaceList($regExp)
+    {
         $sysDir = '/sys/class/net/';
 
         $netInterfaceList = array();
@@ -175,8 +191,11 @@ abstract class UnixUtility {
         unset($netInterfaceList['lo']);
 
         foreach ($netInterfaceList as $netName => &$netConf) {
-            $command = new CommandBuilder('ifdata', '-pa %s', array($netName));
-            $netConf['ipaddress'] = trim($command->execute()->getOutputString());
+            $command              = new CommandBuilder('ifdata', '-pa %s', array($netName));
+            $netConf['ipaddress'] = trim(
+                $command->execute()
+                        ->getOutputString()
+            );
         }
         unset($netConf);
 
@@ -188,11 +207,15 @@ abstract class UnixUtility {
      *
      * @return null
      */
-    public static function defaultGateway() {
+    public static function defaultGateway()
+    {
         $command = new CommandBuilder('ip', 'route show');
-        $command->addPipeCommand( new CommandBuilder('grep', '\'default\'') )
-            ->addPipeCommand( new CommandBuilder('awk', '\'{print $3}\'') );
-        $ret = $command->execute()->getOutputString();
+        $command->addPipeCommand(new CommandBuilder('grep', '\'default\''))
+                ->addPipeCommand(
+                    new CommandBuilder('awk', '\'{print $3}\'')
+                );
+        $ret = $command->execute()
+                       ->getOutputString();
 
         $ret = trim($ret);
 
@@ -204,7 +227,8 @@ abstract class UnixUtility {
      *
      * @param  string $message Message
      */
-    public static function sendWallMessage($message) {
+    public static function sendWallMessage($message)
+    {
         $wall = new CommandBuilder('wall');
         $wall->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_NULL);
 
@@ -219,10 +243,11 @@ abstract class UnixUtility {
      *
      * @return array
      */
-    public static function pathList() {
+    public static function pathList()
+    {
 
         if (self::$pathList === null) {
-            $pathList = explode(':', getenv('PATH'));
+            $pathList       = explode(':', getenv('PATH'));
             self::$pathList = array_map('trim', $pathList);
         }
 
@@ -236,9 +261,10 @@ abstract class UnixUtility {
      *
      * @return bool
      */
-    public static function checkExecutable($command) {
+    public static function checkExecutable($command)
+    {
 
-        if (strpos($command,'/') !== false) {
+        if (strpos($command, '/') !== false) {
             // command with path
             if (file_exists($command) && is_executable($command)) {
                 return true;
@@ -262,9 +288,11 @@ abstract class UnixUtility {
      *
      * @param string|array $file Filename
      * @param string       $path Path
+     *
      * @return boolean|string
      */
-    public static function findFileInDirectortyTree($file, $path = null) {
+    public static function findFileInDirectortyTree($file, $path = null)
+    {
         $ret = false;
 
         $fileList = (array)$file;
@@ -298,31 +326,32 @@ abstract class UnixUtility {
     /**
      * Reload tty
      */
-    public static function reloadTtyBanner($ttyName) {
+    public static function reloadTtyBanner($ttyName)
+    {
         // Check if we can reload tty
         try {
             $who = new CommandBuilder('who');
-            $who->addPipeCommand( new CommandBuilder('grep', '%s', array($ttyName)));
+            $who->addPipeCommand(new CommandBuilder('grep', '%s', array($ttyName)));
             $who->execute();
-
             // if there is no exception -> there is a logged in user
         } catch (\Exception $e) {
             // if there is an exception -> there is NO logged in user
 
             try {
                 $ps = new CommandBuilder('ps', 'h -o pid,comm,args -C getty');
-                $ps->addPipeCommand( new CommandBuilder('grep', '%s', array($ttyName)));
-                $output = $ps->execute()->getOutput();
+                $ps->addPipeCommand(new CommandBuilder('grep', '%s', array($ttyName)));
+                $output = $ps->execute()
+                             ->getOutput();
 
                 if (!empty($output)) {
                     $outputLine      = trim(reset($output));
                     $outputLineParts = preg_split('/[\s]+/', $outputLine);
-                    list($pid)       = $outputLineParts;
+                    list($pid) = $outputLineParts;
 
                     posix_kill($pid, SIGHUP);
                 }
-
-            }  catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
         }
     }
 }

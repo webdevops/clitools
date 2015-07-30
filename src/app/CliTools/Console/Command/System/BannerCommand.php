@@ -25,7 +25,9 @@ use CliTools\Utility\UnixUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements \CliTools\Console\Filter\OnlyRootFilterInterface {
+class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
+    \CliTools\Console\Filter\OnlyRootFilterInterface
+{
 
     /**
      * Enable automatic terminal title
@@ -37,10 +39,10 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('system:banner')
-            ->setDescription('Banner generator for /etc/issue');
+    protected function configure()
+    {
+        $this->setName('system:banner')
+             ->setDescription('Banner generator for /etc/issue');
     }
 
     /**
@@ -51,7 +53,8 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $clearScreen = "\033[H" . "\033[2J";
         $normalFont  = "\033[0m";
 
@@ -73,7 +76,8 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
      *
      * @return string
      */
-    protected function generateBannerHeader() {
+    protected function generateBannerHeader()
+    {
         // INFO: you can use figlet command for generating ascii-art-text
 
         $logo = '
@@ -104,7 +108,8 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
      *
      * @return string
      */
-    protected function generateSystemInfo() {
+    protected function generateSystemInfo()
+    {
         $ret = array();
 
         $leftCol  = array();

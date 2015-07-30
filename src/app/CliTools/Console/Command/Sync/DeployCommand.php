@@ -22,25 +22,27 @@ namespace CliTools\Console\Command\Sync;
 
 use CliTools\Database\DatabaseConnection;
 
-class DeployCommand extends AbstractRemoteSyncCommand {
+class DeployCommand extends AbstractRemoteSyncCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
+    protected function configure()
+    {
         parent::configure();
 
         $this->confArea = 'deploy';
 
-        $this
-            ->setName('sync:deploy')
-            ->setDescription('Deploy files and database to server');
+        $this->setName('sync:deploy')
+             ->setDescription('Deploy files and database to server');
     }
 
     /**
      * Startup task
      */
-    protected function startup() {
+    protected function startup()
+    {
         $this->output->writeln('<h2>Starting server deployment</h2>');
         parent::startup();
     }
@@ -48,7 +50,8 @@ class DeployCommand extends AbstractRemoteSyncCommand {
     /**
      * Backup task
      */
-    protected function runMain() {
+    protected function runMain()
+    {
         // ##################
         // Option specific runners
         // ##################
@@ -88,7 +91,8 @@ class DeployCommand extends AbstractRemoteSyncCommand {
     /**
      * Sync files with rsync
      */
-    protected function runTaskRsync() {
+    protected function runTaskRsync()
+    {
         // ##################
         // Deploy dirs
         // ##################
