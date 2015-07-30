@@ -141,7 +141,7 @@ class PhpUtility
         curl_setopt(
             $curlHandle,
             CURLOPT_USERAGENT,
-            'CliTools ' . CLITOOLS_COMMAND_VERSION . '(https://github.com/mblaschke/vagrant-clitools)'
+            'CliTools ' . CLITOOLS_COMMAND_VERSION . '(https://github.com/webdevops/clitools)'
         );
 
         if ($progress) {
