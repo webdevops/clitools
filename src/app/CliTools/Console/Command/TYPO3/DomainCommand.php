@@ -170,6 +170,7 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand
                          (SELECT sd.domainName
                             FROM sys_domain sd
                            WHERE sd.pid = st.pid
+                             AND sd.hidden = 0
                         ORDER BY sd.forced DESC,
                                  sd.sorting ASC
                            LIMIT 1) as domain_name
@@ -234,7 +235,10 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function showDomainList($dbName)
     {
-        $query      = 'SELECT domainName FROM sys_domain ORDER BY domainName ASC';
+        $query      = 'SELECT domainName
+                         FROM sys_domain
+                        WHERE hidden = 0
+                     ORDER BY domainName ASC';
         $domainList = DatabaseConnection::getCol($query);
 
         $this->output->writeln('<p>Domain list of "' . $dbName . '":</p>');
