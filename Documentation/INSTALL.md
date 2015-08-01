@@ -72,7 +72,7 @@ alias dcmysql='ct docker:mysql'
 
 CliTools will read /etc/clitools.ini (system wide) and ~/.clitools.ini (personal) for configuration
 
-The [default configuration](https://github.com/webdevops/vagrant-clitools/blob/develop/src/config.ini) is inside the phar.
+The [default configuration](https://github.com/webdevops/clitools/blob/develop/src/config.ini) is inside the phar.
 
 ### Docker specific configuration
 ```ini
