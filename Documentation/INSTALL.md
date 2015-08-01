@@ -119,3 +119,20 @@ ct self-update --beta
 ## Fallback update (if GitHub fails)
 ct self-update --fallback
 ```
+
+
+
+## Install clitools from source (You don't have to perform any tasks of the default installation procedure)
+
+```bash
+# Clone the repository
+git clone https://github.com/webdevops/clitools clitools
+
+# cd into cloned repository
+cd clitools
+
+# run all makefile tasks which are necessary for building and installing from source
+make all
+```
+
+If you take a look into the `Makefile` you see which tasks have been executed. The steps are: first the composer cmd, then the main build script and at last the previously built phar file gets copied to `/usr/local/bin` so that you can execute clitools just by typing `ct` without the complete path to the executable.
