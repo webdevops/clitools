@@ -1,7 +1,7 @@
 CliTools Changelog
 ==================
 
-2.1.4 - 2015-07-31
+2.1.4 - 2015-08-01
 ------------------
 - Fixed "CliTools\Shell\CommandBuilder\DatabaseConnection" not found
 - Fixed `typo3:domain` incorrect setting baseurl to hidden domains
