@@ -20,32 +20,33 @@ namespace CliTools\Console\Command\Docker;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 
-class ShellCommand extends AbstractCommand {
+class ShellCommand extends AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('docker:shell')
-            ->setDescription('Enter shell in docker container')
-            ->addArgument(
-                'container',
-                InputArgument::OPTIONAL,
-                'Container'
-            )
-            ->addOption(
-                'user',
-                'u',
-                InputOption::VALUE_REQUIRED,
-                'User for sudo'
-            );
+    protected function configure()
+    {
+        $this->setName('docker:shell')
+             ->setDescription('Enter shell in docker container')
+             ->addArgument(
+                 'container',
+                 InputArgument::OPTIONAL,
+                 'Container'
+             )
+             ->addOption(
+                 'user',
+                 'u',
+                 InputOption::VALUE_REQUIRED,
+                 'User for sudo'
+             );
     }
 
     /**
@@ -56,8 +57,10 @@ class ShellCommand extends AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
-        $container = $this->getApplication()->getConfigValue('docker', 'container');
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
+        $container = $this->getApplication()
+                          ->getConfigValue('docker', 'container');
 
         if ($input->getArgument('container')) {
             $container = $input->getArgument('container');

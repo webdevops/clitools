@@ -20,14 +20,15 @@ namespace CliTools\Console\Command;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\FullSelfCommandBuilder;
 use CliTools\Utility\ConsoleUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Shell\CommandBuilder\FullSelfCommandBuilder;
-use CliTools\Shell\CommandBuilder\CommandBuilder;
 
-abstract class AbstractCommand extends Command {
+abstract class AbstractCommand extends Command
+{
 
     /**
      * Message list (will be shown at the end)
@@ -51,6 +52,13 @@ abstract class AbstractCommand extends Command {
     protected $output;
 
     /**
+     * Enable automatic terminal title
+     *
+     * @var bool
+     */
+    protected $automaticTerminalTitle = true;
+
+    /**
      * Initializes the command just after the input has been validated.
      *
      * This is mainly useful when a lot of commands extends one main command
@@ -59,14 +67,17 @@ abstract class AbstractCommand extends Command {
      * @param InputInterface  $input  An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
      */
-    protected function initialize(InputInterface $input, OutputInterface $output) {
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
         $this->input  = $input;
         $this->output = $output;
 
         ConsoleUtility::initialize($input, $output);
 
-        // Set default terminal title
-        $this->setTerminalTitle(explode(':', $this->getName()));
+        if ($this->automaticTerminalTitle) {
+            // Set default terminal title
+            $this->setTerminalTitle(explode(':', $this->getName()));
+        }
     }
 
     /**
@@ -88,7 +99,8 @@ abstract class AbstractCommand extends Command {
      *
      * @api
      */
-    public function run(InputInterface $input, OutputInterface $output) {
+    public function run(InputInterface $input, OutputInterface $output)
+    {
 
         try {
             $ret = parent::run($input, $output);
@@ -105,11 +117,12 @@ abstract class AbstractCommand extends Command {
     /**
      * Get full parameter list
      *
-     * @param integer   $offset Parameter offset
+     * @param integer $offset Parameter offset
      *
      * @return mixed
      */
-    protected function getFullParameterList($offset = null) {
+    protected function getFullParameterList($offset = null)
+    {
         $ret = $_SERVER['argv'];
 
         // remove requested offset
@@ -128,8 +141,11 @@ abstract class AbstractCommand extends Command {
      *
      * @return int|null|void
      */
-    protected function elevateProcess(InputInterface $input, OutputInterface $output) {
-        if (!$this->getApplication()->isRunningAsRoot()) {
+    protected function elevateProcess(InputInterface $input, OutputInterface $output)
+    {
+        if (!$this->getApplication()
+                  ->isRunningAsRoot()
+        ) {
             // Process is not running as root, trying to elevate to root
             $output->writeln('<comment>Elevating process using sudo...</comment>');
 
@@ -160,7 +176,8 @@ abstract class AbstractCommand extends Command {
      * @return int|null|void
      * @throws \Exception
      */
-    protected function showLog($logList, $input, $output, $grep = null, $optionList = null) {
+    protected function showLog($logList, $input, $output, $grep = null, $optionList = null)
+    {
         $this->elevateProcess($input, $output);
 
         // check if logfiles are accessable
@@ -193,7 +210,8 @@ abstract class AbstractCommand extends Command {
      *
      * @param string $message Message
      */
-    protected function addFinishMessage($message) {
+    protected function addFinishMessage($message)
+    {
         $this->output->writeln($message);
         $this->finishMessageList[] = $message;
     }
@@ -201,7 +219,8 @@ abstract class AbstractCommand extends Command {
     /**
      * Show all finish messages
      */
-    protected function showFinishMessages() {
+    protected function showFinishMessages()
+    {
 
         if (!empty($this->finishMessageList)) {
             $this->output->writeln('');
@@ -222,7 +241,8 @@ abstract class AbstractCommand extends Command {
      *
      * @api
      */
-    public function getApplication() {
+    public function getApplication()
+    {
         return parent::getApplication();
     }
 
@@ -238,13 +258,14 @@ abstract class AbstractCommand extends Command {
      *
      * @return Command The current instance
      */
-    public function setTerminalTitle($title) {
+    public function setTerminalTitle($title)
+    {
         $args = func_get_args();
 
         $titleList = array();
-        foreach($args as $value) {
+        foreach ($args as $value) {
             if (is_array($value)) {
-               $value = implode(' ', $value);
+                $value = implode(' ', $value);
             }
 
             $titleList[] = trim($value);
@@ -253,7 +274,9 @@ abstract class AbstractCommand extends Command {
         $title = implode(' ', $titleList);
         $title = trim($title);
 
-        $this->getApplication()->setTerminalTitle($title);
+        $this->getApplication()
+             ->setTerminalTitle($title);
+
         return $this;
     }
 }

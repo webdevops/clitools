@@ -22,36 +22,37 @@ namespace CliTools\Console\Command\Mysql;
 
 use CliTools\Database\DatabaseConnection;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class SlowLogCommand extends AbstractCommand {
+class SlowLogCommand extends AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('mysql:slowlog')
-            ->setDescription('Enable and show slow query log')
-            ->addArgument(
-                'grep',
-                InputArgument::OPTIONAL,
-                'Grep'
-            )
-            ->addOption(
-                'time',
-                't',
-                InputOption::VALUE_REQUIRED,
-                'Slow query time (default 1 second)'
-            )
-            ->addOption(
-                'no-index',
-                'i',
-                InputOption::VALUE_NONE,
-                'Enable log queries without indexes log'
-            );
+    protected function configure()
+    {
+        $this->setName('mysql:slowlog')
+             ->setDescription('Enable and show slow query log')
+             ->addArgument(
+                 'grep',
+                 InputArgument::OPTIONAL,
+                 'Grep'
+             )
+             ->addOption(
+                 'time',
+                 't',
+                 InputOption::VALUE_REQUIRED,
+                 'Slow query time (default 1 second)'
+             )
+             ->addOption(
+                 'no-index',
+                 'i',
+                 InputOption::VALUE_NONE,
+                 'Enable log queries without indexes log'
+             );
     }
 
     /**
@@ -62,10 +63,11 @@ class SlowLogCommand extends AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $this->elevateProcess($input, $output);
 
-        $slowLogQueryTime = 1;
+        $slowLogQueryTime     = 1;
         $logNonIndexedQueries = false;
 
         // Slow log threshold
@@ -78,7 +80,8 @@ class SlowLogCommand extends AbstractCommand {
             $logNonIndexedQueries = true;
         }
 
-        $debugLogLocation = $this->getApplication()->getConfigValue('db', 'debug_log_dir');
+        $debugLogLocation = $this->getApplication()
+                                 ->getConfigValue('db', 'debug_log_dir');
         $debugLogDir      = dirname($debugLogLocation);
 
         $output->writeln('<h2>Starting MySQL slow query log</h2>');
@@ -136,7 +139,8 @@ class SlowLogCommand extends AbstractCommand {
                     DatabaseConnection::exec($query);
                 }
             };
-            $this->getApplication()->registerTearDown($tearDownFunc);
+            $this->getApplication()
+                 ->registerTearDown($tearDownFunc);
 
             // Read grep value
             $grep = null;

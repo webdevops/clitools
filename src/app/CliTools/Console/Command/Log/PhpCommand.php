@@ -24,21 +24,22 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class PhpCommand extends \CliTools\Console\Command\AbstractCommand {
+class PhpCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('log:php')
-            ->setAliases(array('php:log'))
-            ->setDescription('Show up php log')
-            ->addArgument(
-                'grep',
-                InputArgument::OPTIONAL,
-                'Grep'
-            );
+    protected function configure()
+    {
+        $this->setName('log:php')
+             ->setAliases(array('php:log'))
+             ->setDescription('Show up php log')
+             ->addArgument(
+                 'grep',
+                 InputArgument::OPTIONAL,
+                 'Grep'
+             );
     }
 
     /**
@@ -49,7 +50,8 @@ class PhpCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         // Read grep value
         $grep = null;
         if ($input->hasArgument('grep')) {

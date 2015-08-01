@@ -21,9 +21,10 @@ namespace CliTools\Utility;
  */
 
 use CliTools\Shell\CommandBuilder\CommandBuilder;
-use CliTools\Console\Shell\Executor;
+use CliTools\Shell\Executor;
 
-class DockerUtility {
+class DockerUtility
+{
 
     /**
      * Parse docker configuration (from docker inspect)
@@ -32,7 +33,8 @@ class DockerUtility {
      *
      * @return stdClass|null
      */
-    public static function getDockerConfiguration($container) {
+    public static function getDockerConfiguration($container)
+    {
 
         // Build command
         $command = new CommandBuilder('docker', 'inspect %s', array($container));
@@ -72,7 +74,8 @@ class DockerUtility {
      *
      * @return bool|string
      */
-    public static function searchDockerDirectoryRecursive($path = null) {
+    public static function searchDockerDirectoryRecursive($path = null)
+    {
         return UnixUtility::findFileInDirectortyTree('docker-compose.yml', $path);
     }
 
@@ -83,7 +86,8 @@ class DockerUtility {
      *
      * @return bool
      */
-    public static function isDockerDirectory($path = null) {
+    public static function isDockerDirectory($path = null)
+    {
         if ($path === null) {
             $path = getcwd();
         }
@@ -110,7 +114,8 @@ class DockerUtility {
      *
      * @return mixed|string
      */
-    public static function getDockerInstancePrefix($path = null) {
+    public static function getDockerInstancePrefix($path = null)
+    {
         if ($path === null) {
             $path = getcwd();
         }
@@ -131,7 +136,8 @@ class DockerUtility {
      *
      * @return string
      */
-    public static function getDockerInstanceName($containerName, $containerNumber = 1, $path = null) {
+    public static function getDockerInstanceName($containerName, $containerNumber = 1, $path = null)
+    {
         $dockerName = array(
             \CliTools\Utility\DockerUtility::getDockerInstancePrefix($path),
             (string)$containerName,

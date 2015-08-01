@@ -25,17 +25,18 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ConnectionsCommand extends AbstractCommand {
+class ConnectionsCommand extends AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
+    protected function configure()
+    {
         parent::configure();
 
-        $this
-            ->setName('mysql:connections')
-            ->setDescription('List current connections');
+        $this->setName('mysql:connections')
+             ->setDescription('List current connections');
     }
 
     /**
@@ -46,7 +47,8 @@ class ConnectionsCommand extends AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         // Get current connection id
         $query = 'SELECT CONNECTION_ID()';
         $conId = DatabaseConnection::getOne($query);

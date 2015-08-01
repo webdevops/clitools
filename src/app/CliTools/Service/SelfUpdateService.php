@@ -22,7 +22,8 @@ use CliTools\Shell\CommandBuilder\CommandBuilder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class SelfUpdateService {
+class SelfUpdateService
+{
     /**
      * Github repo url
      *
@@ -102,7 +103,8 @@ class SelfUpdateService {
      * @param $app
      * @param $output
      */
-    public function __construct($app, $output) {
+    public function __construct($app, $output)
+    {
         $this->application = $app;
         $this->output      = $output;
 
@@ -114,8 +116,10 @@ class SelfUpdateService {
      *
      * @return $this
      */
-    public function enablePreVersions() {
+    public function enablePreVersions()
+    {
         $this->updateAllowPreRelease = true;
+
         return $this;
     }
 
@@ -124,9 +128,11 @@ class SelfUpdateService {
      *
      * @return $this
      */
-    public function enableUpdateFallback() {
+    public function enableUpdateFallback()
+    {
         $this->updateUrl     = $this->application->getConfigValue('config', 'update_fallback_url', null);
         $this->updateVersion = 'fallback';
+
         return $this;
     }
 
@@ -135,7 +141,8 @@ class SelfUpdateService {
      *
      * @return boolean
      */
-    public function isElevationNeeded() {
+    public function isElevationNeeded()
+    {
         $ret = false;
 
         if (posix_getuid() !== $this->cliToolsCommandPerms['owner']) {
@@ -150,7 +157,8 @@ class SelfUpdateService {
      *
      * @param boolean $force Force update
      */
-    public function update($force = false) {
+    public function update($force = false)
+    {
 
         // Only ask for github if update url is not set
         if (!$this->updateUrl) {
@@ -174,7 +182,8 @@ class SelfUpdateService {
      *
      * @return bool
      */
-    protected function checkIfUpdateNeeded($force) {
+    protected function checkIfUpdateNeeded($force)
+    {
         $ret = false;
 
         $this->output->write('<info>Checking version... </info>');
@@ -201,7 +210,8 @@ class SelfUpdateService {
     /**
      * Do update
      */
-    protected function doUpdate() {
+    protected function doUpdate()
+    {
         if (empty($this->updateUrl)) {
             throw new \RuntimeException('Self-Update url is not found');
         }
@@ -234,7 +244,9 @@ class SelfUpdateService {
 
             // Version
             $this->output->writeln('');
-            $this->output->writeln('<info>Updated from Version </info><comment>' . CLITOOLS_COMMAND_VERSION . '</comment><info> to </info><comment>' . $this->updateVersion . '</comment>');
+            $this->output->writeln(
+                '<info>Updated from Version </info><comment>' . CLITOOLS_COMMAND_VERSION . '</comment><info> to </info><comment>' . $this->updateVersion . '</comment>'
+            );
             $this->output->writeln('');
 
             // Changelog
@@ -251,7 +263,8 @@ class SelfUpdateService {
     /**
      * Fetch latest release from github api
      */
-    protected function fetchLatestReleaseFromGithub() {
+    protected function fetchLatestReleaseFromGithub()
+    {
         $this->output->write('<info>Getting informations from GitHub... </info>');
 
         $releaseList = \CliTools\Utility\PhpUtility::curlFetch($this->githubReleaseUrl);
@@ -298,22 +311,28 @@ class SelfUpdateService {
             $this->output->writeln('<info>done</info>');
         } else {
             $this->output->writeln('<error>failed</error>');
-            throw new \RuntimeException('Could not fetch new version - maybe GitHub API is down or other error occurred');
+            throw new \RuntimeException(
+                'Could not fetch new version - maybe GitHub API is down or other error occurred'
+            );
         }
     }
 
     /**
      * Show changelog
      */
-    protected function showChangelog() {
+    protected function showChangelog()
+    {
 
         $message = $this->updateChangelog;
 
         // Pad lines
         $message = explode("\n", $message);
-        $message = array_map(function($line) {
-            return '  ' . $line;
-        }, $message);
+        $message = array_map(
+            function ($line) {
+                return '  ' . $line;
+            },
+            $message
+        );
         $message = implode("\n", $message);
 
         $message = preg_replace('/`([^`]+)`/', '<comment>\1</comment>', $message);
@@ -326,7 +345,8 @@ class SelfUpdateService {
     /**
      * Get current file informations=
      */
-    protected function collectInformations() {
+    protected function collectInformations()
+    {
         $this->output->writeln('<info>Collecting informations...</info>');
 
         // ##################
@@ -351,21 +371,22 @@ class SelfUpdateService {
         // ##################
         // Set github defaults
         // ##################
-        $this->githubRepo       =  $this->application->getConfigValue('config', 'github_repo', null);
+        $this->githubRepo       = $this->application->getConfigValue('config', 'github_repo', null);
         $this->githubReleaseUrl = 'https://api.github.com/repos/' . $this->githubRepo . '/releases';
     }
 
     /**
      * Download file
      */
-    protected function downloadUpdate() {
+    protected function downloadUpdate()
+    {
         $output = $this->output;
 
         // Progress counter
-        $progress = function($downloadTotal, $downoadProgress) use ($output) {
+        $progress = function ($downloadTotal, $downoadProgress) use ($output) {
             static $counter = 0;
 
-            if($counter % 30 === 0) {
+            if ($counter % 30 === 0) {
                 $output->write('<info>.</info>');
             }
 
@@ -383,7 +404,8 @@ class SelfUpdateService {
     /**
      * Deploy update
      */
-    protected function deployUpdate() {
+    protected function deployUpdate()
+    {
 
         // ##################
         // Backup
@@ -422,19 +444,25 @@ class SelfUpdateService {
      *
      * @return string
      */
-    protected function testUpdate() {
+    protected function testUpdate()
+    {
         $command = new CommandBuilder('php');
-        $ret = $command->addArgument($this->cliToolsUpdatePath)
-            ->addArgument('--version')
-            ->addArgument('--no-ansi')
-            ->execute()->getOutputString();
+        $ret     = $command->addArgument($this->cliToolsUpdatePath)
+                           ->addArgument('--version')
+                           ->addArgument(
+                               '--no-ansi'
+                           )
+                           ->execute()
+                           ->getOutputString();
+
         return $ret;
     }
 
     /**
      * Cleanup
      */
-    protected function cleanup() {
+    protected function cleanup()
+    {
         // Remove old update file if set and exists
         if ($this->cliToolsUpdatePath && file_exists($this->cliToolsUpdatePath)) {
             unlink($this->cliToolsUpdatePath);

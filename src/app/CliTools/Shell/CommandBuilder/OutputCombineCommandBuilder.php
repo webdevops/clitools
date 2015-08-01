@@ -20,7 +20,8 @@ namespace CliTools\Shell\CommandBuilder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class OutputCombineCommandBuilder extends AbstractCommandBuilder {
+class OutputCombineCommandBuilder extends AbstractCommandBuilder
+{
 
     /**
      * Command list which should be combined
@@ -36,7 +37,8 @@ class OutputCombineCommandBuilder extends AbstractCommandBuilder {
      *
      * @return $this
      */
-    public function addCommandForCombinedOutput(CommandBuilderInterface $command) {
+    public function addCommandForCombinedOutput(CommandBuilderInterface $command)
+    {
         if ($command->isExecuteable()) {
             $this->commandList[] = $command;
         } else {
@@ -51,7 +53,8 @@ class OutputCombineCommandBuilder extends AbstractCommandBuilder {
      *
      * @return bool
      */
-    public function isExecuteable() {
+    public function isExecuteable()
+    {
         $ret = true;
 
         if (empty($this->commandList)) {
@@ -66,7 +69,8 @@ class OutputCombineCommandBuilder extends AbstractCommandBuilder {
      *
      * @return $this
      */
-    public function clear() {
+    public function clear()
+    {
         $ret = parent::__clone();
 
         $this->commandList = array();
@@ -81,7 +85,8 @@ class OutputCombineCommandBuilder extends AbstractCommandBuilder {
      * @return string
      * @throws \Exception
      */
-    public function build() {
+    public function build()
+    {
         $ret = array();
 
         if (!$this->isExecuteable()) {
@@ -113,7 +118,8 @@ class OutputCombineCommandBuilder extends AbstractCommandBuilder {
     /**
      * Clone command
      */
-    public function __clone() {
+    public function __clone()
+    {
         parent::__clone();
 
         $commandList = array();

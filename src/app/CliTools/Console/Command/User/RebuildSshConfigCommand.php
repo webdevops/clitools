@@ -23,15 +23,16 @@ namespace CliTools\Console\Command\User;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class RebuildSshConfigCommand extends \CliTools\Console\Command\AbstractCommand {
+class RebuildSshConfigCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('user:rebuildsshconfig')
-            ->setDescription('Rebuild SSH Config for current user');
+    protected function configure()
+    {
+        $this->setName('user:rebuildsshconfig')
+             ->setDescription('Rebuild SSH Config for current user');
     }
 
     /**
@@ -42,7 +43,8 @@ class RebuildSshConfigCommand extends \CliTools\Console\Command\AbstractCommand 
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $userHome = getenv('HOME');
         $userName = getenv('USER');
 
@@ -50,7 +52,8 @@ class RebuildSshConfigCommand extends \CliTools\Console\Command\AbstractCommand 
 
         $targetConfFile = $userHome . '/.ssh/config';
         $userConfFile   = $userHome . '/.ssh/config.user';
-        $reposDirectory = $this->getApplication()->getConfigValue('config', 'ssh_conf_path', '/opt/conf/ssh');
+        $reposDirectory = $this->getApplication()
+                               ->getConfigValue('config', 'ssh_conf_path', '/opt/conf/ssh');
 
         $defaultFile     = $reposDirectory . '/default.conf';
         $defaultUserFile = $userHome . '/.ssh/config.default';

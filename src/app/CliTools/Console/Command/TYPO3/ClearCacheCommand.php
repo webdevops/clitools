@@ -20,26 +20,29 @@ namespace CliTools\Console\Command\TYPO3;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\Typo3Utility;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Utility\Typo3Utility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ClearCacheCommand extends \CliTools\Console\Command\AbstractCommand {
+class ClearCacheCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('typo3:clearcache')
-            ->setDescription('Clear cache on all (or one specific) TYPO3 instances')
-            ->addArgument(
-                'path',
-                InputArgument::OPTIONAL,
-                'Path to TYPO3 instance'
-            );
+    protected function configure()
+    {
+        $this->setName('typo3:clearcache')
+             ->setDescription(
+                 'Clear cache on all (or one specific) TYPO3 instances'
+             )
+             ->addArgument(
+                 'path',
+                 InputArgument::OPTIONAL,
+                 'Path to TYPO3 instance'
+             );
     }
 
     /**
@@ -50,11 +53,13 @@ class ClearCacheCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         // ####################
         // Init
         // ####################
-        $basePath = $this->getApplication()->getConfigValue('config', 'www_base_path', '/var/www/');
+        $basePath = $this->getApplication()
+                         ->getConfigValue('config', 'www_base_path', '/var/www/');
         $maxDepth = 3;
 
         $output->writeln('<h2>Clear TYPO3 cache</h2>');
@@ -85,7 +90,7 @@ class ClearCacheCommand extends \CliTools\Console\Command\AbstractCommand {
 
                 $command = new CommandBuilder('php');
                 $command->setArgumentList($params)
-                    ->executeInteractive();
+                        ->executeInteractive();
             } catch (\Exception $e) {
                 $output->writeln('<p-error> Failed with exception: ' . $e->getMessage() . '</p-error>');
             }

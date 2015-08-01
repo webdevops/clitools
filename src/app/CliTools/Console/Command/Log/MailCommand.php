@@ -24,20 +24,21 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class MailCommand extends \CliTools\Console\Command\AbstractCommand {
+class MailCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('log:mail')
-            ->setDescription('Show up mail log')
-            ->addArgument(
-                'grep',
-                InputArgument::OPTIONAL,
-                'Grep'
-            );
+    protected function configure()
+    {
+        $this->setName('log:mail')
+             ->setDescription('Show up mail log')
+             ->addArgument(
+                 'grep',
+                 InputArgument::OPTIONAL,
+                 'Grep'
+             );
     }
 
     /**
@@ -48,7 +49,8 @@ class MailCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         // Read grep value
         $grep = null;
         if ($input->hasArgument('grep')) {

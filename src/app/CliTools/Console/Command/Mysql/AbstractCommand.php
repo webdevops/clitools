@@ -25,37 +25,38 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand {
+abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->addOption(
-                'host',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'MySQL host'
-            )
-            ->addOption(
-                'port',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'MySQL port'
-            )
-            ->addOption(
-                'user',
-                'u',
-                InputOption::VALUE_REQUIRED,
-                'MySQL user'
-            )
-            ->addOption(
-                'password',
-                'p',
-                InputOption::VALUE_REQUIRED,
-                'MySQL host'
-            );
+    protected function configure()
+    {
+        $this->addOption(
+            'host',
+            null,
+            InputOption::VALUE_REQUIRED,
+            'MySQL host'
+        )
+             ->addOption(
+                 'port',
+                 null,
+                 InputOption::VALUE_REQUIRED,
+                 'MySQL port'
+             )
+             ->addOption(
+                 'user',
+                 'u',
+                 InputOption::VALUE_REQUIRED,
+                 'MySQL user'
+             )
+             ->addOption(
+                 'password',
+                 'p',
+                 InputOption::VALUE_REQUIRED,
+                 'MySQL host'
+             );
     }
 
     /**
@@ -67,33 +68,44 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @param InputInterface  $input  An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
      */
-    protected function initialize(InputInterface $input, OutputInterface $output) {
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
         parent::initialize($input, $output);
 
         $dsn      = null;
         $user     = null;
         $password = null;
+        $host     = DatabaseConnection::getDbHostname();
+        $port     = DatabaseConnection::getDbPort();
 
+        // host
         if ($this->input->hasOption('host') && $this->input->getOption('host')) {
             $host = $this->input->getOption('host');
-            $port = 3306;
+            $dsn  = false;
+        }
 
-            if ($this->input->getOption('port')) {
-                $port = $this->input->getOption('port');
-            }
+        // port
+        if ($this->input->hasOption('port') && $this->input->getOption('port')) {
+            $port = $this->input->getOption('port');
+            $dsn  = false;
+        }
 
+        // rebuild dsn
+        if ($dsn === false) {
             $dsn = 'mysql:host=' . urlencode($host) . ';port=' . (int)$port;
         }
 
+        // user
         if ($this->input->hasOption('user') && $this->input->getOption('user')) {
             $user = $this->input->getOption('user');
         }
 
+        // password
         if ($this->input->hasOption('password') && $this->input->getOption('password')) {
             $password = $this->input->getOption('password');
         }
 
-        if ($user !== null || $password  !== null) {
+        if ($dsn !== null || $user !== null || $password !== null) {
             DatabaseConnection::setDsn($dsn, $user, $password);
         }
     }

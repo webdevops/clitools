@@ -20,24 +20,26 @@ namespace CliTools\Shell\CommandBuilder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class EditorCommandBuilder extends CommandBuilder
+use CliTools\Database\DatabaseConnection;
+
+class MysqlCommandBuilder extends CommandBuilder
 {
 
     /**
      * Initalized command
-     *
-     * @throws \RuntimeException
      */
     protected function initialize()
     {
-        parent::initialize();
-
-        $editorCmd = getenv('EDITOR');
-
-        if (empty($editorCmd)) {
-            throw new \RuntimeException('No $EDITOR environment variable set');
-        }
-
-        $this->parse($editorCmd);
+        $this->addArgumentTemplate('--user=%s', DatabaseConnection::getDbUsername())
+             ->addArgumentTemplate(
+                 '--password=%s',
+                 DatabaseConnection::getDbPassword()
+             )
+             ->addArgumentTemplate('--host=%s', DatabaseConnection::getDbHostname())
+             ->addArgumentTemplate(
+                 '--port=%s',
+                 DatabaseConnection::getDbPort()
+             );
     }
+
 }

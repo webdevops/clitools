@@ -20,19 +20,20 @@ namespace CliTools\Console\Command\Docker;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Shell\CommandBuilder\CommandBuilder;
 
-class IftopCommand extends \CliTools\Console\Command\AbstractCommand {
+class IftopCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('docker:iftop')
-            ->setDescription('Exec iftop for Docker');
+    protected function configure()
+    {
+        $this->setName('docker:iftop')
+             ->setDescription('Exec iftop for Docker');
     }
 
     /**
@@ -43,10 +44,12 @@ class IftopCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $this->elevateProcess($input, $output);
 
-        $dockerInterface = $this->getApplication()->getConfigValue('docker', 'interface');
+        $dockerInterface = $this->getApplication()
+                                ->getConfigValue('docker', 'interface');
 
         $command = new CommandBuilder('iftop', '-i %s', array($dockerInterface));
         $command->executeInteractive();

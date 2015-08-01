@@ -20,15 +20,17 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-abstract class AbstractShareCommand extends AbstractCommand {
+abstract class AbstractShareCommand extends AbstractCommand
+{
 
-    const PATH_DUMP   = '/dump/';
-    const PATH_DATA   = '/data/';
+    const PATH_DUMP = '/dump/';
+    const PATH_DATA = '/data/';
 
     /**
      * Configure command
      */
-    protected function configure() {
+    protected function configure()
+    {
         parent::configure();
 
         $this->confArea = 'share';
@@ -39,7 +41,8 @@ abstract class AbstractShareCommand extends AbstractCommand {
      *
      * @return boolean
      */
-    protected function validateConfiguration() {
+    protected function validateConfiguration()
+    {
         $ret = parent::validateConfiguration();
 
         // Rsync required for share

@@ -22,23 +22,25 @@ namespace CliTools\Console\Command\Sync;
 
 use CliTools\Shell\CommandBuilder\OutputCombineCommandBuilder;
 
-class BackupCommand extends AbstractShareCommand {
+class BackupCommand extends AbstractShareCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
+    protected function configure()
+    {
         parent::configure();
 
-        $this
-            ->setName('sync:backup')
-            ->setDescription('Backup files and database from share');
+        $this->setName('sync:backup')
+             ->setDescription('Backup files and database from share');
     }
 
     /**
      * Startup task
      */
-    protected function startup() {
+    protected function startup()
+    {
         $this->output->writeln('<h2>Starting share backup</h2>');
         parent::startup();
     }
@@ -46,7 +48,8 @@ class BackupCommand extends AbstractShareCommand {
     /**
      * Backup task
      */
-    protected function runMain() {
+    protected function runMain()
+    {
         // ##################
         // Option specific runners
         // ##################
@@ -79,9 +82,10 @@ class BackupCommand extends AbstractShareCommand {
     /**
      * Sync files with rsync
      */
-    protected function runTaskRsync() {
-        $source  = $this->getRsyncWorkingPath();
-        $target  = $this->getRsyncPathFromConfig() . self::PATH_DATA;
+    protected function runTaskRsync()
+    {
+        $source = $this->getRsyncWorkingPath();
+        $target = $this->getRsyncPathFromConfig() . self::PATH_DATA;
 
         $command = $this->createRsyncCommandWithConfiguration($source, $target, 'rsync');
         $command->executeInteractive();
@@ -90,7 +94,8 @@ class BackupCommand extends AbstractShareCommand {
     /**
      * Sync database
      */
-    protected function runTaskMysql() {
+    protected function runTaskMysql()
+    {
         // ##################
         // Sync databases
         // ##################
@@ -115,16 +120,15 @@ class BackupCommand extends AbstractShareCommand {
             $command = new OutputCombineCommandBuilder();
             $command->addCommandForCombinedOutput($mysqldump);
 
-            $command
-                ->setOutputRedirectToFile($dumpFile)
-                ->executeInteractive();
+            $command->setOutputRedirectToFile($dumpFile)
+                    ->executeInteractive();
         }
 
         // ##################
         // Backup mysql dump
         // ##################
-        $source = $this->tempDir;
-        $target = $this->getRsyncPathFromConfig() . self::PATH_DUMP;
+        $source  = $this->tempDir;
+        $target  = $this->getRsyncPathFromConfig() . self::PATH_DUMP;
         $command = $this->createRsyncCommand($source, $target);
         $command->executeInteractive();
     }

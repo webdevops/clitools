@@ -20,9 +20,10 @@ namespace CliTools\Shell\CommandBuilder;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Console\Shell\Executor;
+use CliTools\Shell\Executor;
 
-class AbstractCommandBuilder implements CommandBuilderInterface {
+class AbstractCommandBuilder implements CommandBuilderInterface
+{
 
     // ##########################################
     // Constants
@@ -31,7 +32,7 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     /**
      * Redirect STDOUT and STDERR to /dev/null (no output)
      */
-    const OUTPUT_REDIRECT_NULL       = ' &> /dev/null';
+    const OUTPUT_REDIRECT_NULL = ' &> /dev/null';
 
     /**
      * Redirect STDERR to STDOUT
@@ -41,7 +42,7 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     /**
      * Redirect STDERR to /dev/null (no error output)
      */
-    const OUTPUT_REDIRECT_NO_STDERR  = ' 2> /dev/null';
+    const OUTPUT_REDIRECT_NO_STDERR = ' 2> /dev/null';
 
     // ##########################################
     // Attributs
@@ -89,11 +90,12 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     /**
      * Constructor
      *
-     * @param null|string        $command   Command
-     * @param null|string|array  $args      Arguments
-     * @param null|array         $argParams Argument params (sprintf)
+     * @param null|string       $command   Command
+     * @param null|string|array $args      Arguments
+     * @param null|array        $argParams Argument params (sprintf)
      */
-    public function __construct($command = null, $args = null, $argParams = null) {
+    public function __construct($command = null, $args = null, $argParams = null)
+    {
         $this->initialize();
 
         if ($command !== null) {
@@ -123,14 +125,15 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     /**
      * Initalized command
      */
-    protected function initialize() {
-
+    protected function initialize()
+    {
     }
 
     /**
      * @return string
      */
-    public function getCommand() {
+    public function getCommand()
+    {
         return $this->command;
     }
 
@@ -138,10 +141,13 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      * Set command
      *
      * @param string $command
+     *
      * @return $this
      */
-    public function setCommand($command) {
+    public function setCommand($command)
+    {
         $this->command = $command;
+
         return $this;
     }
 
@@ -150,11 +156,13 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      *
      * @return $this
      */
-    public function clear() {
+    public function clear()
+    {
         $this->command        = null;
         $this->argumentList   = array();
         $this->outputRedirect = null;
         $this->pipeList       = array();
+
         return $this;
     }
 
@@ -163,8 +171,10 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      *
      * @return $this
      */
-    public function clearArguments() {
+    public function clearArguments()
+    {
         $this->argumentList = array();
+
         return $this;
     }
 
@@ -173,8 +183,10 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      *
      * @return $this
      */
-    public function addArgumentSeparator() {
+    public function addArgumentSeparator()
+    {
         $this->argumentList[] = '--';
+
         return $this;
     }
 
@@ -182,53 +194,63 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      * Set argument from list
      *
      * @param  array $args Arguments
+     *
      * @return $this
      */
-    public function setArgumentList(array $args) {
+    public function setArgumentList(array $args)
+    {
         $this->clearArguments();
         $this->appendArgumentsToList($args);
+
         return $this;
     }
 
     /**
      * Set arguments raw (unescaped)
      *
-     * @param  string $arg... Argument
+     * @param  string $arg ... Argument
+     *
      * @return $this
      */
-    public function addArgumentRaw($arg) {
+    public function addArgumentRaw($arg)
+    {
         return $this->addArgumentList(func_get_args(), false);
     }
 
     /**
      * Set arguments list raw (unescaped)
      *
-     * @param  array $arg... Argument
+     * @param  array $arg ... Argument
+     *
      * @return $this
      */
-    public function addArgumentListRaw($arg) {
+    public function addArgumentListRaw($arg)
+    {
         return $this->addArgumentList($arg, false);
     }
 
     /**
      * Set arguments
      *
-     * @param  string $arg... Argument
+     * @param  string $arg ... Argument
+     *
      * @return $this
      */
-    public function addArgument($arg) {
+    public function addArgument($arg)
+    {
         return $this->addArgumentList(func_get_args());
     }
 
     /**
      * Add argument with template
      *
-     * @param string $arg        Argument sprintf
-     * @param string $params...  Argument parameters
+     * @param string $arg    Argument sprintf
+     * @param string $params ...  Argument parameters
      *
      * @return $this
      */
-    public function addArgumentTemplate($arg, $params) {
+    public function addArgumentTemplate($arg, $params)
+    {
         $funcArgs = func_get_args();
         array_shift($funcArgs);
 
@@ -238,12 +260,13 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     /**
      * Add argument with template multiple times
      *
-     * @param string $arg     Argument sprintf
-     * @param array  $paramList  Argument parameters
+     * @param string $arg       Argument sprintf
+     * @param array  $paramList Argument parameters
      *
      * @return $this
      */
-    public function addArgumentTemplateMultiple($arg, $paramList) {
+    public function addArgumentTemplateMultiple($arg, $paramList)
+    {
         foreach ($paramList as $param) {
             $this->addArgumentTemplate($arg, $param);
         }
@@ -254,28 +277,33 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     /**
      * Set argument with template
      *
-     * @param string $arg     Argument sprintf
-     * @param array  $params  Argument parameters
+     * @param string $arg    Argument sprintf
+     * @param array  $params Argument parameters
      *
      * @return $this
      */
-    public function addArgumentTemplateList($arg, array $params) {
+    public function addArgumentTemplateList($arg, array $params)
+    {
         $this->validateArgumentValue($arg);
 
-        $params = array_map('escapeshellarg', $params);
+        $params               = array_map('escapeshellarg', $params);
         $this->argumentList[] = vsprintf($arg, $params);
+
         return $this;
     }
 
     /**
      * Add arguments list
      *
-     * @param  array   $arg Argument
+     * @param  array   $arg    Argument
      * @param  boolean $escape Escape shell arguments
+     *
      * @return $this
      */
-    public function addArgumentList(array $arg, $escape = true) {
+    public function addArgumentList(array $arg, $escape = true)
+    {
         $this->appendArgumentsToList($arg, $escape);
+
         return $this;
     }
 
@@ -287,7 +315,8 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      *
      * @return $this
      */
-    protected function appendArgumentToList($arg, $escape = true) {
+    protected function appendArgumentToList($arg, $escape = true)
+    {
         $this->validateArgumentValue($arg);
 
         if ($escape) {
@@ -300,12 +329,13 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     /**
      * Append multiple arguments to list
      *
-     * @param array   $args    Arguments
+     * @param array   $args   Arguments
      * @param boolean $escape Enable argument escaping
      *
      * @return $this
      */
-    protected function appendArgumentsToList($args, $escape = true) {
+    protected function appendArgumentsToList($args, $escape = true)
+    {
         // Validate each argument value
         array_walk($args, array($this, 'validateArgumentValue'));
 
@@ -321,7 +351,8 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      *
      * @return array
      */
-    public function getArgumentList() {
+    public function getArgumentList()
+    {
         return $this->argumentList;
     }
 
@@ -330,7 +361,8 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      *
      * @return null|string
      */
-    public function getOutputRedirect() {
+    public function getOutputRedirect()
+    {
         return $this->outputRedirect;
     }
 
@@ -338,10 +370,13 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      * Set output (stdout and/or stderr) redirection
      *
      * @param null|string $outputRedirect
+     *
      * @return $this
      */
-    public function setOutputRedirect($outputRedirect = null) {
+    public function setOutputRedirect($outputRedirect = null)
+    {
         $this->outputRedirect = $outputRedirect;
+
         return $this;
     }
 
@@ -350,10 +385,13 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      * Redirect command stdout output to file
      *
      * @param string $filename Filename
+     *
      * @return $this
      */
-    public function setOutputRedirectToFile($filename) {
+    public function setOutputRedirectToFile($filename)
+    {
         $this->outputRedirect = '> ' . escapeshellarg($filename);
+
         return $this;
     }
 
@@ -362,8 +400,10 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      *
      * @return $this
      */
-    public function clearOutputRedirect() {
+    public function clearOutputRedirect()
+    {
         $this->outputRedirect = null;
+
         return $this;
     }
 
@@ -373,9 +413,11 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      * WARNING: Not safe!
      *
      * @param  string $str Command string
+     *
      * @return $this
      */
-    public function parse($str) {
+    public function parse($str)
+    {
         $parsedCmd = explode(' ', $str, 2);
 
         // Check required command
@@ -390,6 +432,7 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
         if (!empty($parsedCmd[1])) {
             $this->addArgumentRaw($parsedCmd[1]);
         }
+
         return $this;
     }
 
@@ -397,12 +440,13 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     /**
      * Append another command builder
      *
-     * @param CommandBuilderInterface $command  Command builder
-     * @param boolean                 $inline   Add command as inline string (one big parameter)
+     * @param CommandBuilderInterface $command Command builder
+     * @param boolean                 $inline  Add command as inline string (one big parameter)
      *
      * @return $this
      */
-    public function append(CommandBuilderInterface $command, $inline = true) {
+    public function append(CommandBuilderInterface $command, $inline = true)
+    {
 
         // Check if sub command is executeable
         if (!$command->isExecuteable()) {
@@ -414,7 +458,7 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
             $this->addArgument($command->build());
         } else {
             // Append each as own argument
-            $this->addArgument( $command->command );
+            $this->addArgument($command->command);
             $this->argumentList = array_merge($this->argumentList, $command->argumentList);
         }
 
@@ -426,14 +470,18 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      *
      * @return bool
      */
-    public function isExecuteable() {
+    public function isExecuteable()
+    {
         // Command must be set
         if (empty($this->command)) {
             return false;
         }
 
         // Only check command paths for local commands
-        if (!($this instanceof RemoteCommandBuilder) && !\CliTools\Utility\UnixUtility::checkExecutable($this->command)) {
+        if (!($this instanceof RemoteCommandBuilder) && !\CliTools\Utility\UnixUtility::checkExecutable(
+                $this->command
+            )
+        ) {
             return false;
         }
 
@@ -446,7 +494,8 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      *
      * @return array
      */
-    public function getPipeList() {
+    public function getPipeList()
+    {
         return $this->pipeList;
     }
 
@@ -454,10 +503,13 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      * Set pipe list
      *
      * @param array $pipeList
+     *
      * @return $this
      */
-    public function setPipeList(array $pipeList) {
+    public function setPipeList(array $pipeList)
+    {
         $this->pipeList = $pipeList;
+
         return $this;
     }
 
@@ -466,8 +518,10 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      *
      * @return $this
      */
-    public function clearPipes() {
+    public function clearPipes()
+    {
         $this->pipeList = array();
+
         return $this;
     }
 
@@ -475,10 +529,13 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      * Add pipe command
      *
      * @param CommandBuilderInterface $command
+     *
      * @return $this
      */
-    public function addPipeCommand(CommandBuilderInterface $command) {
+    public function addPipeCommand(CommandBuilderInterface $command)
+    {
         $this->pipeList[] = $command;
+
         return $this;
     }
 
@@ -488,11 +545,14 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      * @return string
      * @throws \Exception
      */
-    public function build() {
+    public function build()
+    {
         $ret = array();
 
         if (!$this->isExecuteable()) {
-            throw new \RuntimeException('Command "' . $this->getCommand() . '" is not executable or available, please install it');
+            throw new \RuntimeException(
+                'Command "' . $this->getCommand() . '" is not executable or available, please install it'
+            );
         }
 
         // Add command
@@ -523,7 +583,8 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      *
      * @return Executor
      */
-    public function getExecutor() {
+    public function getExecutor()
+    {
         if ($this->executor === null) {
             $this->executor = new Executor($this);
         }
@@ -536,7 +597,8 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      *
      * @param Executor $executor
      */
-    public function setExecutor(Executor $executor) {
+    public function setExecutor(Executor $executor)
+    {
         $this->executor = $executor;
     }
 
@@ -545,27 +607,34 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      *
      * @return Executor
      */
-    public function execute() {
-        return $this->getExecutor()->execute();
+    public function execute()
+    {
+        return $this->getExecutor()
+                    ->execute();
     }
 
     /**
      * Execute command
      *
      * @param array $opts Option array
+     *
      * @return Executor
      */
-    public function executeInteractive(array $opts = null) {
-        return $this->getExecutor()->execInteractive($opts);
+    public function executeInteractive(array $opts = null)
+    {
+        return $this->getExecutor()
+                    ->execInteractive($opts);
     }
 
     /**
      * Validate argument value
      *
      * @param mixed $value Value
+     *
      * @throws \RuntimeException
      */
-    protected function validateArgumentValue($value) {
+    protected function validateArgumentValue($value)
+    {
         if (strlen($value) === 0) {
             throw new \RuntimeException('Argument value cannot be empty');
         }
@@ -578,7 +647,8 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
     /**
      * Clone command
      */
-    public function __clone() {
+    public function __clone()
+    {
         if (!empty($this->executor)) {
             $this->executor = clone $this->executor;
         }
@@ -589,7 +659,8 @@ class AbstractCommandBuilder implements CommandBuilderInterface {
      *
      * @return string
      */
-    public function __toString() {
+    public function __toString()
+    {
         return $this->build();
     }
 

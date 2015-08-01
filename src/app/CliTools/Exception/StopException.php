@@ -20,6 +20,7 @@ namespace CliTools\Exception;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class StopException extends \RuntimeException {
+class StopException extends \RuntimeException
+{
 
 }

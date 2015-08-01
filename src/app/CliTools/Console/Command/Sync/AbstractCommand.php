@@ -20,26 +20,27 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\PhpUtility;
-use CliTools\Utility\UnixUtility;
-use CliTools\Utility\ConsoleUtility;
-use CliTools\Utility\FilterUtility;
+use CliTools\Database\DatabaseConnection;
+use CliTools\Reader\ConfigReader;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
-use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
-use CliTools\Shell\CommandBuilder\SelfCommandBuilder;
 use CliTools\Shell\CommandBuilder\CommandBuilderInterface;
 use CliTools\Shell\CommandBuilder\OutputCombineCommandBuilder;
-use CliTools\Reader\ConfigReader;
-use CliTools\Database\DatabaseConnection;
-use Symfony\Component\Console\Input\InputOption;
+use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
+use CliTools\Shell\CommandBuilder\SelfCommandBuilder;
+use CliTools\Utility\ConsoleUtility;
+use CliTools\Utility\FilterUtility;
+use CliTools\Utility\PhpUtility;
+use CliTools\Utility\UnixUtility;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Yaml\Yaml;
-use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Yaml\Yaml;
 
-abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand {
+abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     const CONFIG_FILE = 'clisync.yml';
     const GLOBAL_KEY  = 'GLOBAL';
@@ -89,32 +90,32 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setDescription('Sync files and database from server')
-            ->addArgument(
-                'context',
-                InputArgument::OPTIONAL,
-                'Configuration name for server'
-            )
-            ->addOption(
-                'mysql',
-                null,
-                InputOption::VALUE_NONE,
-                'Run only mysql'
-            )
-            ->addOption(
-                'rsync',
-                null,
-                InputOption::VALUE_NONE,
-                'Run only rsync'
-            )
-            ->addOption(
-                'config',
-                null,
-                InputOption::VALUE_NONE,
-                'Show generated config'
-            );
+    protected function configure()
+    {
+        $this->setDescription('Sync files and database from server')
+             ->addArgument(
+                 'context',
+                 InputArgument::OPTIONAL,
+                 'Configuration name for server'
+             )
+             ->addOption(
+                 'mysql',
+                 null,
+                 InputOption::VALUE_NONE,
+                 'Run only mysql'
+             )
+             ->addOption(
+                 'rsync',
+                 null,
+                 InputOption::VALUE_NONE,
+                 'Run only rsync'
+             )
+             ->addOption(
+                 'config',
+                 null,
+                 InputOption::VALUE_NONE,
+                 'Show generated config'
+             );
     }
 
     /**
@@ -125,9 +126,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @param InputInterface  $input  An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
+     *
      * @throws \RuntimeException
      */
-    protected function initialize(InputInterface $input, OutputInterface $output) {
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
         parent::initialize($input, $output);
 
         $this->initializeConfiguration();
@@ -136,7 +139,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Init configuration
      */
-    protected function initializeConfiguration() {
+    protected function initializeConfiguration()
+    {
         // Search for configuration in path
         $this->findConfigurationInPath();
 
@@ -149,7 +153,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @return boolean
      */
-    protected function validateConfiguration() {
+    protected function validateConfiguration()
+    {
         $ret = true;
 
         // Rsync (optional)
@@ -175,7 +180,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Find configuration file in current path
      */
-    protected function findConfigurationInPath() {
+    protected function findConfigurationInPath()
+    {
         $confFileList = array(
             self::CONFIG_FILE,
             '.' . self::CONFIG_FILE,
@@ -190,13 +196,16 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         $this->workingPath = dirname($this->confFilePath);
 
-        $this->output->writeln('<comment>Found ' . self::CONFIG_FILE . ' directory: ' . $this->workingPath . '</comment>');
+        $this->output->writeln(
+            '<comment>Found ' . self::CONFIG_FILE . ' directory: ' . $this->workingPath . '</comment>'
+        );
     }
 
     /**
      * Read and validate configuration
      */
-    protected function readConfiguration() {
+    protected function readConfiguration()
+    {
         $this->config = new ConfigReader();
 
         if (empty($this->confArea)) {
@@ -222,7 +231,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @return array|null
      */
-    protected function getContextListFromConfiguration() {
+    protected function getContextListFromConfiguration()
+    {
         return $this->config->getArray($this->confArea);
     }
 
@@ -230,9 +240,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * Get command list from current configuration
      *
      * @param string $section Section name for commands (startup, final)
+     *
      * @return array
      */
-    protected function getCommandList($section) {
+    protected function getCommandList($section)
+    {
         $ret = array();
 
         if ($this->contextConfig->exists('command.' . $section)) {
@@ -247,7 +259,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @param $context
      */
-    protected function buildContextConfiguration($context) {
+    protected function buildContextConfiguration($context)
+    {
         $this->contextConfig = new ConfigReader();
 
         // Fetch global conf
@@ -273,13 +286,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $contextConf = $areaConf[$context];
 
 
-        $arrayFilterRecursive = function($input, $callback) use (&$arrayFilterRecursive) {
+        $arrayFilterRecursive = function ($input, $callback) use (&$arrayFilterRecursive) {
             $ret = array();
             foreach ($input as $key => $value) {
                 if (is_array($value)) {
                     $value = $arrayFilterRecursive($value, $callback);
                 } else {
-                    if (strlen($value)==0) {
+                    if (strlen($value) == 0) {
                         $value = null;
                     }
                 }
@@ -293,9 +306,9 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         };
 
         // Merge
-        $globalConf     = $arrayFilterRecursive( $globalConf, 'strlen' );
-        $areaGlobalConf = $arrayFilterRecursive( $areaGlobalConf, 'strlen' );
-        $contextConf    = $arrayFilterRecursive( $contextConf, 'strlen' );
+        $globalConf     = $arrayFilterRecursive($globalConf, 'strlen');
+        $areaGlobalConf = $arrayFilterRecursive($areaGlobalConf, 'strlen');
+        $contextConf    = $arrayFilterRecursive($contextConf, 'strlen');
 
         $conf = array_replace_recursive($globalConf, $areaGlobalConf, $contextConf);
 
@@ -312,7 +325,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @return int|null|void
      * @throws \Exception
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         try {
             // Get context selection
             $this->initContext();
@@ -329,7 +343,6 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
                 $this->runMain();
                 $this->runCommands('finalize');
             }
-
         } catch (\Exception $e) {
             $this->cleanup();
             throw $e;
@@ -341,7 +354,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Init context
      */
-    protected function initContext() {
+    protected function initContext()
+    {
         $context = $this->getContextFromUser();
         $this->buildContextConfiguration($context);
 
@@ -355,7 +369,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Get context from user
      */
-    protected function getContextFromUser() {
+    protected function getContextFromUser()
+    {
         $ret = null;
 
         if (!$this->input->getArgument('context')) {
@@ -396,7 +411,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
                     foreach ($dbList as $databaseConf) {
                         if (strpos($databaseConf, ':') !== false) {
                             // local and foreign database in one string
-                            $databaseConf = explode(':', $databaseConf, 2);
+                            $databaseConf    = explode(':', $databaseConf, 2);
                             $foreignDbList[] = $databaseConf[1];
                         } else {
                             // database equal
@@ -426,7 +441,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
                 $questionDialog = new QuestionHelper();
 
                 $ret = $questionDialog->ask($this->input, $this->output, $question);
-            } catch(\InvalidArgumentException $e) {
+            } catch (\InvalidArgumentException $e) {
                 // Invalid server context, just stop here
                 throw new \CliTools\Exception\StopException(1);
             }
@@ -440,7 +455,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Show context configuration
      */
-    protected function showContextConfig() {
+    protected function showContextConfig()
+    {
         print_r($this->contextConfig->get());
     }
 
@@ -449,8 +465,9 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @return boolean
      */
-    protected function validateConfigurationRsync() {
-        $ret    = true;
+    protected function validateConfigurationRsync()
+    {
+        $ret = true;
 
         // Check if rsync target exists
         if (!$this->getRsyncPathFromConfig()) {
@@ -473,7 +490,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @return boolean
      */
-    protected function validateConfigurationMysql() {
+    protected function validateConfigurationMysql()
+    {
         $ret = true;
 
         // Check if one database is configured
@@ -488,8 +506,9 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Startup task
      */
-    protected function startup() {
-        $this->tempDir = '/tmp/.clisync-'.getmypid();
+    protected function startup()
+    {
+        $this->tempDir = '/tmp/.clisync-' . getmypid();
         $this->clearTempDir();
         PhpUtility::mkdir($this->tempDir, 0777, true);
         PhpUtility::mkdir($this->tempDir . '/mysql/', 0777, true);
@@ -500,14 +519,16 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Cleanup task
      */
-    protected function cleanup() {
+    protected function cleanup()
+    {
         $this->clearTempDir();
     }
 
     /**
      * Clear temp. storage directory if exists
      */
-    protected function clearTempDir() {
+    protected function clearTempDir()
+    {
         // Remove storage dir
         if (!empty($this->tempDir) && is_dir($this->tempDir)) {
             $command = new CommandBuilder('rm', '-rf');
@@ -522,7 +543,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @throws \CliTools\Exception\StopException
      */
-    protected function checkIfDockerExists() {
+    protected function checkIfDockerExists()
+    {
         $dockerPath = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
 
         if (!empty($dockerPath)) {
@@ -543,7 +565,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Run defined commands
      */
-    protected function runCommands($area) {
+    protected function runCommands($area)
+    {
         $commandList = $this->getCommandList($area);
 
         if (!empty($commandList)) {
@@ -555,7 +578,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
                     // Simple, local task
                     $command = new CommandBuilder();
                     $command->parse($commandRow);
-                } elseif(is_array($commandRow)) {
+                } elseif (is_array($commandRow)) {
                     // Complex task
                     $command = $this->buildComplexTask($commandRow);
                 }
@@ -574,7 +597,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @return CommandBuilder|CommandBuilderInterface
      */
-    protected function buildComplexTask(array $task) {
+    protected function buildComplexTask(array $task)
+    {
         if (empty($task['type'])) {
             $task['type'] = 'local';
         }
@@ -609,13 +633,14 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Create rsync command for sync
      *
-     * @param string     $source    Source directory
-     * @param string     $target    Target directory
-     * @param string     $confKey   List of files (patterns)
+     * @param string $source  Source directory
+     * @param string $target  Target directory
+     * @param string $confKey List of files (patterns)
      *
      * @return CommandBuilder
      */
-    protected function createRsyncCommandWithConfiguration($source, $target, $confKey) {
+    protected function createRsyncCommandWithConfiguration($source, $target, $confKey)
+    {
         $options = array();
 
         // #############
@@ -640,7 +665,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         if ($this->contextConfig->exists($confKey . '.conf.maxSize')) {
             $options['max-size'] = array(
                 'template' => '--max-size=%s',
-                'params' => array(
+                'params'   => array(
                     $this->contextConfig->get($confKey . '.conf.maxSize')
                 ),
             );
@@ -652,7 +677,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         if ($this->contextConfig->exists($confKey . '.conf.minSize')) {
             $options['min-size'] = array(
                 'template' => '--min-size=%s',
-                'params' => array(
+                'params'   => array(
                     $this->contextConfig->get($confKey . '.conf.minSize')
                 ),
             );
@@ -664,15 +689,21 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Create rsync command for sync
      *
-     * @param string     $source    Source directory
-     * @param string     $target    Target directory
-     * @param array|null $filelist  List of files (patterns)
-     * @param array|null $exclude   List of excludes (patterns)
-     * @param array|null $options   Custom rsync options
+     * @param string     $source   Source directory
+     * @param string     $target   Target directory
+     * @param array|null $filelist List of files (patterns)
+     * @param array|null $exclude  List of excludes (patterns)
+     * @param array|null $options  Custom rsync options
      *
      * @return CommandBuilder
      */
-    protected function createRsyncCommand($source, $target, array $filelist = null, array $exclude = null, array $options = null) {
+    protected function createRsyncCommand(
+        $source,
+        $target,
+        array $filelist = null,
+        array $exclude = null,
+        array $options = null
+    ) {
         $this->output->writeln('<comment>Rsync from ' . $source . ' to ' . $target . '</comment>');
 
         $command = new CommandBuilder('rsync', '-rlptD --delete-after --progress --human-readable');
@@ -694,7 +725,6 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
                 } else {
                     $command->addArgument($optionValue);
                 }
-
             }
         }
 
@@ -714,12 +744,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @return boolean|string
      */
-    protected function getRsyncPathFromConfig() {
+    protected function getRsyncPathFromConfig()
+    {
         $ret = false;
         if ($this->contextConfig->exists('rsync.path')) {
             // Use path from rsync
             $ret = $this->contextConfig->get('rsync.path');
-        } elseif($this->contextConfig->exists('ssh.hostname') && $this->contextConfig->exists('ssh.path')) {
+        } elseif ($this->contextConfig->exists('ssh.hostname') && $this->contextConfig->exists('ssh.path')) {
             // Build path from ssh configuration
             $ret = $this->contextConfig->get('ssh.hostname') . ':' . $this->contextConfig->get('ssh.path');
         }
@@ -733,7 +764,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @return boolean|string
      */
-    protected function getRsyncWorkingPath() {
+    protected function getRsyncWorkingPath()
+    {
         $ret = $this->workingPath;
 
         // remove right /
@@ -752,27 +784,31 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @param CommandBuilder $command Rsync Command
      * @param array          $list    List of files
      */
-    protected function rsyncAddFileList(CommandBuilder $command, array $list) {
+    protected function rsyncAddFileList(CommandBuilder $command, array $list)
+    {
         $rsyncFilter = $this->tempDir . '/.rsync-filelist';
 
         PhpUtility::filePutContents($rsyncFilter, implode("\n", $list));
 
-        $command->addArgumentTemplate('--files-from=%s', $rsyncFilter);
+        $command->addArgumentTemplate('--include-from=%s', $rsyncFilter);
 
         // cleanup rsync file
-        $command->getExecutor()->addFinisherCallback(function () use ($rsyncFilter) {
-            unlink($rsyncFilter);
-        });
-
+        $command->getExecutor()
+                ->addFinisherCallback(
+                    function () use ($rsyncFilter) {
+                        unlink($rsyncFilter);
+                    }
+                );
     }
 
     /**
      * Add exclude (pattern) list to rsync command
      *
-     * @param CommandBuilder $command  Rsync Command
-     * @param array          $list     List of excludes
+     * @param CommandBuilder $command Rsync Command
+     * @param array          $list    List of excludes
      */
-    protected function rsyncAddExcludeList(CommandBuilder $command, $list) {
+    protected function rsyncAddExcludeList(CommandBuilder $command, $list)
+    {
         $rsyncFilter = $this->tempDir . '/.rsync-exclude';
 
         PhpUtility::filePutContents($rsyncFilter, implode("\n", $list));
@@ -780,22 +816,27 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $command->addArgumentTemplate('--exclude-from=%s', $rsyncFilter);
 
         // cleanup rsync file
-        $command->getExecutor()->addFinisherCallback(function () use ($rsyncFilter) {
-            unlink($rsyncFilter);
-        });
+        $command->getExecutor()
+                ->addFinisherCallback(
+                    function () use ($rsyncFilter) {
+                        unlink($rsyncFilter);
+                    }
+                );
     }
 
     /**
      * Create mysql backup command
      *
-     * @param string      $database Database name
-     * @param string      $dumpFile MySQL dump file
+     * @param string $database Database name
+     * @param string $dumpFile MySQL dump file
      *
      * @return SelfCommandBuilder
      */
-    protected function createMysqlRestoreCommand($database, $dumpFile) {
+    protected function createMysqlRestoreCommand($database, $dumpFile)
+    {
         $command = new SelfCommandBuilder();
         $command->addArgumentTemplate('mysql:restore %s %s', $database, $dumpFile);
+
         return $command;
     }
 
@@ -808,7 +849,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @return SelfCommandBuilder
      */
-    protected function createMysqlBackupCommand($database, $dumpFile, $filter = null) {
+    protected function createMysqlBackupCommand($database, $dumpFile, $filter = null)
+    {
         $command = new SelfCommandBuilder();
         $command->addArgumentTemplate('mysql:backup %s %s', $database, $dumpFile);
 
@@ -823,9 +865,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * Wrap command with ssh if needed
      *
      * @param  CommandBuilderInterface $command
+     *
      * @return CommandBuilderInterface
      */
-    protected function wrapRemoteCommand(CommandBuilderInterface $command) {
+    protected function wrapRemoteCommand(CommandBuilderInterface $command)
+    {
         // Wrap in ssh if needed
         if ($this->contextConfig->exists('ssh.hostname')) {
             $sshCommand = new CommandBuilder('ssh', '-o BatchMode=yes');
@@ -845,7 +889,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @return RemoteCommandBuilder
      */
-    protected function createRemoteMySqlCommand($database = null) {
+    protected function createRemoteMySqlCommand($database = null)
+    {
         $command = new RemoteCommandBuilder('mysql');
         $command
             // batch mode
@@ -883,7 +928,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @return RemoteCommandBuilder
      */
-    protected function createLocalMySqlCommand($database = null) {
+    protected function createLocalMySqlCommand($database = null)
+    {
         $command = new RemoteCommandBuilder('mysql');
         $command
             // batch mode
@@ -925,7 +971,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @return RemoteCommandBuilder
      */
-    protected function createRemoteMySqlDumpCommand($database = null) {
+    protected function createRemoteMySqlDumpCommand($database = null)
+    {
         $command = new RemoteCommandBuilder('mysqldump');
 
         // Add username
@@ -949,15 +996,15 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         }
 
         // Transfer compression
-        switch($this->contextConfig->get('mysql.compression')) {
+        switch ($this->contextConfig->get('mysql.compression')) {
             case 'bzip2':
                 // Add pipe compressor (bzip2 compressed transfer via ssh)
-                $command->addPipeCommand( new CommandBuilder('bzip2', '--compress --stdout') );
+                $command->addPipeCommand(new CommandBuilder('bzip2', '--compress --stdout'));
                 break;
 
             case 'gzip':
                 // Add pipe compressor (gzip compressed transfer via ssh)
-                $command->addPipeCommand( new CommandBuilder('gzip', '--stdout') );
+                $command->addPipeCommand(new CommandBuilder('gzip', '--stdout'));
                 break;
         }
 
@@ -975,7 +1022,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @return RemoteCommandBuilder
      */
-    protected function createLocalMySqlDumpCommand($database = null) {
+    protected function createLocalMySqlDumpCommand($database = null)
+    {
         $command = new RemoteCommandBuilder('mysqldump');
 
         // Add username
@@ -1008,15 +1056,15 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         }
 
         // Transfer compression
-        switch($this->contextConfig->get('mysql.compression')) {
+        switch ($this->contextConfig->get('mysql.compression')) {
             case 'bzip2':
                 // Add pipe compressor (bzip2 compressed transfer via ssh)
-                $command->addPipeCommand( new CommandBuilder('bzip2', '--compress --stdout') );
+                $command->addPipeCommand(new CommandBuilder('bzip2', '--compress --stdout'));
                 break;
 
             case 'gzip':
                 // Add pipe compressor (gzip compressed transfer via ssh)
-                $command->addPipeCommand( new CommandBuilder('gzip', '--stdout') );
+                $command->addPipeCommand(new CommandBuilder('gzip', '--stdout'));
                 break;
         }
 
@@ -1027,13 +1075,14 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Add mysqldump filter to command
      *
-     * @param CommandBuilderInterface $commandDump  Command
-     * @param string                  $database     Database
-     * @param boolean                 $isRemote     Remote filter
+     * @param CommandBuilderInterface $commandDump Command
+     * @param string                  $database    Database
+     * @param boolean                 $isRemote    Remote filter
      *
      * @return CommandBuilderInterface
      */
-    protected function addMysqlDumpFilterArguments(CommandBuilderInterface $commandDump, $database, $isRemote = true) {
+    protected function addMysqlDumpFilterArguments(CommandBuilderInterface $commandDump, $database, $isRemote = true)
+    {
         $command = $commandDump;
 
         $filter = $this->contextConfig->get('mysql.filter');
@@ -1043,7 +1092,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $filterList = (array)$filter;
             $filter     = 'custom table filter';
         } else {
-            $filterList = $this->getApplication()->getConfigValue('mysql-backup-filter', $filter);
+            $filterList = $this->getApplication()
+                               ->getConfigValue('mysql-backup-filter', $filter);
         }
 
         if (empty($filterList)) {
@@ -1066,22 +1116,21 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $tableListDumper = $this->wrapRemoteCommand($tableListDumper);
         }
 
-        $tableList = $tableListDumper->execute()->getOutput();
+        $tableList = $tableListDumper->execute()
+                                     ->getOutput();
 
         // Filter table list
         $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $filterList, $database);
 
         // Dump only structure
         $commandStructure = clone $command;
-        $commandStructure
-            ->addArgument('--no-data')
-            ->clearPipes();
+        $commandStructure->addArgument('--no-data')
+                         ->clearPipes();
 
         // Dump only data (only filtered tables)
         $commandData = clone $command;
-        $commandData
-            ->addArgument('--no-create-info')
-            ->clearPipes();
+        $commandData->addArgument('--no-create-info')
+                    ->clearPipes();
 
         if (!empty($ignoredTableList)) {
             $commandData->addArgumentTemplateMultiple('--ignore-table=%s', $ignoredTableList);
@@ -1091,9 +1140,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         // Combine both commands to one
         $command = new OutputCombineCommandBuilder();
-        $command
-            ->addCommandForCombinedOutput($commandStructure)
-            ->addCommandForCombinedOutput($commandData);
+        $command->addCommandForCombinedOutput($commandStructure)
+                ->addCommandForCombinedOutput($commandData);
 
         // Read compression pipe
         if (!empty($commandPipeList)) {

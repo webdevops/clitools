@@ -20,7 +20,8 @@ namespace CliTools\Utility;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class FormatUtility {
+class FormatUtility
+{
 
     /**
      * Format number in human readable format
@@ -30,7 +31,8 @@ class FormatUtility {
      *
      * @return  string
      */
-    public static function number($number, $precision = 0) {
+    public static function number($number, $precision = 0)
+    {
         $ret = number_format($number, $precision);
 
         return $ret;
@@ -44,7 +46,8 @@ class FormatUtility {
      *
      * @return  string
      */
-    public static function bytes($bytes, $precision = 2) {
+    public static function bytes($bytes, $precision = 2)
+    {
         $units = array('B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB');
 
         $bytes = max($bytes, 0);

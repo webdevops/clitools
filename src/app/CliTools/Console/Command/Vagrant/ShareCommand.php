@@ -22,67 +22,68 @@ namespace CliTools\Console\Command\Vagrant;
 
 use CliTools\Shell\CommandBuilder\CommandBuilder;
 use CliTools\Shell\CommandBuilder\SelfCommandBuilder;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ShareCommand extends \CliTools\Console\Command\AbstractCommand {
+class ShareCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('vagrant:share')
-            ->setDescription('Start share for vagrant')
-            ->addArgument(
-                'name',
-                InputArgument::OPTIONAL,
-                'Specific name for the share'
-            )
-            ->addOption(
-                'http',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Local HTTP port to forward to'
-            )
-            ->addOption(
-                'https',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Local HTTPS port to forward to'
-            )
-            ->addOption(
-                'name',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Specific name for the share'
-            )
-            ->addOption(
-                'ssh',
-                null,
-                InputOption::VALUE_NONE,
-                'Allow \'vagrant connect --ssh\' access'
-            )
-            ->addOption(
-                'ssh-no-password',
-                null,
-                InputOption::VALUE_NONE,
-                'Key won\'t be encrypted with --ssh'
-            )
-            ->addOption(
-                'ssh-port',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Specific port for SSH when using --ssh'
-            )
-            ->addOption(
-                '--ssh-once',
-                null,
-                InputOption::VALUE_NONE,
-                'Allow \'vagrant connect --ssh\' only one time'
-            );
+    protected function configure()
+    {
+        $this->setName('vagrant:share')
+             ->setDescription('Start share for vagrant')
+             ->addArgument(
+                 'name',
+                 InputArgument::OPTIONAL,
+                 'Specific name for the share'
+             )
+             ->addOption(
+                 'http',
+                 null,
+                 InputOption::VALUE_REQUIRED,
+                 'Local HTTP port to forward to'
+             )
+             ->addOption(
+                 'https',
+                 null,
+                 InputOption::VALUE_REQUIRED,
+                 'Local HTTPS port to forward to'
+             )
+             ->addOption(
+                 'name',
+                 null,
+                 InputOption::VALUE_REQUIRED,
+                 'Specific name for the share'
+             )
+             ->addOption(
+                 'ssh',
+                 null,
+                 InputOption::VALUE_NONE,
+                 'Allow \'vagrant connect --ssh\' access'
+             )
+             ->addOption(
+                 'ssh-no-password',
+                 null,
+                 InputOption::VALUE_NONE,
+                 'Key won\'t be encrypted with --ssh'
+             )
+             ->addOption(
+                 'ssh-port',
+                 null,
+                 InputOption::VALUE_REQUIRED,
+                 'Specific port for SSH when using --ssh'
+             )
+             ->addOption(
+                 '--ssh-once',
+                 null,
+                 InputOption::VALUE_NONE,
+                 'Allow \'vagrant connect --ssh\' only one time'
+             );
     }
 
     /**
@@ -93,9 +94,10 @@ class ShareCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
 
-        $runningCallback = function($process, $status) {
+        $runningCallback = function ($process, $status) {
             static $domainFound = false;
             if ($domainFound) {
                 return;
@@ -113,11 +115,13 @@ class ShareCommand extends \CliTools\Console\Command\AbstractCommand {
                             $domainName = $matches[1];
 
                             $typo3Domain = new SelfCommandBuilder();
-                            $typo3Domain
-                                ->addArgument('typo3:domain')
-                                ->addArgumentTemplate('--remove=%s', '*.vagrantshare.com')
-                                ->addArgumentTemplate('--duplicate=%s', $domainName . '.vagrantshare.com')
-                                ->execute();
+                            $typo3Domain->addArgument('typo3:domain')
+                                        ->addArgumentTemplate(
+                                            '--remove=%s',
+                                            '*.vagrantshare.com'
+                                        )
+                                        ->addArgumentTemplate('--duplicate=%s', $domainName . '.vagrantshare.com')
+                                        ->execute();
 
                             $domainFound = true;
                         }
@@ -126,14 +130,17 @@ class ShareCommand extends \CliTools\Console\Command\AbstractCommand {
             }
         };
 
-        $cleanupCallback = function() {
+        $cleanupCallback = function () {
             $typo3Domain = new SelfCommandBuilder();
-            $typo3Domain
-                ->addArgument('typo3:domain')
-                ->addArgumentTemplate('--remove=%s', '*.vagrantshare.com')
-                ->execute();
+            $typo3Domain->addArgument('typo3:domain')
+                        ->addArgumentTemplate(
+                            '--remove=%s',
+                            '*.vagrantshare.com'
+                        )
+                        ->execute();
         };
-        $this->getApplication()->registerTearDown($cleanupCallback);
+        $this->getApplication()
+             ->registerTearDown($cleanupCallback);
 
         $opts = array(
             'runningCallback' => $runningCallback,

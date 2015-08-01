@@ -20,20 +20,21 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\PhpUtility;
 use CliTools\Shell\CommandBuilder\EditorCommandBuilder;
+use CliTools\Utility\PhpUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class InitCommand extends \CliTools\Console\Command\AbstractCommand {
+class InitCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('sync:init')
-            ->setDescription('Create example clisync.yml');
+    protected function configure()
+    {
+        $this->setName('sync:init')
+             ->setDescription('Create example clisync.yml');
     }
 
     /**
@@ -45,11 +46,15 @@ class InitCommand extends \CliTools\Console\Command\AbstractCommand {
      * @return int|null|void
      * @throws \Exception
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $cliSyncFilePath = getcwd() . '/' . AbstractCommand::CONFIG_FILE;
 
         if (file_exists($cliSyncFilePath)) {
-            $this->output->writeln('<p-error>Configuration file ' . AbstractCommand::CONFIG_FILE . ' already exists</p-error>');
+            $this->output->writeln(
+                '<p-error>Configuration file ' . AbstractCommand::CONFIG_FILE . ' already exists</p-error>'
+            );
+
             return 1;
         }
 
@@ -62,9 +67,8 @@ class InitCommand extends \CliTools\Console\Command\AbstractCommand {
         // Start editor with file (if $EDITOR is set)
         try {
             $editor = new EditorCommandBuilder();
-            $editor
-                ->addArgument($cliSyncFilePath)
-                ->executeInteractive();
+            $editor->addArgument($cliSyncFilePath)
+                   ->executeInteractive();
         } catch (\Exception $e) {
             $this->output->writeln('<p-error>' . $e->getMessage() . '</p-error>');
         }

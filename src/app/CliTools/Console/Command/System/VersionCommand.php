@@ -27,15 +27,16 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
+class VersionCommand extends \CliTools\Console\Command\AbstractCommand
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('system:version')
-            ->setDescription('List common version');
+    protected function configure()
+    {
+        $this->setName('system:version')
+             ->setDescription('List common version');
     }
 
     /**
@@ -46,14 +47,15 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
 
         $versionList = array();
 
         // ############################
         // System (LSB Version)
         // ############################
-        $versionRow = array(
+        $versionRow    = array(
             'system'  => 'System',
             'version' => UnixUtility::lsbSystemDescription(),
         );
@@ -88,7 +90,8 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
 
         $command = new CommandBuilder('apache2ctl', '-v');
         $command->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_NO_STDERR);
-        $execOutput = $command->execute()->getOutput();
+        $execOutput = $command->execute()
+                              ->getOutput();
 
         foreach ($execOutput as $execOutputLine) {
             if (strpos($execOutputLine, ':') !== false) {
@@ -107,7 +110,7 @@ class VersionCommand extends \CliTools\Console\Command\AbstractCommand {
         // ############################
         // Docker
         // ############################
-        $versionRow = array(
+        $versionRow    = array(
             'system'  => 'Docker',
             'version' => \CliTools\Utility\UnixUtility::dockerVersion(),
         );

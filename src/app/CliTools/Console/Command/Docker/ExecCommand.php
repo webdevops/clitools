@@ -20,19 +20,20 @@ namespace CliTools\Console\Command\Docker;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
 
-class ExecCommand extends AbstractCommand implements \CliTools\Console\Filter\AnyParameterFilterInterface {
+class ExecCommand extends AbstractCommand implements \CliTools\Console\Filter\AnyParameterFilterInterface
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('docker:exec')
-            ->setDescription('Run defined command in docker container');
+    protected function configure()
+    {
+        $this->setName('docker:exec')
+             ->setDescription('Run defined command in docker container');
     }
 
     /**
@@ -43,9 +44,11 @@ class ExecCommand extends AbstractCommand implements \CliTools\Console\Filter\An
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $paramList = $this->getFullParameterList();
-        $container = $this->getApplication()->getConfigValue('docker', 'container');
+        $container = $this->getApplication()
+                          ->getConfigValue('docker', 'container');
 
 
         if (!empty($paramList)) {

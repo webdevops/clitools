@@ -20,22 +20,24 @@ namespace CliTools\Console\Command\System;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Utility\UnixUtility;
 use CliTools\Database\DatabaseConnection;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
 use CliTools\Shell\CommandBuilder\SelfCommandBuilder;
+use CliTools\Utility\UnixUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class StartupCommand extends \CliTools\Console\Command\AbstractCommand implements \CliTools\Console\Filter\OnlyRootFilterInterface {
+class StartupCommand extends \CliTools\Console\Command\AbstractCommand implements
+    \CliTools\Console\Filter\OnlyRootFilterInterface
+{
 
     /**
      * Configure command
      */
-    protected function configure() {
-        $this
-            ->setName('system:startup')
-            ->setDescription('System startup task');
+    protected function configure()
+    {
+        $this->setName('system:startup')
+             ->setDescription('System startup task');
     }
 
     /**
@@ -46,7 +48,8 @@ class StartupCommand extends \CliTools\Console\Command\AbstractCommand implement
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
         $this->setupBanner();
         $this->cleanupMysql();
 
@@ -56,10 +59,12 @@ class StartupCommand extends \CliTools\Console\Command\AbstractCommand implement
     /**
      * Setup banner
      */
-    protected function setupBanner() {
+    protected function setupBanner()
+    {
         $command = new SelfCommandBuilder();
         $command->addArgument('system:banner');
-        $output = $command->execute()->getOutputString();
+        $output = $command->execute()
+                          ->getOutputString();
 
         // escape special chars for /etc/issue
         $outputIssue = addcslashes($output, '\\');
@@ -75,7 +80,8 @@ class StartupCommand extends \CliTools\Console\Command\AbstractCommand implement
      *
      * @return string
      */
-    protected function cleanupMysql() {
+    protected function cleanupMysql()
+    {
         try {
             // ############################
             // Clear general log
@@ -92,9 +98,11 @@ class StartupCommand extends \CliTools\Console\Command\AbstractCommand implement
             if (!empty($logFileRow['Value'])) {
                 $command = new CommandBuilder('rm');
                 $command->addArgument('-f')
-                    ->addArgumentSeparator()
-                    ->addArgument($logFileRow['Value'])
-                    ->executeInteractive();
+                        ->addArgumentSeparator()
+                        ->addArgument(
+                            $logFileRow['Value']
+                        )
+                        ->executeInteractive();
             }
         } catch (\Exception $e) {
             // do nothing if no mysql is running

@@ -20,7 +20,8 @@ namespace CliTools\Iterator\Filter;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Typo3RecursiveDirectoryFilter extends \CliTools\Iterator\Filter\RecursiveDirectoryFilter {
+class Typo3RecursiveDirectoryFilter extends \CliTools\Iterator\Filter\RecursiveDirectoryFilter
+{
 
     /**
      * List of directories which will be ignored (for sub search)
@@ -50,7 +51,8 @@ class Typo3RecursiveDirectoryFilter extends \CliTools\Iterator\Filter\RecursiveD
      *
      * @return bool
      */
-    public function accept() {
+    public function accept()
+    {
         if (!parent::accept()) {
             return false;
         }

@@ -22,7 +22,8 @@ namespace CliTools\Database;
 
 use CliTools\Utility\ConsoleUtility;
 
-class DatabaseConnection {
+class DatabaseConnection
+{
 
     /**
      * Database connectiond dsn
@@ -59,7 +60,8 @@ class DatabaseConnection {
      * @param string|null $username Username
      * @param string|null $password Password
      */
-    public static function setDsn($dsn, $username = null, $password = null) {
+    public static function setDsn($dsn, $username = null, $password = null)
+    {
 
         if ($dsn !== null) {
             self::$dbDsn = $dsn;
@@ -81,7 +83,8 @@ class DatabaseConnection {
      *
      * @return string
      */
-    public static function getDsn() {
+    public static function getDsn()
+    {
         return self::$dbDsn;
     }
 
@@ -90,7 +93,8 @@ class DatabaseConnection {
      *
      * @return string
      */
-    public static function getDbUsername() {
+    public static function getDbUsername()
+    {
         return self::$dbUsername;
     }
 
@@ -99,7 +103,8 @@ class DatabaseConnection {
      *
      * @return string
      */
-    public static function getDbPassword() {
+    public static function getDbPassword()
+    {
         return self::$dbPassword;
     }
 
@@ -108,7 +113,8 @@ class DatabaseConnection {
      *
      * @return string
      */
-    public static function getDbHostname() {
+    public static function getDbHostname()
+    {
         return self::parseDsnValue('host');
     }
 
@@ -117,7 +123,8 @@ class DatabaseConnection {
      *
      * @return string
      */
-    public static function getDbPort() {
+    public static function getDbPort()
+    {
         return self::parseDsnValue('port');
     }
 
@@ -128,7 +135,8 @@ class DatabaseConnection {
      * @return \PDO
      * @throws \PDOException
      */
-    public static function getConnection() {
+    public static function getConnection()
+    {
 
         if (self::$connection === null) {
             try {
@@ -138,11 +146,16 @@ class DatabaseConnection {
                 $con->exec('SET NAMES utf8');
                 $con->exec('SET CHARACTER SET utf8');
                 // SET SESSION sql_mode = 'STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE'
-                $con->exec('SET SESSION sql_mode = \'ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE\'');
+                $con->exec(
+                    'SET SESSION sql_mode = \'ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE\''
+                );
 
                 self::$connection = $con;
             } catch (\Exception $e) {
-                throw new \PDOException('Cannot connect to "' . self::$dbDsn . '" with user "' . self::$dbUsername . '" and password "' . self::$dbPassword . '", error was:' . $e->getMessage());
+                throw new \PDOException(
+                    'Cannot connect to "' . self::$dbDsn . '" with user "' . self::$dbUsername . '" and password "' . self::$dbPassword . '", error was:' . $e->getMessage(
+                    )
+                );
             }
         }
 
@@ -155,10 +168,12 @@ class DatabaseConnection {
      *
      * @return bool
      */
-    public static function ping() {
+    public static function ping()
+    {
         ConsoleUtility::verboseWriteln('DB::PING', null);
         try {
-            self::getConnection()->query('SELECT 1');
+            self::getConnection()
+                ->query('SELECT 1');
         } catch (\PDOException $e) {
             ConsoleUtility::verboseWriteln('DB::QUERY::EXCEPTION', $e);
             throw $e;
@@ -175,11 +190,13 @@ class DatabaseConnection {
      * @return \PDOStatement
      * @throws \PDOException
      */
-    public static function query($query) {
+    public static function query($query)
+    {
         ConsoleUtility::verboseWriteln('DB::QUERY', $query);
 
         try {
-            $ret = self::getConnection()->query($query);
+            $ret = self::getConnection()
+                       ->query($query);
         } catch (\PDOException $e) {
             ConsoleUtility::verboseWriteln('DB::QUERY::EXCEPTION', $e);
             throw $e;
@@ -195,7 +212,8 @@ class DatabaseConnection {
      *
      * @throws \PDOException
      */
-    public static function switchDatabase($database) {
+    public static function switchDatabase($database)
+    {
         self::exec('USE ' . self::sanitizeSqlDatabase($database));
     }
 
@@ -207,11 +225,13 @@ class DatabaseConnection {
      * @return int
      * @throws \PDOException
      */
-    public static function exec($query) {
+    public static function exec($query)
+    {
         ConsoleUtility::verboseWriteln('DB::EXEC', $query);
 
         try {
-            $ret = self::getConnection()->exec($query);
+            $ret = self::getConnection()
+                       ->exec($query);
         } catch (\PDOException $e) {
             ConsoleUtility::verboseWriteln('DB::EXEC::EXCEPTION', $e);
             throw $e;
@@ -230,7 +250,8 @@ class DatabaseConnection {
      * @return int
      * @throws \PDOException
      */
-    public static function insert($table, $values) {
+    public static function insert($table, $values)
+    {
         $fieldList = array_keys($values);
 
         $valueList = array();
@@ -239,7 +260,7 @@ class DatabaseConnection {
         }
 
         $query = 'INSERT INTO %s (%s) VALUES (%s)';
-        $query = sprintf($query, $table, implode(',',$fieldList), implode(',',$valueList));
+        $query = sprintf($query, $table, implode(',', $fieldList), implode(',', $valueList));
         self::exec($query);
     }
 
@@ -251,8 +272,10 @@ class DatabaseConnection {
      * @return string
      * @throws \PDOException
      */
-    public static function quote($value) {
-        return self::getConnection()->quote($value);
+    public static function quote($value)
+    {
+        return self::getConnection()
+                   ->quote($value);
     }
 
 
@@ -263,7 +286,8 @@ class DatabaseConnection {
      *
      * @return  array
      */
-    public static function quoteArray($valueList) {
+    public static function quoteArray($valueList)
+    {
         $ret = array();
         foreach ($valueList as $k => $v) {
             $ret[$k] = self::quote($v);
@@ -279,7 +303,8 @@ class DatabaseConnection {
      *
      * @return mixed|null
      */
-    public static function getOne($query) {
+    public static function getOne($query)
+    {
         $ret = null;
 
         $res = self::query($query);
@@ -299,7 +324,8 @@ class DatabaseConnection {
      * @return mixed|null
      * @throws \PDOException
      */
-    public static function getRow($query) {
+    public static function getRow($query)
+    {
         $ret = null;
 
         $res = self::query($query);
@@ -319,7 +345,8 @@ class DatabaseConnection {
      * @return array
      * @throws \PDOException
      */
-    public static function getAll($query) {
+    public static function getAll($query)
+    {
         $ret = array();
 
         $res = self::query($query);
@@ -341,7 +368,8 @@ class DatabaseConnection {
      * @return array
      * @throws \PDOException
      */
-    public static function getAllWithIndex($query, $indexCol = null) {
+    public static function getAllWithIndex($query, $indexCol = null)
+    {
         $ret = array();
 
         $res = self::query($query);
@@ -369,7 +397,8 @@ class DatabaseConnection {
      * @return array
      * @throws \PDOException
      */
-    public static function getCol($query) {
+    public static function getCol($query)
+    {
         $ret = array();
 
         $res = self::query($query);
@@ -389,7 +418,8 @@ class DatabaseConnection {
      * @return array
      * @throws \PDOException
      */
-    public static function getColWithIndex($query) {
+    public static function getColWithIndex($query)
+    {
         $ret = array();
 
         $res = self::query($query);
@@ -410,7 +440,8 @@ class DatabaseConnection {
      * @return array
      * @throws \PDOException
      */
-    public static function getList($query) {
+    public static function getList($query)
+    {
         $ret = array();
 
         $res = self::query($query);
@@ -428,14 +459,16 @@ class DatabaseConnection {
      * Check if database exists
      *
      * @param string $database Database name
+     *
      * @return boolean
      */
-    public static function databaseExists($database) {
+    public static function databaseExists($database)
+    {
         $query = 'SELECT COUNT(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = %s';
         $query = sprintf($query, self::quote($database));
         $ret   = (int)self::getOne($query);
 
-        return ($ret === 1 );
+        return ($ret === 1);
     }
 
     /**
@@ -443,7 +476,8 @@ class DatabaseConnection {
      *
      * @return array
      */
-    public static function databaseList() {
+    public static function databaseList()
+    {
         // Get list of databases
         $query = 'SELECT SCHEMA_NAME FROM information_schema.SCHEMATA';
         $ret   = DatabaseConnection::getCol($query);
@@ -458,9 +492,11 @@ class DatabaseConnection {
      * Return list of tables of one database
      *
      * @param string $database Database name
+     *
      * @return array
      */
-    public static function tableList($database) {
+    public static function tableList($database)
+    {
         $query = 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s';
         $query = sprintf($query, self::quote($database));
         $ret   = self::getCol($query);
@@ -474,11 +510,13 @@ class DatabaseConnection {
      *
      * @param string $database Database name
      * @param string $table    Table name
+     *
      * @return boolean
      */
-    public static function tableExists($database, $table) {
+    public static function tableExists($database, $table)
+    {
         $query = 'SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s';
-        $query = sprintf($query, self::quote($database), self::quote($table) );
+        $query = sprintf($query, self::quote($database), self::quote($table));
         $ret   = (bool)self::getOne($query);
 
         return $ret;
@@ -487,21 +525,24 @@ class DatabaseConnection {
     /**
      * Begin transaction
      */
-    public static function beginTransaction() {
+    public static function beginTransaction()
+    {
         self::exec('BEGIN TRANSACTION');
     }
 
     /**
      * Commit transaction
      */
-    public static function commit() {
+    public static function commit()
+    {
         self::exec('COMMIT');
     }
 
     /**
      * Rollback transaction
      */
-    public static function rollback() {
+    public static function rollback()
+    {
         self::exec('ROLLBACK');
     }
 
@@ -516,7 +557,8 @@ class DatabaseConnection {
      *
      * @return string
      */
-    public static function addCondition($condition) {
+    public static function addCondition($condition)
+    {
         $ret = ' ';
 
         if (!empty($condition)) {
@@ -539,7 +581,8 @@ class DatabaseConnection {
      *
      * @return string
      */
-    public static function conditionIn($field, $values, $required = true) {
+    public static function conditionIn($field, $values, $required = true)
+    {
         if (!empty($values)) {
             $quotedValues = self::quoteArray($values);
 
@@ -564,7 +607,8 @@ class DatabaseConnection {
      *
      * @return string
      */
-    public static function conditionNotIn($field, $values, $required = true) {
+    public static function conditionNotIn($field, $values, $required = true)
+    {
         if (!empty($values)) {
             $quotedValues = self::quoteArray($values);
 
@@ -587,7 +631,8 @@ class DatabaseConnection {
      *
      * @return  string
      */
-    public static function sanitizeSqlField($field) {
+    public static function sanitizeSqlField($field)
+    {
         $field = preg_replace('/[\0\\\\\/]/', '', $field);
 
         // Rule: Database, table, and column names cannot end with space characters.
@@ -603,7 +648,8 @@ class DatabaseConnection {
      *
      * @return string
      */
-    public static function sanitizeSqlTable($table) {
+    public static function sanitizeSqlTable($table)
+    {
         return '`' . self::sanitizeSqlIdentifier($table) . '`';
     }
 
@@ -614,7 +660,8 @@ class DatabaseConnection {
      *
      * @return string
      */
-    public static function sanitizeSqlDatabase($database) {
+    public static function sanitizeSqlDatabase($database)
+    {
         return '`' . self::sanitizeSqlIdentifier($database) . '`';
     }
 
@@ -625,7 +672,8 @@ class DatabaseConnection {
      *
      * @return string
      */
-    public static function sanitizeSqlIdentifier($value) {
+    public static function sanitizeSqlIdentifier($value)
+    {
         $ret = preg_replace('/[\0\\\\\/\.]/', '', $value);
 
         // Rule: Database, table, and column names cannot end with space characters.
@@ -639,9 +687,11 @@ class DatabaseConnection {
      *
      * @param string      $key     DSN Key
      * @param string|null $default Default value
+     *
      * @return string|null
      */
-    protected static function parseDsnValue($key, $default = NULL) {
+    protected static function parseDsnValue($key, $default = null)
+    {
         $ret = $default;
 
         $pattern = sprintf('~%s=([^;]*)(?:;|$)~', preg_quote($key, '~'));
