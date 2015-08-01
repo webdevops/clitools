@@ -1,6 +1,18 @@
 CliTools Changelog
 ==================
 
+2.1.4 - 2015-08-01
+------------------
+- Fixed "CliTools\Shell\CommandBuilder\DatabaseConnection" not found
+- Fixed `typo3:domain` incorrect setting baseurl to hidden domains
+- Set new fallback download url (dl.webdevops.io)
+
+2.1.3 - 2015-07-31
+------------------
+- PSR2 reformatting
+- Fixed mysql/mysqldump username/passwort/hostname/port setting from internal connection
+- Changed github repository to webdevops organisation
+
 2.1.2 - 2015-07-22
 ------------------
 - Fixed smaller issues
