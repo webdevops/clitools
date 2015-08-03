@@ -1,6 +1,10 @@
 CliTools Changelog
 ==================
 
+2.1.5 - 2015-08-03
+------------------
+- Fixed `sync:...` commands with wrong rsync synchronization
+
 2.1.4 - 2015-08-01
 ------------------
 - Fixed "CliTools\Shell\CommandBuilder\DatabaseConnection" not found
