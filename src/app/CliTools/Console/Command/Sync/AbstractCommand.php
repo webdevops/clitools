@@ -651,6 +651,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $fileList = $this->contextConfig->get($confKey . '.directory');
         }
 
+
         // #############
         // Excludes
         // #############
@@ -658,7 +659,6 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         if ($this->contextConfig->exists($confKey . '.exclude')) {
             $excludeList = $this->contextConfig->get($confKey . '.exclude');
         }
-
         // #############
         // Max size
         // #############
@@ -708,9 +708,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         $command = new CommandBuilder('rsync', '-rlptD --delete-after --progress --human-readable');
 
-        // Add file list (external file with --files-from option)
+        // Add file list (external file with --include-from option)
         if (!empty($filelist)) {
             $this->rsyncAddFileList($command, $filelist);
+
+            // Make sure only add file list is included, all other excluded
+            $command->addArgumentTemplate('--exclude=%s', '/');
+            $command->addArgumentTemplate('--exclude=%s', '/*');
         }
 
         // Add exclude (external file with --exclude-from option)
@@ -786,7 +790,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function rsyncAddFileList(CommandBuilder $command, array $list)
     {
-        $rsyncFilter = $this->tempDir . '/.rsync-filelist';
+        $rsyncFilter = $this->tempDir . '/.rsync-filelist' . base64_encode(microtime(true) . '#' . rand(0,1000000));
 
         PhpUtility::filePutContents($rsyncFilter, implode("\n", $list));
 
@@ -809,10 +813,9 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function rsyncAddExcludeList(CommandBuilder $command, $list)
     {
-        $rsyncFilter = $this->tempDir . '/.rsync-exclude';
+        $rsyncFilter = $this->tempDir . '/.rsync-exclude.' . base64_encode(microtime(true) . '#' . rand(0,1000000));
 
         PhpUtility::filePutContents($rsyncFilter, implode("\n", $list));
-
         $command->addArgumentTemplate('--exclude-from=%s', $rsyncFilter);
 
         // cleanup rsync file
