@@ -1,9 +1,9 @@
 # CliTools for Docker, PHP und MySQL development
 
-[![latest v2.1.4](https://img.shields.io/badge/latest-v2.1.4-green.svg?style=flat)](https://github.com/mblaschke/clitools/releases/tag/2.1.4)
+[![latest v2.1.5](https://img.shields.io/badge/latest-v2.1.5-green.svg?style=flat)](https://github.com/webdevops/clitools/releases/tag/2.1.5)
 [![License GPL3](https://img.shields.io/badge/license-GPL3-blue.svg?style=flat)](/LICENSE)
-[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/mblaschke/clitools.svg)](http://isitmaintained.com/project/mblaschke/clitools "Average time to resolve an issue")
-[![Percentage of issues still open](http://isitmaintained.com/badge/open/mblaschke/clitools.svg)](http://isitmaintained.com/project/mblaschke/clitools "Percentage of issues still open")
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/webdevops/clitools.svg)](http://isitmaintained.com/project/webdevops/clitools "Average time to resolve an issue")
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/webdevops/clitools.svg)](http://isitmaintained.com/project/webdevops/clitools "Percentage of issues still open")
 
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416/big.png)](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416)
 
