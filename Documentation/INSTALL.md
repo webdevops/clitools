@@ -135,4 +135,9 @@ cd clitools
 make all
 ```
 
-If you take a look into the `Makefile` you see which tasks have been executed. The steps are: first the composer cmd, then the main build script and at last the previously built phar file gets copied to `/usr/local/bin` so that you can execute clitools just by typing `ct` without the complete path to the executable.
+If you take a look into the `Makefile`, you will see which tasks have been executed.
+The steps are:
+
+1. Execute composer command
+2. Start main build script
+3. Copy the previously built phar file to `/usr/local/bin`, so that you can execute clitools just by typing ct.
