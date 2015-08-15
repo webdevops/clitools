@@ -581,8 +581,6 @@ class AbstractCommandBuilder implements CommandBuilderInterface
             $ret[] = $envName . '=' . escapeshellarg($envValue);
         }
 
-        var_dump($this->envList);
-
         // Add command
         $ret[] = escapeshellcmd($this->command);
 
