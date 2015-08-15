@@ -22,6 +22,7 @@ namespace CliTools\Console\Command\Docker;
 
 use CliTools\Shell\CommandBuilder\CommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class UpCommand extends AbstractCommand
@@ -33,7 +34,13 @@ class UpCommand extends AbstractCommand
     protected function configure()
     {
         $this->setName('docker:up')
-             ->setDescription('Start docker container (with fast switching)');
+             ->setDescription('Start docker container (with fast switching)')
+             ->addOption(
+                 'switch',
+                 's',
+                 InputOption::VALUE_NONE,
+                 'Switch mode (shutdown previous started Docker instance)'
+             );
     }
 
     /**
@@ -58,11 +65,13 @@ class UpCommand extends AbstractCommand
 
         $output->writeln('<h2>Starting docker containers</h2>');
 
-        // Stop last docker instance
-        if ($dockerPath && $lastDockerPath) {
-            // Only stop if instance is another one
-            if ($dockerPath !== $lastDockerPath) {
-                $this->stopContainersFromPrevRun($lastDockerPath);
+        if ($input->getOption('switch')) {
+            // Stop last docker instance
+            if ($dockerPath && $lastDockerPath) {
+                // Only stop if instance is another one
+                if ($dockerPath !== $lastDockerPath) {
+                    $this->stopContainersFromPrevRun($lastDockerPath);
+                }
             }
         }
 
