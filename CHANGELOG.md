@@ -1,6 +1,10 @@
 CliTools Changelog
 ==================
 
+UPCOMING VERSION
+------------------
+- Introduced `docker:up --switch` (`docker:up` without --switch parameter no longer shutdown previous one)
+
 2.1.5 - 2015-08-03
 ------------------
 - Fixed `sync:...` commands with wrong rsync synchronization
