@@ -131,6 +131,19 @@ class SniffCommand extends AbstractCommand
                 break;
 
             // ##############
+            // PHP-FPM
+            // ##############
+            case 'php-fpm':
+                $output->writeln('<p>Using protocol "php-fpm"</p>');
+                $command->setCommand('tcpdump');
+                $command->addArgumentRaw('-nl -s0 -w- port 9000');
+
+                $pipeCommand = new CommandBuilder('strings', '-a');
+
+                $command->addPipeCommand($pipeCommand);
+                break;
+
+            // ##############
             // SOLR
             // ##############
             case 'solr':
@@ -255,6 +268,7 @@ class SniffCommand extends AbstractCommand
             $protocolList = array(
                 'http'          => 'HTTP (requests only)',
                 'http-full'     => 'HTTP (full)',
+                'php-fpm'       => 'PHP-FPM',
                 'solr'          => 'Solr',
                 'elasticsearch' => 'Elasticsearch',
                 'memcache'      => 'Memcache',

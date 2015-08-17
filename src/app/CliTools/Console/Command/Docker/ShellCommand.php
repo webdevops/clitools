@@ -81,6 +81,7 @@ class ShellCommand extends AbstractCommand
         if (!empty($cliUser)) {
             // sudo wrapping as cli user
             $commandSudo = new RemoteCommandBuilder('sudo', '-H -E -u %s', array($cliUser));
+            $commandSudo->addArgumentTemplate('TERM=%s', getenv('TERM'));
             $commandSudo->append($command, false);
             $command = $commandSudo;
         }

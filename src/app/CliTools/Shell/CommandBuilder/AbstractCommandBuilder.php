@@ -83,6 +83,13 @@ class AbstractCommandBuilder implements CommandBuilderInterface
      */
     protected $executor;
 
+    /**
+     * Environment list
+     *
+     * @var array
+     */
+    protected $envList = array();
+
     // ##########################################
     // Methods
     // ##########################################
@@ -162,6 +169,7 @@ class AbstractCommandBuilder implements CommandBuilderInterface
         $this->argumentList   = array();
         $this->outputRedirect = null;
         $this->pipeList       = array();
+        $this->envList        = array();
 
         return $this;
     }
@@ -457,7 +465,6 @@ class AbstractCommandBuilder implements CommandBuilderInterface
             // Inline, one big parameter
             $this->addArgument($command->build());
         } else {
-            // Append each as own argument
             $this->addArgument($command->command);
             $this->argumentList = array_merge($this->argumentList, $command->argumentList);
         }
@@ -526,6 +533,21 @@ class AbstractCommandBuilder implements CommandBuilderInterface
     }
 
     /**
+     * Add environment variable
+     *
+     * @param string $name  Variable name
+     * @param string $value Variable value
+     *
+     * @return $this
+     */
+    public function addEnvironmentVar($name, $value)
+    {
+        $this->envList[$name] = $value;
+
+        return $this;
+    }
+
+    /**
      * Add pipe command
      *
      * @param CommandBuilderInterface $command
@@ -553,6 +575,10 @@ class AbstractCommandBuilder implements CommandBuilderInterface
             throw new \RuntimeException(
                 'Command "' . $this->getCommand() . '" is not executable or available, please install it'
             );
+        }
+
+        foreach ($this->envList as $envName => $envValue) {
+            $ret[] = $envName . '=' . escapeshellarg($envValue);
         }
 
         // Add command
