@@ -31,6 +31,7 @@ Thanks for support, ideas and issues ...
 - [Ingo Pfennigstorf](https://twitter.com/krautsock)
 - [Florian Tatzel](https://twitter.com/PanadeEdu)
 - [Philipp Kitzberger](https://github.com/Kitzberger)
+- [Josef Glatz](https://github.com/jousch)
 - my (old) colleagues at [Lightwerk GmbH](http://www.lightwerk.de/)
 - my colleagues at [cron IT GmbH](http://www.cron.eu/)
 
