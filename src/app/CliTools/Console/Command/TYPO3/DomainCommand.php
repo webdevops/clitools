@@ -96,7 +96,7 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand
 
             foreach ($databaseList as $dbName) {
                 // Check if database is TYPO3 instance
-                $query           = 'SELECT COUNT(*) as count
+                $query = 'SELECT COUNT(*) as count
                             FROM information_schema.tables
                            WHERE table_schema = ' . DatabaseConnection::quote($dbName) . '
                              AND table_name = \'sys_domain\'';
@@ -165,7 +165,7 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function updateBaseUrlConfig()
     {
-        $query          = 'SELECT st.uid as template_id,
+        $query = 'SELECT st.uid as template_id,
                          st.config as template_config,
                          (SELECT sd.domainName
                             FROM sys_domain sd
@@ -235,10 +235,10 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function showDomainList($dbName)
     {
-        $query      = 'SELECT domainName
-                         FROM sys_domain
-                        WHERE hidden = 0
-                     ORDER BY domainName ASC';
+        $query = 'SELECT domainName
+                    FROM sys_domain
+                   WHERE hidden = 0
+                ORDER BY domainName ASC';
         $domainList = DatabaseConnection::getCol($query);
 
         $this->output->writeln('<p>Domain list of "' . $dbName . '":</p>');

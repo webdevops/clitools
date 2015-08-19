@@ -127,7 +127,7 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand
             $dbFound = false;
             foreach ($databaseList as $dbName) {
                 // Check if database is TYPO3 instance
-                $query           = 'SELECT COUNT(*) as count
+                $query = 'SELECT COUNT(*) as count
                             FROM information_schema.tables
                            WHERE table_schema = ' . DatabaseConnection::quote($dbName) . '
                              AND table_name = \'be_users\'';
@@ -203,7 +203,7 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand
 
         try {
             // Get uid from current dev user (if already existing)
-            $query    = 'SELECT uid
+            $query = 'SELECT uid
                         FROM ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.be_users
                        WHERE username = ' . DatabaseConnection::quote($username) . '
                          AND deleted = 0';
