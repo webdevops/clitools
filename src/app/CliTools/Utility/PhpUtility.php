@@ -70,6 +70,20 @@ class PhpUtility
     }
 
     /**
+     * Genrate unique name
+     *
+     * @param null|string $salt Salt
+     * @return string
+     */
+    public static function uniqueName($salt = null)
+    {
+        $ret = microtime(true) . '#' . $salt . '#' . rand(0,1000000);
+        $ret = sha1($ret);
+        $ret = substr($ret, 5, 12);
+        return $ret;
+    }
+
+    /**
      * Change current working directory
      *
      * @param string $path Target path

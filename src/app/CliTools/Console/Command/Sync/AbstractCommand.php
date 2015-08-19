@@ -786,7 +786,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function rsyncAddFileList(CommandBuilder $command, array $list)
     {
-        $rsyncFilter = $this->tempDir . '/.rsync-filelist' . base64_encode(microtime(true) . '#' . rand(0,1000000));
+        $rsyncFilter = $this->tempDir . '/.rsync-filelist.' . PhpUtility::uniqueName();
 
         PhpUtility::filePutContents($rsyncFilter, implode("\n", $list));
 
@@ -809,7 +809,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function rsyncAddExcludeList(CommandBuilder $command, $list)
     {
-        $rsyncFilter = $this->tempDir . '/.rsync-exclude.' . base64_encode(microtime(true) . '#' . rand(0,1000000));
+        $rsyncFilter = $this->tempDir . '/.rsync-exclude.' . PhpUtility::uniqueName();
 
         PhpUtility::filePutContents($rsyncFilter, implode("\n", $list));
         $command->addArgumentTemplate('--exclude-from=%s', $rsyncFilter);
