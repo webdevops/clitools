@@ -711,10 +711,6 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         // Add file list (external file with --include-from option)
         if (!empty($filelist)) {
             $this->rsyncAddFileList($command, $filelist);
-
-            // Make sure only add file list is included, all other excluded
-            $command->addArgumentTemplate('--exclude=%s', '/');
-            $command->addArgumentTemplate('--exclude=%s', '/*');
         }
 
         // Add exclude (external file with --exclude-from option)
@@ -794,7 +790,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         PhpUtility::filePutContents($rsyncFilter, implode("\n", $list));
 
-        $command->addArgumentTemplate('--include-from=%s', $rsyncFilter);
+        $command->addArgumentTemplate('--files-from=%s', $rsyncFilter);
 
         // cleanup rsync file
         $command->getExecutor()
