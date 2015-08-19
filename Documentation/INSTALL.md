@@ -1,4 +1,4 @@
-[<-- Back to main section](../README.md)
+q[<-- Back to main section](../README.md)
 
 # Installation
 
@@ -30,8 +30,8 @@ wget -O/usr/local/bin/ct https://www.achenar.net/clicommand/clitools.phar
 # Set executable bit
 chmod 777 /usr/local/bin/ct
 
-# Download example config
-wget -O"$HOME/.clitools.ini" https://raw.githubusercontent.com/mblaschke/vagrant-development/develop/provision/ansible/roles/clitools/files/clitools.ini
+# MacOS/Linux: example configuration for Docker VM
+wget -O"$HOME/.clitools.ini" https://github.com/webdevops/clitools/blob/develop/Documentation/Examples/macos-docker-clitools.ini
 ```
 
 ## Aliases
