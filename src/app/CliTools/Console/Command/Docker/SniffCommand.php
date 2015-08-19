@@ -135,12 +135,8 @@ class SniffCommand extends AbstractCommand
             // ##############
             case 'php-fpm':
                 $output->writeln('<p>Using protocol "php-fpm"</p>');
-                $command->setCommand('tcpdump');
-                $command->addArgumentRaw('-nl -s0 -w- port 9000');
-
-                $pipeCommand = new CommandBuilder('strings', '-a');
-
-                $command->addPipeCommand($pipeCommand);
+                $command->setCommand('ngrep');
+                $command->addArgumentRaw('port 9000 -W byline');
                 break;
 
             // ##############
