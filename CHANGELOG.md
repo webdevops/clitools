@@ -1,9 +1,10 @@
 CliTools Changelog
 ==================
 
-UPCOMING VERSION
+2.2.0 - UPCOMING VERSION
 ------------------
 - Introduced `docker:up --switch` (`docker:up` without --switch parameter no longer shutdown previous one)
+- Reverted to old `sync` method (`--files-from` instead of `--include-from`)
 
 2.1.5 - 2015-08-03
 ------------------
