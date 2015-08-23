@@ -708,6 +708,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         $command = new CommandBuilder('rsync', '-rlptD --delete-after --progress --human-readable');
 
+        // Additional options
+        if ($this->contextConfig->exists('rsync.opts')) {
+            $command->addArgumentRaw($this->contextConfig->get('rsync.opts'));
+        }
+
         // Add file list (external file with --include-from option)
         if (!empty($filelist)) {
             $this->rsyncAddFileList($command, $filelist);
