@@ -1,6 +1,10 @@
 CliTools Changelog
 ==================
 
+2.2.1 - UPCOMING
+------------------
+- Added rsync.opts section in `clisync.yml` for additional rsync options
+
 2.2.0 - 2015-08-19
 ------------------
 - Introduced `docker:up --switch` (`docker:up` without --switch parameter no longer shutdown previous one)
