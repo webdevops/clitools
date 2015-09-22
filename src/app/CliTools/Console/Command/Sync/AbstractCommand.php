@@ -42,8 +42,9 @@ use Symfony\Component\Yaml\Yaml;
 abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 {
 
-    const CONFIG_FILE = 'clisync.yml';
-    const GLOBAL_KEY  = 'GLOBAL';
+    const CONFIG_FILE   = 'clisync.yml';
+    const GLOBAL_KEY    = 'GLOBAL';
+    const CONFIG_ENVKEY = 'SYNC_CONFIG';
 
     /**
      * Config area
@@ -186,6 +187,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             self::CONFIG_FILE,
             '.' . self::CONFIG_FILE,
         );
+
+        if (getenv(self::CONFIG_ENVKEY) !== FALSE) {
+            array_unshift($confFileList, getenv(self::CONFIG_ENVKEY));
+            array_unshift($confFileList, getenv(self::CONFIG_ENVKEY) . DIRECTORY_SEPARATOR . self::CONFIG_FILE);
+            array_unshift($confFileList, getenv(self::CONFIG_ENVKEY) . DIRECTORY_SEPARATOR . '.' . self::CONFIG_FILE);
+        }
 
         // Find configuration file
         $this->confFilePath = UnixUtility::findFileInDirectortyTree($confFileList);
