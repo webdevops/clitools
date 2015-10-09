@@ -58,6 +58,8 @@ class UpCommand extends AbstractCommand
         $lastDockerPath = $this->getApplication()
                                ->getSettingsService()
                                ->get('docker.up.last');
+        $dockerComposeArgs = $this->getApplication()
+                                  ->getConfigValue('dockerCompose', 'up');
 
         if (!empty($dockerPath)) {
             $dockerPath = dirname($dockerPath);
@@ -77,7 +79,7 @@ class UpCommand extends AbstractCommand
 
         // Start current docker containers
         $this->output->writeln('<p>Start docker containers in "' . $dockerPath . '"</p>');
-        $command = new CommandBuilder(null, 'up -d');
+        $command = new CommandBuilder(null, $dockerComposeArgs);
         $ret     = $this->executeDockerCompose($command);
 
         // Store docker path in settings (last docker startup)
