@@ -158,10 +158,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $ret = true;
 
         // Rsync (optional)
-        if ($this->contextConfig->exists('rsync')) {
+        if ($this->contextConfig->exists('rsync.path')) {
             if (!$this->validateConfigurationRsync()) {
                 $ret = false;
             }
+        } else {
+            // Clear rsync if any options set
+            $this->contextConfig->clear('rsync');
         }
 
         // MySQL (optional)
