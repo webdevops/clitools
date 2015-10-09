@@ -232,6 +232,7 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
 
                 $mail = imap_open($hostname, $username, $password);
                 $res = imap_check($mail);
+                imap_close($mail);
 
                 if (!empty($res)) {
                     $ret = $res->Nmsgs;
