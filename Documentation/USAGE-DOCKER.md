@@ -14,6 +14,9 @@ ct docker:create foobar
 # Create and start new docker boilerplate into foobar directory
 ct docker:create foobar --up
 
+# Create new typo3 docker boilerplate
+ct docker:create foobar --docker=typo3
+
 # Create new custom docker boilerplate 
 ct docker:create foobar --docker=git...
 
