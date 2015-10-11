@@ -64,9 +64,7 @@ GLOBAL:
 
             # VCS
             - ".git*"
-            - ".gitignore"
-            - ".gitmodules"
-            - ".svn"
+            - ".svn*"
 
             # Build files
             - "composer.json"
