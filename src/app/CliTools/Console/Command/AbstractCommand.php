@@ -260,6 +260,11 @@ abstract class AbstractCommand extends Command
      */
     public function setTerminalTitle($title)
     {
+        // no title if stdout redirect
+        if(!posix_isatty(STDOUT)) {
+            return;
+        }
+
         $args = func_get_args();
 
         $titleList = array();
