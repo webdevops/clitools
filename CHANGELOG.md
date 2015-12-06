@@ -4,6 +4,7 @@ CliTools Changelog
 2.2.1 - UPCOMING
 ------------------
 - Added rsync.opts section in `clisync.yml` for additional rsync options
+- No terminal title if stdout redirect is detected
 
 2.2.0 - 2015-08-19
 ------------------
