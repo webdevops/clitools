@@ -69,8 +69,8 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand
             // ##############
 
             // Get list of databases
-            $query        = 'SELECT SCHEMA_NAME
-                    FROM information_schema.SCHEMATA';
+            $query = 'SELECT SCHEMA_NAME
+                        FROM information_schema.SCHEMATA';
             $databaseList = DatabaseConnection::getCol($query);
 
             foreach ($databaseList as $dbName) {
@@ -80,7 +80,7 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand
                 }
 
                 // Check if database is TYPO3 instance
-                $query           = 'SELECT COUNT(*) as count
+                $query = 'SELECT COUNT(*) as count
                             FROM information_schema.tables
                            WHERE table_schema = ' . DatabaseConnection::quote($dbName) . '
                              AND table_name = \'be_users\'';

@@ -1,9 +1,16 @@
 CliTools Changelog
 ==================
 
-UPCOMING VERSION
+2.2.1 - UPCOMING
+------------------
+- Added rsync.opts section in `clisync.yml` for additional rsync options
+- No terminal title if stdout redirect is detected
+
+2.2.0 - 2015-08-19
 ------------------
 - Introduced `docker:up --switch` (`docker:up` without --switch parameter no longer shutdown previous one)
+- Reverted to old `sync` method (`--files-from` instead of `--include-from`)
+- Added protocol `php-fpm` to `docker:sniff`
 
 2.1.5 - 2015-08-03
 ------------------

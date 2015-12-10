@@ -127,7 +127,7 @@ abstract class UnixUtility
      */
     public static function mountInfoList()
     {
-        $command = new CommandBuilder('df', '-a --type=ext3 --type=ext4 --type vmhgfs --type vboxsf --portability');
+        $command = new CommandBuilder('df', '-a --type=ext3 --type=ext4 --type vmhgfs --type vboxsf --type prl_fs --portability');
         $command->addPipeCommand(new CommandBuilder('tail', '--lines=+2'))
                 ->addPipeCommand(
                     new CommandBuilder('awk', '\'{ print $6 " " $3 " " $4 " " $5 }\'')

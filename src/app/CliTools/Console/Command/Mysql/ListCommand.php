@@ -88,21 +88,21 @@ class ListCommand extends AbstractCommand
             $databaseRowList = array();
             foreach ($databaseList as $database) {
                 // Get all tables
-                $query      = 'SELECT COUNT(*) AS count
+                $query = 'SELECT COUNT(*) AS count
                             FROM information_schema.tables
                            WHERE TABLE_SCHEMA = ' . DatabaseConnection::quote($database) . '
                              AND TABLE_TYPE = \'BASE TABLE\'';
                 $tableCount = DatabaseConnection::getOne($query);
 
                 // Get all views
-                $query     = 'SELECT COUNT(*) AS count
+                $query = 'SELECT COUNT(*) AS count
                             FROM information_schema.tables
                            WHERE TABLE_SCHEMA = ' . DatabaseConnection::quote($database) . '
                              AND TABLE_TYPE LIKE \'%VIEW\'';
                 $viewCount = DatabaseConnection::getOne($query);
 
                 // Get size of database
-                $query    = 'SELECT SUM(data_length) AS data_size,
+                $query = 'SELECT SUM(data_length) AS data_size,
                                  SUM(index_length) AS index_size,
                                  SUM(data_length + index_length) AS total_size
                             FROM information_schema.tables

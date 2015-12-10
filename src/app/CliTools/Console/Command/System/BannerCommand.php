@@ -126,6 +126,7 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
         $kernelVersion = UnixUtility::kernelVersion();
         $dockerVersion = UnixUtility::dockerVersion();
         $mountInfoList = UnixUtility::mountInfoList();
+        $mailCount     = $this->getMailCount();
 
         // Padding
         $memSize = str_pad($memSize, $bytesPadding, ' ', STR_PAD_LEFT);
@@ -164,7 +165,13 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
         foreach ($netInterfaceList as $netName => $netConf) {
             $netName = str_pad($netName, $labelLength, ' ', STR_PAD_LEFT);
 
-            $rightCol[] = $netName . ': ' . $netConf['ipaddress'];
+            $rightCol[] = str_pad($netName, $labelLength, ' ', STR_PAD_LEFT) . ': ' . $netConf['ipaddress'];
+        }
+
+        $rightCol[] = '';
+
+        if ($mailCount !== null) {
+            $rightCol[] = str_pad('Mails', $labelLength, ' ', STR_PAD_LEFT) . ': ' . $mailCount;
         }
 
         // ##################
@@ -205,4 +212,124 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
 
         return implode("\n", $ret);
     }
+
+    /**
+     * Get mail count
+     */
+    protected function getMailCount()
+    {
+        $ret = null;
+        $mailboxUri = $this->getApplication()->getConfigValue('banner', 'mailbox');
+
+        if (!empty($mailboxUri) && function_exists('imap_open')) {
+            try {
+                $mailboxConf = parse_url($mailboxUri);
+
+                $hostname = $this->buildMailboxServerString($mailboxConf);
+                $options  = $this->buildMailboxServerOptions($mailboxConf);
+                $username = $mailboxConf['user'];
+                $password = $mailboxConf['pass'];
+
+                $mail = imap_open($hostname, $username, $password);
+                $res = imap_check($mail);
+                imap_close($mail);
+
+                if (!empty($res)) {
+                    $ret = $res->Nmsgs;
+                } else {
+                    throw new \RuntimeException('Mailcheck failed');
+                }
+            } catch (\Exception $e) {
+                var_dump($e->getMessage());exit;
+                $ret = 'error';
+            }
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Build imap connection string
+     *
+     * @param array $mailboxConf Mailbox configuration
+     * @return string
+     */
+    protected function buildMailboxServerString(array $mailboxConf)
+    {
+        $hostname = $mailboxConf['host'];
+        $path     = ltrim($mailboxConf['path'],'/');
+
+        switch ($mailboxConf['scheme']) {
+            case 'imap-insecure':
+                $port = !empty($mailboxConf['port']) ? $mailboxConf['port'] : 143;
+
+                $ret = sprintf(
+                    '{%s:%s/novalidate-cert/norsh}%s',
+                    $hostname,
+                    $port,
+                    $path
+                );
+                break;
+
+            case 'imap':
+                $port = !empty($mailboxConf['port']) ? $mailboxConf['port'] : 143;
+
+                $ret = sprintf(
+                    '{%s:%s}%s',
+                    $hostname,
+                    $port,
+                    $path
+                );
+
+                break;
+
+            case 'imap':
+                $port = !empty($mailboxConf['port']) ? $mailboxConf['port'] : 993;
+
+                $ret = sprintf(
+                    '{%s:%s/imap/ssl}%s',
+                    $hostname,
+                    $port,
+                    $path
+                );
+                break;
+
+
+            case 'pop3':
+                $port = !empty($mailboxConf['port']) ? $mailboxConf['port'] : 110;
+
+                $ret = sprintf(
+                    '{%s:%s/pop3}%s',
+                    $hostname,
+                    $port,
+                    $path
+                );
+                break;
+
+            default:
+                throw new \RuntimeException('Mailbox scheme "' . $mailboxConf['scheme'] . '"" is not supported');
+                break;
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Build imap connection options
+     *
+     * @param array $mailboxConf Mailbox configuration
+     * @return integer
+     */
+    protected function buildMailboxServerOptions(array $mailboxConf)
+    {
+        $ret = 0;
+
+        switch ($mailboxConf['scheme']) {
+            case 'imap-insecure':
+                break;
+        }
+
+        return $ret;
+    }
 }
+

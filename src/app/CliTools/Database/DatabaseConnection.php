@@ -515,7 +515,10 @@ class DatabaseConnection
      */
     public static function tableExists($database, $table)
     {
-        $query = 'SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s';
+        $query = 'SELECT COUNT(*)
+                    FROM INFORMATION_SCHEMA.TABLES
+                   WHERE TABLE_SCHEMA = %s
+                     AND TABLE_NAME = %s';
         $query = sprintf($query, self::quote($database), self::quote($table));
         $ret   = (bool)self::getOne($query);
 
