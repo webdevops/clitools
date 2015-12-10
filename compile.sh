@@ -31,6 +31,12 @@ composer dump-autoload --optimize --no-dev
 
 ## create phar
 cd "$SCRIPT_DIR/"
-box.phar build -c box.json
+
+boxbin="/usr/local/bin/box"
+if [ -x $boxbin ]; then
+	box build -c box.json
+else
+    box.phar build -c box.json
+fi
 
 cd "$OLD_PWD"
