@@ -31,11 +31,13 @@ composer dump-autoload --optimize --no-dev
 ## create phar
 cd "$SCRIPT_DIR/"
 
-boxbin="/usr/local/bin/box"
-if [ -x $boxbin ]; then
-	box build -c box.json
-else
-    box.phar build -c box.json
-fi
+which box.phar > /dev/null && {
+		box.phar build -c box.json
+	} || which box > /dev/null && {
+		box build -c box.json
+	} || {
+		echo 'ERROR: box.phar (box-project/box2) not found'
+		exit 1
+	}
 
 cd "$OLD_PWD"
