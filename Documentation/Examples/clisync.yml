@@ -54,6 +54,7 @@ GLOBAL:
         workdir: ""
 
         # Additional options ("-rlptD --delete-after --progress --human-readable" is already set)
+        # (" --iconv=UTF8-MAC,UTF8" is automatically set if OS is OSX to enable Umlauts support)
         opts: ""
 
         # exclude list/patterns for files and directories

@@ -716,6 +716,10 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $command->addArgumentRaw($this->contextConfig->get('rsync.opts'));
         }
 
+        // Umlauts support for rsync
+        if (PhpUtility::getOsName() === 'Darwin') {
+            $command->addArgumentRaw('--iconv=UTF8-MAC,UTF8');
+
         // Add file list (external file with --include-from option)
         if (!empty($filelist)) {
             $this->rsyncAddFileList($command, $filelist);
