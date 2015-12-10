@@ -17,11 +17,8 @@ q[<-- Back to main section](../README.md)
   - sudo
   - moreutils (ifdata)
   - coreutils (grep, sort, uniq, awk, cat, df, ip, cut, lsb_release, wall)
-<<<<<<< HEAD
   - rsync (to prevent bugs with umlauts you have to use rsync with version >= 3.0)
-=======
   - gnu-sed
->>>>>>> webdevops/develop
   - docker and docker-compose (if you want to use docker)
   - mysql (if you want to use mysql)
 
