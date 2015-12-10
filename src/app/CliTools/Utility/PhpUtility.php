@@ -199,4 +199,15 @@ class PhpUtility
 
         return $ret;
     }
+
+
+    /**
+     * Get operating system name
+     *
+     * @return string
+     */
+    public static function getOsName()
+    {
+        return php_uname('s');
+    }
 }
