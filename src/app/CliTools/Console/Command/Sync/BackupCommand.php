@@ -32,7 +32,7 @@ class BackupCommand extends AbstractShareCommand
     {
         parent::configure();
 
-        $this->setName('sync:backup')
+        $this->setName('share:backup')
              ->setDescription('Backup files and database from share');
     }
 

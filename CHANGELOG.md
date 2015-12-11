@@ -8,6 +8,10 @@ CliTools Changelog
 - Added umlauts support for rsync under OSX
 - Added rsync.opts section in `clisync.yml` for additional rsync options
 - No terminal title if stdout redirect is detected
+- Renamed `sync:server` to `sync`
+- Renamed `sync:backup` to `share:backup`
+- Renamed `sync:restore` to `share:restore`
+- Renamed `sync:deploy` to `deploy`
 
 2.2.0 - 2015-08-19
 ------------------

@@ -33,7 +33,7 @@ class InitCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function configure()
     {
-        $this->setName('sync:init')
+        $this->setName('sync-init')
              ->setDescription('Create example clisync.yml');
     }
 

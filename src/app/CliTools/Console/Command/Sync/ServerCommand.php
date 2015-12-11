@@ -34,7 +34,7 @@ class ServerCommand extends AbstractRemoteSyncCommand
 
         $this->confArea = 'sync';
 
-        $this->setName('sync:server')
+        $this->setName('sync')
              ->setDescription('Sync files and database from server');
     }
 

@@ -11,7 +11,7 @@ First you need to create a `clisync.yml` in your project directory, the CliTools
 of this file by using following command:
 
 ```bash
-ct sync:init
+ct sync-init
 ```
 
 If you need special SSH settings (ports, compression, identify...) please use your `~/.ssh/config` file 
@@ -30,38 +30,38 @@ Now you can sync your `production` server to your local installation:
 
 ```bash
 # Full sync (files and database, with interactive context selection)
-ct sync:server
+ct sync
 
 # Only MySQL (from production context, without interactive context selection)
-ct sync:server production --mysql
+ct sync production --mysql
 
 # Only Files (from production context, without interactive context selection)
-ct sync:server production --rsync
+ct sync production --rsync
 ```
 
-## Project sharing  (ct sync:backup and ct sync:restore)
+## Project sharing  (ct share:backup and ct share:restore)
 
 The sharing can be used to share files (assets) and databases between developers.
 Please use a common development/storage server with ssh access for each developer for this feature.
 
 ```bash
 # Make backup of current state and transfer to share server
-ct sync:backup
+ct share:backup
 
 # ... only MySQL
-ct sync:backup --mysql
+ct share:backup --mysql
 
 # ... only files
-ct sync:backup --rsync
+ct share:backup --rsync
 
 # Restore to state from the share server
-ct sync:restore
+ct share:restore
 
 # ... only MySQL
-ct sync:restore --mysql
+ct share:restore --mysql
 
 # ... only files
-ct sync:restore --rsync
+ct share:restore --rsync
 
 ```
 
@@ -74,10 +74,10 @@ solutions build on Jenkis, Ansible and others.
 
 ```bash
 # Push your project to your servers (with interactive context selection)
-ct sync:deploy
+ct deploy
 
 # Push your project to your staging server (without interactive context selection)
-ct sync:deploy staging
+ct deploy staging
 ```
 
 ## Advanced ssh options

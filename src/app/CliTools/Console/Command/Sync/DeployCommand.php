@@ -34,7 +34,7 @@ class DeployCommand extends AbstractRemoteSyncCommand
 
         $this->confArea = 'deploy';
 
-        $this->setName('sync:deploy')
+        $this->setName('deploy')
              ->setDescription('Deploy files and database to server');
     }
 
