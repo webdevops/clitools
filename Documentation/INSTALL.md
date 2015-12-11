@@ -38,37 +38,9 @@ wget -O"$HOME/.clitools.ini" https://github.com/webdevops/clitools/blob/develop/
 
 ## Aliases
 
-Now you can use following aliases (some aliases requires clitools 1.8.0!):
+Now you can use some useful aliases (some aliases requires clitools 1.8.0!):
 
-```bash
-# Shortcut for auto-tree-searching make
-alias make='ct make'
-
-# Shortcut for auto-tree-searching make
-alias composer='ct php:composer'
-
-# Shortcut for docker-compose (autosearch docker-compose.yml in up-dir, you don't have to be in directory with docker-compose.yml)
-alias dcc='ct docker:compose'
-
-# Startup docker-container (and shutdown previous one, v1.9.0 and up)
-alias dccup='ct docker:up'
-alias dccstop='ct docker:compose stop'
-
-# Enter main docker container (as CLI_USER if available - if not specified then root is used)
-alias dcshell='ct docker:shell'
-alias dcsh='ct docker:shell'
-
-# Enter main docker container (as root)
-alias dcroot='ct docker:root'
-
-# Execute predefined cli in docker container
-alias dccrun='ct docker:cli'
-alias dcrun='ct docker:cli'
-
-# Execute mysql client in docker container
-alias dcsql='ct docker:mysql'
-alias dcmysql='ct docker:mysql'
-```
+[Example aliases for clitools](ALIASES.md)
 
 ## Configuration
 
