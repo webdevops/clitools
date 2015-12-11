@@ -22,6 +22,7 @@ alias dcroot='ct docker:root'
 
 # Execute predefined cli in docker container
 alias dccrun='ct docker:cli'
+alias dcrun='ct docker:cli'
 
 # Run command
 alias dcexec='ct docker:exec'
