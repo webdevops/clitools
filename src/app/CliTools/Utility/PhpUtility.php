@@ -210,4 +210,26 @@ class PhpUtility
     {
         return php_uname('s');
     }
+
+    /**
+     * Trim explode with filter
+     *
+     * @param string $delimiter Explode delimiter
+     * @param string $value     Value string
+     * @param bool   $noEmpty   Filter no empty values
+     * @return array
+     */
+    public static function trimExplode($delimiter, $value, $noEmpty = true)
+    {
+        $ret = array_map('trim', explode((string)$delimiter, (string)$value));
+
+        if ($noEmpty) {
+            $ret = array_filter($ret, function ($val) {
+                return strlen($val) !== 0;
+            });
+        }
+
+        return $ret;
+    }
+
 }
