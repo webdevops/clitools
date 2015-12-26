@@ -21,6 +21,7 @@ namespace CliTools\Console\Command\Docker;
  */
 
 use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
+use CliTools\Utility\PhpUtility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -70,8 +71,15 @@ class ShellCommand extends AbstractCommand
             // User user by option
             $cliUser = $input->getOption('user');
         } else {
+            $userVarList = PhpUtility::trimExplode(',', $this->getApplication()->getConfigValue('docker', 'user_env_vars'));
+
             // Use docker env
-            $cliUser = $this->getDockerEnv($container, 'CLI_USER');
+            foreach ($userVarList as $varName) {
+                if ($tmp = $this->getDockerEnv($container, $varName) ) {
+                    $cliUser = $tmp;
+                    break;
+                }
+            }
         }
 
         $this->setTerminalTitle('docker', 'shell', $container);
