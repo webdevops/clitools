@@ -1,7 +1,7 @@
 CliTools Changelog
 ==================
 
-2.2.1 - UPCOMING
+2.3.0 - UPCOMING
 ------------------
 - Updated compile documentation
 - Improved compile scripts
@@ -12,6 +12,7 @@ CliTools Changelog
 - Renamed `sync:backup` to `share:backup`
 - Renamed `sync:restore` to `share:restore`
 - Renamed `sync:deploy` to `deploy`
+- Support for new PHP and TYPO3 Docker Boilerplate (with APPLICATION_USER detection, configurable)
 
 2.2.0 - 2015-08-19
 ------------------
