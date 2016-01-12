@@ -108,3 +108,21 @@ ct docker:sniff http --full
 # Show mysql querys by using network sniffer
 ct docker:sniff mysql 
 ```
+
+## Docker cleanup
+Docker currently doesn't cleanup orphaned images or volumes so you have to cleanup your system regulary to get free disk space
+
+```bash
+ct docker:cleanup
+```
+
+It's a shortcut for:
+
+```bash
+# Docker image cleanup:
+docker images | grep "<none>" | awk "{print \$3}" | xargs --no-run-if-empty docker rmi -f
+
+# Docker volume cleanup
+docker pull martin/docker-cleanup-volumes
+docker run -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/docker:/var/lib/docker --rm martin/docker-cleanup-volumes
+```
