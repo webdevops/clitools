@@ -55,6 +55,8 @@ class ComposerCommand extends \CliTools\Console\Command\AbstractCommand implemen
             $composerJsonPath = UnixUtility::findFileInDirectortyTree('composer.json');
 
             if (!empty($composerJsonPath)) {
+                // composer.json found
+
                 $path = dirname($composerJsonPath);
                 $this->output->writeln('<comment>Found composer.json directory: ' . $path . '</comment>');
                 // Switch to directory of docker-compose.yml
@@ -62,9 +64,9 @@ class ComposerCommand extends \CliTools\Console\Command\AbstractCommand implemen
 
                 return $this->runComposer($paramList);
             } else {
-                $this->output->writeln('<error>No composer.json found in tree</error>');
-
-                return 1;
+                // no composer.json found but try to run the command anyway
+                $this->output->writeln('<warning>No composer.json found in tree</warning>');
+                return $this->runComposer($paramList);
             }
         } else {
             return $this->runComposer($paramList);
