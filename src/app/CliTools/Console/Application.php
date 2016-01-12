@@ -214,6 +214,11 @@ class Application extends \Symfony\Component\Console\Application
         $style->setPadding(' [EE] ');
         $output->getFormatter()
                ->setStyle('p-error', $style);
+
+        $style = new OutputFormatterStyle('yellow');
+        $style->setPadding(' [!!!] ');
+        $output->getFormatter()
+               ->setStyle('warning', $style);
     }
 
     /**
