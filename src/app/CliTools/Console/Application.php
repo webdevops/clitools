@@ -267,7 +267,7 @@ class Application extends \Symfony\Component\Console\Application
     protected function initializeChecks()
     {
         if (!function_exists('pcntl_signal')) {
-            echo ' [ERROR] PHP-Module pcnt not loaded';
+            echo ' [ERROR] PHP-Module pcntl not loaded';
             exit(1);
         }
     }
