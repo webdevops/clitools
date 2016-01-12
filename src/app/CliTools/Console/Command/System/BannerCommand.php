@@ -226,7 +226,6 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
                 $mailboxConf = parse_url($mailboxUri);
 
                 $hostname = $this->buildMailboxServerString($mailboxConf);
-                $options  = $this->buildMailboxServerOptions($mailboxConf);
                 $username = $mailboxConf['user'];
                 $password = $mailboxConf['pass'];
 
@@ -240,7 +239,6 @@ class BannerCommand extends \CliTools\Console\Command\AbstractCommand implements
                     throw new \RuntimeException('Mailcheck failed');
                 }
             } catch (\Exception $e) {
-                var_dump($e->getMessage());exit;
                 $ret = 'error';
             }
         }
