@@ -21,7 +21,6 @@ namespace CliTools\Console\Command\Docker;
  */
 
 use CliTools\Shell\CommandBuilder\CommandBuilder;
-use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
