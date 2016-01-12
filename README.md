@@ -5,7 +5,7 @@
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/webdevops/clitools.svg)](http://isitmaintained.com/project/webdevops/clitools "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/webdevops/clitools.svg)](http://isitmaintained.com/project/webdevops/clitools "Percentage of issues still open")
 
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416/big.png)](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416)
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/57b021a7-35a7-486f-80c8-e3fc6dee426c/big.png)](https://insight.sensiolabs.com/projects/57b021a7-35a7-486f-80c8-e3fc6dee426c)
 
 
 ## Introduction
