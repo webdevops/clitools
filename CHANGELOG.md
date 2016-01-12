@@ -8,6 +8,7 @@ CliTools Changelog
 - Added umlauts support for rsync under OSX
 - Added rsync.opts section in `clisync.yml` for additional rsync options
 - No terminal title if stdout redirect is detected
+- Added `docker:cleanup` for cleanup of orphaned images and volumes
 - Renamed `sync:server` to `sync`
 - Renamed `sync:backup` to `share:backup`
 - Renamed `sync:restore` to `share:restore`
