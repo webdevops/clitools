@@ -34,7 +34,7 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
     {
         $this->setName('docker:cli')
              ->setDescription(
-                 'Run cli command in docker container (defined by CLI_SCRIPT and CLI_USER as docker environment variable)'
+                 'Run cli command in docker container'
              );
     }
 
@@ -61,8 +61,13 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
             # with Docker exec (faster, complex)
             ###########################
             case 'docker-exec':
-                $cliScript = $this->getDockerEnv($container, 'CLI_SCRIPT');
-                $cliUser   = $this->getDockerEnv($container, 'CLI_USER');
+                // Try to find defined script
+                $scriptVarList = PhpUtility::trimExplode(',', $this->getApplication()->getConfigValue('docker', 'script_env_vars'));
+                $cliScript = $this->findAndGetDockerEnv($scriptVarList);
+
+                // Try to find defined username
+                $userVarList = PhpUtility::trimExplode(',', $this->getApplication()->getConfigValue('docker', 'user_env_vars'));
+                $cliUser = $this->findAndGetDockerEnv($userVarList);
 
                 if (empty($cliScript)) {
                     $output->writeln(

@@ -72,14 +72,7 @@ class ShellCommand extends AbstractCommand
             $cliUser = $input->getOption('user');
         } else {
             $userVarList = PhpUtility::trimExplode(',', $this->getApplication()->getConfigValue('docker', 'user_env_vars'));
-
-            // Use docker env
-            foreach ($userVarList as $varName) {
-                if ($tmp = $this->getDockerEnv($container, $varName) ) {
-                    $cliUser = $tmp;
-                    break;
-                }
-            }
+            $cliUser = $this->findAndGetDockerEnv($userVarList);
         }
 
         $this->setTerminalTitle('docker', 'shell', $container);

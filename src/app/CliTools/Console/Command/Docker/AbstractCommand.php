@@ -54,7 +54,29 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     }
 
     /**
-     * Execute docker command
+     * Find and get docker environment variable
+     *
+     * @param  string $containerName Container name
+     * @param  array  $envNameList   Environment variable (list)
+     *
+     * @return string|bool|null
+     */
+    protected function findAndGetDockerEnv($containerName, array $envNameList)
+    {
+        $ret = null;
+
+        foreach ($envNameList as $envName) {
+            if ($tmp = $this->getDockerEnv($containerName, $envName) ) {
+                $ret = $tmp;
+                break;
+            }
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Get docker environment variable
      *
      * @param  string $containerName Container name
      * @param  string $envName       Environment variable
