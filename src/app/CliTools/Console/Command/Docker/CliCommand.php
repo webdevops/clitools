@@ -63,7 +63,7 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
             ###########################
             case 'docker-exec':
                 // Try to find defined script
-                $scriptVarList = PhpUtility::trimExplode(',', $this->getApplication()->getConfigValue('docker', 'd'));
+                $scriptVarList = PhpUtility::trimExplode(',', $this->getApplication()->getConfigValue('docker', 'script_env_vars'));
                 $cliScript = $this->findAndGetDockerEnv($container, $scriptVarList);
 
                 // Try to find defined username
