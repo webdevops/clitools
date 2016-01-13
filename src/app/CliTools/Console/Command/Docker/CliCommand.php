@@ -62,8 +62,10 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
             # with Docker exec (faster, complex)
             ###########################
             case 'docker-exec':
+                $scriptEnvVar = $this->getApplication()->getConfigValue('docker', 'script_env_vars');
+
                 // Try to find defined script
-                $scriptVarList = PhpUtility::trimExplode(',', $this->getApplication()->getConfigValue('docker', 'script_env_vars'));
+                $scriptVarList = PhpUtility::trimExplode(',', $scriptEnvVar);
                 $cliScript = $this->findAndGetDockerEnv($container, $scriptVarList);
 
                 // Try to find defined username
@@ -72,7 +74,7 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
 
                 if (empty($cliScript)) {
                     $output->writeln(
-                        '<p-error>Docker container "' . $container . '" doesn\'t have environment variable "CLI_SCRIPT"</p-error>'
+                        '<p-error>Docker container "' . $container . '" doesn\'t have environment variables: ' . $scriptEnvVar . '</p-error>'
                     );
 
                     return 1;
