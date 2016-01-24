@@ -58,11 +58,7 @@ class CleanupCommand extends AbstractCommand
     {
         $this->output->writeln('<h2>Cleanup orphaned docker images</h2>');
         try {
-            $command = new CommandBuilder('docker', 'images');
-            $command
-                ->addPipeCommand( new CommandBuilder('grep', '"<none>"') )
-                ->addPipeCommand( new CommandBuilder('awk', '"{print \$3}"') )
-                ->addPipeCommand( new CommandBuilder('xargs', '--no-run-if-empty docker rmi -f') );
+            $command = new CommandBuilder('docker', 'rmi $(docker images -qf "dangling=true")');
             $command->executeInteractive();
 
         } catch (\Exception $e) {
