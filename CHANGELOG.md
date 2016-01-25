@@ -13,6 +13,7 @@ CliTools Changelog
 - Renamed `sync:backup` to `share:backup`
 - Renamed `sync:restore` to `share:restore`
 - Renamed `sync:deploy` to `deploy`
+- Added `COMPOSER=custom.json ct php:composer` support
 - Support for new PHP and TYPO3 Docker Boilerplate (with APPLICATION_USER detection, configurable)
 
 2.2.0 - 2015-08-19
