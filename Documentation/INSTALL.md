@@ -17,10 +17,13 @@ q[<-- Back to main section](../README.md)
   - sudo
   - moreutils (ifdata)
   - coreutils (grep, sort, uniq, awk, cat, df, ip, cut, lsb_release, wall)
-  - rsync (to prevent bugs with umlauts you have to use rsync with version >= 3.0)
+  - rsync (to prevent bugs with umlauts while you have to use rsync with version >= 3.0 (GNU version))
   - gnu-sed
   - docker and docker-compose (if you want to use docker)
   - mysql (if you want to use mysql)
+  
+When you're want to using clitools under OSX, you could use homebrew, an excellent package manager
+to easily install the above mentioned requirements.
 
 
 ## Install clitools
