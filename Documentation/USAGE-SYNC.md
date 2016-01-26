@@ -101,7 +101,7 @@ in the [install section](../INSTALL.md) of this documentation).
 
 ## Advanced ssh options
 
-If you need some advaned ssh options (eg. other ports) use your `~/.ssh/config` configuration file:
+If you need some advanced ssh options (eg. other ports) use your `~/.ssh/config` configuration file:
 
     Host project-server
         Hostname project-server.example.com
