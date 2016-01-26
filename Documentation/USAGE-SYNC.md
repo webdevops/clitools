@@ -97,7 +97,7 @@ rsync.opts: "--iconv=UTF8-MAC,UTF8"
 ```
 
 If you run into problems with `--iconv` make shure you have a compatible version of rsync >= 3.0 (as already mentioned
-in the [install section](../INSTALL.md) of this documentation).
+in the [install section](INSTALL.md) of this documentation).
 
 ## Advanced ssh options
 
