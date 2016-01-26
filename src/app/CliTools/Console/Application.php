@@ -4,6 +4,7 @@ namespace CliTools\Console;
 
 /*
  * CliTools Command
+ * Copyright (C) 2016 WebDevOps.io
  * Copyright (C) 2015 Markus Blaschke <markus@familie-blaschke.net>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -214,6 +215,11 @@ class Application extends \Symfony\Component\Console\Application
         $style->setPadding(' [EE] ');
         $output->getFormatter()
                ->setStyle('p-error', $style);
+
+        $style = new OutputFormatterStyle('yellow');
+        $style->setPadding(' [!!!] ');
+        $output->getFormatter()
+               ->setStyle('warning', $style);
     }
 
     /**
@@ -262,7 +268,7 @@ class Application extends \Symfony\Component\Console\Application
     protected function initializeChecks()
     {
         if (!function_exists('pcntl_signal')) {
-            echo ' [ERROR] PHP-Module pcnt not loaded';
+            echo ' [ERROR] PHP-Module pcntl not loaded';
             exit(1);
         }
     }

@@ -1,4 +1,4 @@
-q[<-- Back to main section](../README.md)
+[<-- Back to main section](../README.md)
 
 # Installation
 
@@ -17,8 +17,13 @@ q[<-- Back to main section](../README.md)
   - sudo
   - moreutils (ifdata)
   - coreutils (grep, sort, uniq, awk, cat, df, ip, cut, lsb_release, wall)
+  - rsync (to prevent bugs with umlauts while you have to use rsync with version >= 3.0 (GNU version))
+  - gnu-sed
   - docker and docker-compose (if you want to use docker)
   - mysql (if you want to use mysql)
+  
+When you're want to using clitools under OSX, you could use homebrew, an excellent package manager
+to easily install the above mentioned requirements.
 
 
 ## Install clitools
@@ -36,37 +41,9 @@ wget -O"$HOME/.clitools.ini" https://github.com/webdevops/clitools/blob/develop/
 
 ## Aliases
 
-Now you can use following aliases (some aliases requires clitools 1.8.0!):
+Now you can use some useful aliases (some aliases requires clitools 1.8.0!):
 
-```bash
-# Shortcut for auto-tree-searching make
-alias make='ct make'
-
-# Shortcut for auto-tree-searching make
-alias composer='ct php:composer'
-
-# Shortcut for docker-compose (autosearch docker-compose.yml in up-dir, you don't have to be in directory with docker-compose.yml)
-alias dcc='ct docker:compose'
-
-# Startup docker-container (and shutdown previous one, v1.9.0 and up)
-alias dccup='ct docker:up'
-alias dccstop='ct docker:compose stop'
-
-# Enter main docker container (as CLI_USER if available - if not specified then root is used)
-alias dcshell='ct docker:shell'
-alias dcsh='ct docker:shell'
-
-# Enter main docker container (as root)
-alias dcroot='ct docker:root'
-
-# Execute predefined cli in docker container
-alias dccrun='ct docker:cli'
-alias dcrun='ct docker:cli'
-
-# Execute mysql client in docker container
-alias dcsql='ct docker:mysql'
-alias dcmysql='ct docker:mysql'
-```
+[Example aliases for clitools](ALIASES.md)
 
 ## Configuration
 
@@ -135,9 +112,12 @@ cd clitools
 make all
 ```
 
+### Details about the Makefile
 If you take a look into the `Makefile`, you will see which tasks have been executed.
 The steps are:
 
 1. Execute composer command
 2. Start main build script
 3. Copy the previously built phar file to `/usr/local/bin`, so that you can execute clitools just by typing ct.
+
+*Note*: If you're compiling clitools in OSX the easiest thing is to install requirements with homebrew: `brew install coreutils g-sed homebrew/php/box`

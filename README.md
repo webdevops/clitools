@@ -1,11 +1,11 @@
 # CliTools for Docker, PHP und MySQL development
 
-[![latest v2.2.0](https://img.shields.io/badge/latest-v2.2.0-green.svg?style=flat)](https://github.com/webdevops/clitools/releases/tag/2.2.0)
+[![latest v2.3.0](https://img.shields.io/badge/latest-v2.3.0-green.svg?style=flat)](https://github.com/webdevops/clitools/releases/tag/2.3.0)
 [![License GPL3](https://img.shields.io/badge/license-GPL3-blue.svg?style=flat)](/LICENSE)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/webdevops/clitools.svg)](http://isitmaintained.com/project/webdevops/clitools "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/webdevops/clitools.svg)](http://isitmaintained.com/project/webdevops/clitools "Percentage of issues still open")
 
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416/big.png)](https://insight.sensiolabs.com/projects/9f12f125-3623-4b9d-b01b-07090f91e416)
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/57b021a7-35a7-486f-80c8-e3fc6dee426c/big.png)](https://insight.sensiolabs.com/projects/57b021a7-35a7-486f-80c8-e3fc6dee426c)
 
 
 ## Introduction
@@ -32,6 +32,7 @@ Thanks for support, ideas and issues ...
 - [Florian Tatzel](https://twitter.com/PanadeEdu)
 - [Philipp Kitzberger](https://github.com/Kitzberger)
 - [Josef Glatz](https://github.com/jousch)
+- [Alexander Grein](https://github.com/rabe69)
 - my (old) colleagues at [Lightwerk GmbH](http://www.lightwerk.de/)
 - my colleagues at [cron IT GmbH](http://www.cron.eu/)
 

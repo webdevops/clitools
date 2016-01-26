@@ -1,6 +1,25 @@
 CliTools Changelog
 ==================
 
+next - UPCOMING
+------------------
+
+
+2.3.0 - 2016-01-26
+------------------
+- Updated compile documentation
+- Improved compile scripts
+- Added rsync.opts documentation
+- Added rsync.opts section in `clisync.yml` for additional rsync options
+- No terminal title if stdout redirect is detected
+- Added `docker:cleanup` for cleanup of orphaned images and volumes
+- Renamed `sync:server` to `sync`
+- Renamed `sync:backup` to `share:backup`
+- Renamed `sync:restore` to `share:restore`
+- Renamed `sync:deploy` to `deploy`
+- Added `COMPOSER=custom.json ct php:composer` support
+- Support for new PHP and TYPO3 Docker Boilerplate (with APPLICATION_USER detection, configurable)
+
 2.2.0 - 2015-08-19
 ------------------
 - Introduced `docker:up --switch` (`docker:up` without --switch parameter no longer shutdown previous one)

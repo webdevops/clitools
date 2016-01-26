@@ -53,6 +53,9 @@ GLOBAL:
         # set target as sub directroy (will be appended to working directory)
         workdir: ""
 
+        # Additional options ("-rlptD --delete-after --progress --human-readable" is already set)
+        opts: ""
+
         # exclude list/patterns for files and directories
         exclude:
             # Temp files
@@ -61,9 +64,7 @@ GLOBAL:
 
             # VCS
             - ".git*"
-            - ".gitignore"
-            - ".gitmodules"
-            - ".svn"
+            - ".svn*"
 
             # Build files
             - "composer.json"

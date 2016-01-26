@@ -17,7 +17,7 @@ ct mysql:list
 
 # Debugging
 
-The `ct mysql:querylog` and `ct mysql:slowlog` provides a convinent way to access the general query log 
+The `ct mysql:querylog` and `ct mysql:slowlog` provides a convenient way to access the general query log 
 and the slow log.
 
 In the query log you can see all queries send and executed by the MySQL database.
@@ -67,7 +67,7 @@ Also the compression is automatically detected by file mime type.
 ct mysql:restore typo3 dump.sql
 ```
 
-# Datbase charset conversion
+# Database charset conversion
 
 ```bash
 # Convert database to UTF8

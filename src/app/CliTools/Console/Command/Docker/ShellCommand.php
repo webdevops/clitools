@@ -4,6 +4,7 @@ namespace CliTools\Console\Command\Docker;
 
 /*
  * CliTools Command
+ * Copyright (C) 2016 WebDevOps.io
  * Copyright (C) 2015 Markus Blaschke <markus@familie-blaschke.net>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,6 +22,7 @@ namespace CliTools\Console\Command\Docker;
  */
 
 use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
+use CliTools\Utility\PhpUtility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -70,8 +72,8 @@ class ShellCommand extends AbstractCommand
             // User user by option
             $cliUser = $input->getOption('user');
         } else {
-            // Use docker env
-            $cliUser = $this->getDockerEnv($container, 'CLI_USER');
+            $userVarList = PhpUtility::trimExplode(',', $this->getApplication()->getConfigValue('docker', 'user_env_vars'));
+            $cliUser = $this->findAndGetDockerEnv($container, $userVarList);
         }
 
         $this->setTerminalTitle('docker', 'shell', $container);

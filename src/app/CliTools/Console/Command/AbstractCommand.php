@@ -4,6 +4,7 @@ namespace CliTools\Console\Command;
 
 /*
  * CliTools Command
+ * Copyright (C) 2016 WebDevOps.io
  * Copyright (C) 2015 Markus Blaschke <markus@familie-blaschke.net>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -260,6 +261,11 @@ abstract class AbstractCommand extends Command
      */
     public function setTerminalTitle($title)
     {
+        // no title if stdout redirect
+        if(!posix_isatty(STDOUT)) {
+            return;
+        }
+
         $args = func_get_args();
 
         $titleList = array();

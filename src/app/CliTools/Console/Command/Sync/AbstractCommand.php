@@ -4,6 +4,7 @@ namespace CliTools\Console\Command\Sync;
 
 /*
  * CliTools Command
+ * Copyright (C) 2016 WebDevOps.io
  * Copyright (C) 2015 Markus Blaschke <markus@familie-blaschke.net>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -158,10 +159,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $ret = true;
 
         // Rsync (optional)
-        if ($this->contextConfig->exists('rsync')) {
+        if ($this->contextConfig->exists('rsync.path')) {
             if (!$this->validateConfigurationRsync()) {
                 $ret = false;
             }
+        } else {
+            // Clear rsync if any options set
+            $this->contextConfig->clear('rsync');
         }
 
         // MySQL (optional)
@@ -707,6 +711,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $this->output->writeln('<comment>Rsync from ' . $source . ' to ' . $target . '</comment>');
 
         $command = new CommandBuilder('rsync', '-rlptD --delete-after --progress --human-readable');
+
+        // Additional options
+        if ($this->contextConfig->exists('rsync.opts')) {
+            $command->addArgumentRaw($this->contextConfig->get('rsync.opts'));
+        }
 
         // Add file list (external file with --include-from option)
         if (!empty($filelist)) {

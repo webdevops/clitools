@@ -4,6 +4,7 @@ namespace CliTools\Utility;
 
 /*
  * CliTools Command
+ * Copyright (C) 2016 WebDevOps.io
  * Copyright (C) 2015 Markus Blaschke <markus@familie-blaschke.net>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -127,7 +128,7 @@ abstract class UnixUtility
      */
     public static function mountInfoList()
     {
-        $command = new CommandBuilder('df', '-a --type=ext3 --type=ext4 --type vmhgfs --type vboxsf --portability');
+        $command = new CommandBuilder('df', '-a --type=ext3 --type=ext4 --type vmhgfs --type vboxsf --type prl_fs --portability');
         $command->addPipeCommand(new CommandBuilder('tail', '--lines=+2'))
                 ->addPipeCommand(
                     new CommandBuilder('awk', '\'{ print $6 " " $3 " " $4 " " $5 }\'')

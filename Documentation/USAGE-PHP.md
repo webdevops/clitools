@@ -4,7 +4,7 @@
 
 ## Composer (auto searching in path tree)
 
-Because you always need to jump into `composer.json` directroy `ct php:composer` will do this for you
+Because you always need to jump into `composer.json` directory `ct php:composer` will do this for you
 
 ```bash
 # Run composer install task

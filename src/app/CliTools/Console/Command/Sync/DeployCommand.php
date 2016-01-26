@@ -4,6 +4,7 @@ namespace CliTools\Console\Command\Sync;
 
 /*
  * CliTools Command
+ * Copyright (C) 2016 WebDevOps.io
  * Copyright (C) 2015 Markus Blaschke <markus@familie-blaschke.net>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -34,7 +35,7 @@ class DeployCommand extends AbstractRemoteSyncCommand
 
         $this->confArea = 'deploy';
 
-        $this->setName('sync:deploy')
+        $this->setName('deploy')
              ->setDescription('Deploy files and database to server');
     }
 

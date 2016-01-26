@@ -9,5 +9,8 @@ install:
 autoload:
 	sh -c "cd src ; composer dump-autoload --optimize --no-dev"
 
+update:
+	sh -c "cd src ; composer update"
+
 sloccount:
 	sloccount src/app/ src/command.php

@@ -4,6 +4,7 @@ namespace CliTools\Console\Command\Docker;
 
 /*
  * CliTools Command
+ * Copyright (C) 2016 WebDevOps.io
  * Copyright (C) 2015 Markus Blaschke <markus@familie-blaschke.net>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -82,28 +83,26 @@ class CreateCommand extends AbstractCommand
     {
         $currDir = getcwd();
 
-        $path = $input->getArgument('path');
+        $path            = $input->getArgument('path');
+        $boilerplateRepo = $this->getBoilerplateRepository();
+        $codeRepo        = $this->input->getOption('code');
 
-        if ($this->input->getOption('docker')) {
-            // Custom boilerplate
-            $boilerplateRepo = $this->input->getOption('docker');
-        } else {
-            // Boilerplate from config
-            $boilerplateRepo = $this->getApplication()
-                                    ->getConfigValue('docker', 'boilerplate');
-        }
 
         $output->writeln('<h2>Creating new docker boilerplate instance in "' . $path . '"</h2>');
+        $output->writeln('<p> Docker repository: ' . $boilerplateRepo . '</p>');
+        if ($codeRepo) {
+            $output->writeln('<p>   Code repository: ' . $codeRepo . '</p>');
+        }
 
         // Init docker boilerplate
         $this->createDockerInstance($path, $boilerplateRepo);
         PhpUtility::chdir($currDir);
 
         // Init code
-        if ($this->input->getOption('code')) {
+        if ($codeRepo) {
 
             $output->writeln('<h2>Init code repository</h2>');
-            $this->initCode($path, $input->getOption('code'));
+            $this->initCode($path, $codeRepo);
             PhpUtility::chdir($currDir);
 
             $output->writeln('<h2>Init document root</h2>');
@@ -135,6 +134,35 @@ class CreateCommand extends AbstractCommand
         }
 
         return 0;
+    }
+
+    /**
+     * Get boilerplate repository
+     *
+     * @return mixed|null
+     */
+    protected function getBoilerplateRepository() {
+        $app = $this->getApplication();
+
+        // Boilerplate from config (legacy default)
+        $ret = $app->getConfigValue('docker', 'boilerplate');
+
+        // Boilerplate from config (default)
+        if (empty($ret)) {
+            $ret = $app->getConfigValue('dockerBoilerplate', 'default');
+        }
+
+        // Boilerplate from config (type)
+        if ($this->input->getOption('docker')) {
+            $ret = $app ->getConfigValue('dockerBoilerplate', $this->input->getOption('docker'));
+
+            if (empty($ret)) {
+                // Custom boilerplate
+                $ret = $this->input->getOption('docker');
+            }
+        }
+
+        return $ret;
     }
 
     /**

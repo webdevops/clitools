@@ -4,6 +4,7 @@ namespace CliTools\Console\Command\Sync;
 
 /*
  * CliTools Command
+ * Copyright (C) 2016 WebDevOps.io
  * Copyright (C) 2015 Markus Blaschke <markus@familie-blaschke.net>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -33,7 +34,7 @@ class InitCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function configure()
     {
-        $this->setName('sync:init')
+        $this->setName('sync-init')
              ->setDescription('Create example clisync.yml');
     }
 

@@ -4,6 +4,7 @@ namespace CliTools\Console\Command\Docker;
 
 /*
  * CliTools Command
+ * Copyright (C) 2016 WebDevOps.io
  * Copyright (C) 2015 Markus Blaschke <markus@familie-blaschke.net>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,6 +22,7 @@ namespace CliTools\Console\Command\Docker;
  */
 
 use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
+use CliTools\Utility\PhpUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -34,7 +36,7 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
     {
         $this->setName('docker:cli')
              ->setDescription(
-                 'Run cli command in docker container (defined by CLI_SCRIPT and CLI_USER as docker environment variable)'
+                 'Run cli command in docker container'
              );
     }
 
@@ -61,12 +63,19 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
             # with Docker exec (faster, complex)
             ###########################
             case 'docker-exec':
-                $cliScript = $this->getDockerEnv($container, 'CLI_SCRIPT');
-                $cliUser   = $this->getDockerEnv($container, 'CLI_USER');
+                $scriptEnvVar = $this->getApplication()->getConfigValue('docker', 'script_env_vars');
+
+                // Try to find defined script
+                $scriptVarList = PhpUtility::trimExplode(',', $scriptEnvVar);
+                $cliScript = $this->findAndGetDockerEnv($container, $scriptVarList);
+
+                // Try to find defined username
+                $userVarList = PhpUtility::trimExplode(',', $this->getApplication()->getConfigValue('docker', 'user_env_vars'));
+                $cliUser = $this->findAndGetDockerEnv($container, $userVarList);
 
                 if (empty($cliScript)) {
                     $output->writeln(
-                        '<p-error>Docker container "' . $container . '" doesn\'t have environment variable "CLI_SCRIPT"</p-error>'
+                        '<p-error>Docker container "' . $container . '" doesn\'t have environment variables: ' . $scriptEnvVar . '</p-error>'
                     );
 
                     return 1;

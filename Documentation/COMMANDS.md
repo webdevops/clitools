@@ -77,7 +77,7 @@ All log commands are using a grep-filter (specified as optional argument)
 |                            | __ct mysql:restore typo3 dump.sql.xz__ -> xz'ed (lzma'ed) sql dump        |
 |                            | __ct mysql:restore typo3 dump.sql --filter=typo3__ -> No TYPO3 cache tables in dump |
 | ct mysql:restore           | Create (and drops if already exists) a database and restore from a dump   |
-|                            | Dump file can be plaintext, gziped, bzip2 or lzma compressed              |
+|                            | Dump file can be plaintext, gzip, bzip2 or lzma compressed              |
 |                            | and will automatically detected                                           |
 |                            | __ct mysql:restore typo3 dump.sql.bz2__                                   |
 | ct mysql:convert           | Convert character set and collation of a database                         |

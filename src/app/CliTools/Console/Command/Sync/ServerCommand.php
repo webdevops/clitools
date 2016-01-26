@@ -4,6 +4,7 @@ namespace CliTools\Console\Command\Sync;
 
 /*
  * CliTools Command
+ * Copyright (C) 2016 WebDevOps.io
  * Copyright (C) 2015 Markus Blaschke <markus@familie-blaschke.net>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -34,7 +35,7 @@ class ServerCommand extends AbstractRemoteSyncCommand
 
         $this->confArea = 'sync';
 
-        $this->setName('sync:server')
+        $this->setName('sync')
              ->setDescription('Sync files and database from server');
     }
 

@@ -4,6 +4,7 @@ namespace CliTools\Utility;
 
 /*
  * CliTools Command
+ * Copyright (C) 2016 WebDevOps.io
  * Copyright (C) 2015 Markus Blaschke <markus@familie-blaschke.net>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -199,4 +200,37 @@ class PhpUtility
 
         return $ret;
     }
+
+
+    /**
+     * Get operating system name
+     *
+     * @return string
+     */
+    public static function getOsName()
+    {
+        return php_uname('s');
+    }
+
+    /**
+     * Trim explode with filter
+     *
+     * @param string $delimiter Explode delimiter
+     * @param string $value     Value string
+     * @param bool   $noEmpty   Filter no empty values
+     * @return array
+     */
+    public static function trimExplode($delimiter, $value, $noEmpty = true)
+    {
+        $ret = array_map('trim', explode((string)$delimiter, (string)$value));
+
+        if ($noEmpty) {
+            $ret = array_filter($ret, function ($val) {
+                return strlen($val) !== 0;
+            });
+        }
+
+        return $ret;
+    }
+
 }

@@ -4,6 +4,7 @@ namespace CliTools\Console\Command\Php;
 
 /*
  * CliTools Command
+ * Copyright (C) 2016 WebDevOps.io
  * Copyright (C) 2015 Markus Blaschke <markus@familie-blaschke.net>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -51,20 +52,28 @@ class ComposerCommand extends \CliTools\Console\Command\AbstractCommand implemen
     {
         $paramList = $this->getFullParameterList();
 
+        // Get composer.json from env variable
+        $composerJson = getenv('COMPOSER');
+        if (empty($composerJson)) {
+            $composerJson = 'composer.json';
+        }
+
         if ($this->checkIfComposerJsonIsNeeded($paramList)) {
-            $composerJsonPath = UnixUtility::findFileInDirectortyTree('composer.json');
+            $composerJsonPath = UnixUtility::findFileInDirectortyTree($composerJson);
 
             if (!empty($composerJsonPath)) {
+                // composer.json found
+
                 $path = dirname($composerJsonPath);
-                $this->output->writeln('<comment>Found composer.json directory: ' . $path . '</comment>');
+                $this->output->writeln('<comment>Found ' . $composerJson . ' directory: ' . $path . '</comment>');
                 // Switch to directory of docker-compose.yml
                 PhpUtility::chdir($path);
 
                 return $this->runComposer($paramList);
             } else {
-                $this->output->writeln('<error>No composer.json found in tree</error>');
-
-                return 1;
+                // no composer.json found but try to run the command anyway
+                $this->output->writeln('<warning>No ' . $composerJson . ' found in tree</warning>');
+                return $this->runComposer($paramList);
             }
         } else {
             return $this->runComposer($paramList);
