@@ -69,7 +69,7 @@ ct share:restore --rsync
 
 With `sync:deploy` you can push your files to your production servers.
 Please keep in mind that this feature is just an wrapped rsync and should only be
-the simplest solution for deployment. For more advanced or centralized deployemnt try
+the simplest solution for deployment. For more advanced or centralized deployment try
 solutions build on Jenkis, Ansible and others.
 
 ```bash
@@ -80,9 +80,28 @@ ct deploy
 ct deploy staging
 ```
 
+## Rsync additional options (rsync.opts)
+
+The rsync options `-rlptD --delete-after --progress --human-readable` are automatically added when using the sync
+features of clitools. In addition, it is possible to set more options by adding them via `rsync.opts` (available since
+version 2.3 of clitools). In the following example the option `--iconv=UTF8-MAC,UTF8` is added to enable rsync filename
+charset conversion between local and remote file system. You need this especially when using rsync between hosts where a
+charset conversion on filenames is necessary (see `man rsync` for further details; e.g.: you probably need this when
+you sync between mac and linux utf-8 filesystem).
+
+```
+...
+# Enable filename charset conversion where local is UTF8-MAC (Mac OSX) and remote is UTF8 (e.g. Linux)
+rsync.opts: "--iconv=UTF8-MAC,UTF8"
+...
+```
+
+If you run into problems with `--iconv` make shure you have a compatible version of rsync >= 3.0 (as already mentioned
+in the [install section](INSTALL.md) of this documentation).
+
 ## Advanced ssh options
 
-If you need some advaned ssh options (eg. other ports) use your `~/.ssh/config` configuration file:
+If you need some advanced ssh options (eg. other ports) use your `~/.ssh/config` configuration file:
 
     Host project-server
         Hostname project-server.example.com

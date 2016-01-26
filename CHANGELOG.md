@@ -5,7 +5,7 @@ CliTools Changelog
 ------------------
 - Updated compile documentation
 - Improved compile scripts
-- Added umlauts support for rsync under OSX
+- Added rsync.opts documentation
 - Added rsync.opts section in `clisync.yml` for additional rsync options
 - No terminal title if stdout redirect is detected
 - Added `docker:cleanup` for cleanup of orphaned images and volumes
