@@ -1,7 +1,11 @@
 CliTools Changelog
 ==================
 
-2.3.0 - UPCOMING
+next - UPCOMING
+------------------
+
+
+2.3.0 - 2016-01-26
 ------------------
 - Updated compile documentation
 - Improved compile scripts

@@ -3,6 +3,7 @@
 
 /*
  * CliTools Command
+ * Copyright (C) 2016 WebDevOps.io
  * Copyright (C) 2015 Markus Blaschke <markus@familie-blaschke.net>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,7 +21,7 @@
  */
 
 error_reporting(E_ALL);
-define('CLITOOLS_COMMAND_VERSION', '2.2.1');
+define('CLITOOLS_COMMAND_VERSION', '2.3.0');
 define('CLITOOLS_ROOT_FS', __DIR__);
 
 require __DIR__ . '/vendor/autoload.php';
