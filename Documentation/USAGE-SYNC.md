@@ -69,7 +69,7 @@ ct share:restore --rsync
 
 With `sync:deploy` you can push your files to your production servers.
 Please keep in mind that this feature is just an wrapped rsync and should only be
-the simplest solution for deployment. For more advanced or centralized deployemnt try
+the simplest solution for deployment. For more advanced or centralized deployment try
 solutions build on Jenkis, Ansible and others.
 
 ```bash
