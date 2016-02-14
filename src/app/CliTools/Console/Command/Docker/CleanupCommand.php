@@ -24,6 +24,7 @@ namespace CliTools\Console\Command\Docker;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 class CleanupCommand extends AbstractCommand
 {
@@ -34,7 +35,13 @@ class CleanupCommand extends AbstractCommand
     protected function configure()
     {
         $this->setName('docker:cleanup')
-            ->setDescription('Cleanup docker environment');
+            ->setDescription('Cleanup docker environment')
+            ->addOption(
+                'force',
+                'f',
+                InputOption::VALUE_NONE,
+                'Force deletion'
+            );
     }
 
     /**
@@ -59,8 +66,23 @@ class CleanupCommand extends AbstractCommand
     {
         $this->output->writeln('<h2>Cleanup orphaned docker images</h2>');
         try {
-            $command = new CommandBuilder('docker', 'rmi $(docker images -qf "dangling=true")');
-            $command->executeInteractive();
+            $command = new CommandBuilder('docker', 'images -qf "dangling=true"');
+            $imageList = $command->execute()->getOutput();
+
+            if (!empty($volumeList)) {
+                $this->output->writeln('<p>Found ' . number_format(count($imageList)) . ' images for cleanup</p>');
+
+                while (!empty($imageList)) {
+                    $command = new CommandBuilder('docker', 'rmi');
+                    if ($this->input->getOption('force')) {
+                        $command->addArgument('--force');
+                    }
+                    $command->addArgumentList(array_splice($imageList, 0, 50));
+                    $command->executeInteractive();
+                }
+            } else {
+                $this->output->writeln('<p>No images for cleanup found</p>');
+            }
 
         } catch (\Exception $e) {
             $this->output->writeln('<comment>Some images could not be removed (this is normal)</comment>');
@@ -75,14 +97,28 @@ class CleanupCommand extends AbstractCommand
     protected function cleanDockerVolumes()
     {
         $this->output->writeln('<h2>Cleanup orphaned docker volumes</h2>');
-        $this->output->writeln('<info>Updating docker image "martin/docker-cleanup-volumes"</info>');
 
-        $command = new CommandBuilder('docker', 'pull martin/docker-cleanup-volumes');
-        $command->executeInteractive();
+         try {
+             $command = new CommandBuilder('docker', 'volume ls -qf "dangling=true"');
+             $volumeList = $command->execute()->getOutput();
 
-        $this->output->writeln('<info>Run docker image "martin/docker-cleanup-volumes"</info>');
-        $command = new CommandBuilder('docker', 'run -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/docker:/var/lib/docker --rm martin/docker-cleanup-volumes');
-        $command->executeInteractive();
+             if (!empty($volumeList)) {
+                 $this->output->writeln('<p>Found ' . number_format(count($volumeList)) . ' volumes for cleanup</p>');
+
+                 while (!empty($volumeList)) {
+                     $command = new CommandBuilder('docker', 'volume rm');
+                     if ($this->input->getOption('force')) {
+                         $command->addArgument('--force');
+                     }
+                     $command->addArgumentList(array_splice($volumeList, 0, 50));
+                     $command->executeInteractive();
+                 }
+             } else {
+                 $this->output->writeln('<p>No volumes for cleanup found</p>');
+             }
+         } catch (\Exception $e) {
+             $this->output->writeln('<comment>Some volumes could not be removed (this is normal)</comment>');
+         }
 
         $this->output->writeln('');
     }
