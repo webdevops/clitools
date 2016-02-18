@@ -69,7 +69,7 @@ class CleanupCommand extends AbstractCommand
             $command = new CommandBuilder('docker', 'images -qf "dangling=true"');
             $imageList = $command->execute()->getOutput();
 
-            if (!empty($volumeList)) {
+            if (!empty($imageList)) {
                 $this->output->writeln('<p>Found ' . number_format(count($imageList)) . ' images for cleanup</p>');
 
                 while (!empty($imageList)) {
