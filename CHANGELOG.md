@@ -4,6 +4,11 @@ CliTools Changelog
 next - UPCOMING
 ------------------
 
+2.3.2 - 2016-02-18
+------------------
+- Fixed issue which prevented deletion of orpahend docker images 
+- SLOC: 7,034
+
 2.3.1 - 2016-02-14
 ------------------
 - Switched to official docker volume cleanup
