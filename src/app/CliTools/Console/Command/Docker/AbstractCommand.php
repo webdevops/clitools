@@ -23,6 +23,7 @@ namespace CliTools\Console\Command\Docker;
 
 use CliTools\Shell\CommandBuilder\CommandBuilder;
 use CliTools\Shell\CommandBuilder\CommandBuilderInterface;
+use CliTools\Utility\DockerUtility;
 use CliTools\Utility\PhpUtility;
 
 abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
@@ -34,6 +35,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @var null|string
      */
     protected $dockerPath;
+
+    /**
+     * @var array
+     */
+    protected $runningContainerCache = array();
 
     /**
      * Search and return for updir docker path
@@ -105,7 +111,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         if (!empty($path)) {
             // Genrate full docker container name
-            $dockerContainerName = \CliTools\Utility\DockerUtility::getDockerInstanceName($containerName, 1, $path);
+            $dockerContainerName = $this->findAndBuildContainerName($containerName);
 
             // Switch to directory of docker-compose.yml
             PhpUtility::chdir($path);
@@ -122,6 +128,52 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             if (!empty($conf->Config->Env[$envName])) {
                 $ret = $conf->Config->Env[$envName];
             }
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Check if docker container is available
+     *
+     * @param  string $containerName Container name
+     *
+     * @return string|bool|null
+     */
+    protected function checkIfDockerContainerIsAvailable($containerName)
+    {
+        $ret = null;
+
+        if (empty($containerName)) {
+            $this->output->writeln('<p-error>No container specified</p-error>');
+
+            return false;
+        }
+
+        try {
+            // Search updir for docker-compose.yml
+            $path = $this->getDockerPath();
+
+            if (!empty($path)) {
+                // Genrate full docker container name
+                $dockerContainerName = \CliTools\Utility\DockerUtility::getDockerInstanceName($containerName, 1, $path);
+
+                // Switch to directory of docker-compose.yml
+                PhpUtility::chdir($path);
+
+                // Get docker confguration (fetched directly from docker)
+                $conf = \CliTools\Utility\DockerUtility::getDockerConfiguration($dockerContainerName);
+
+                if (!empty($conf)
+                    && !empty($conf->State)
+                    && !empty($conf->State->Status)
+                    && in_array(strtolower($conf->State->Status), ['running'], true)
+                ) {
+                    $ret = true;
+                }
+            }
+        } catch (\Exception $e) {
+            $ret = false;
         }
 
         return $ret;
@@ -154,7 +206,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         if (!empty($path)) {
             // Genrate full docker container name
-            $dockerContainerName = \CliTools\Utility\DockerUtility::getDockerInstanceName($containerName, 1, $path);
+            $dockerContainerName = $this->findAndBuildContainerName($containerName);
 
             // Switch to directory of docker-compose.yml
             PhpUtility::chdir($path);
@@ -238,5 +290,38 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         }
 
         return 0;
+    }
+
+    /**
+     * @param null $containerName Poissible Container name (csv)
+     * @return null|string
+     */
+    protected function findAndBuildContainerName($containerName = null) {
+        // Use cached container name
+        if (isset($this->runningContainerCache[$containerName])) {
+            return $this->runningContainerCache[$containerName];
+        }
+
+        $fullContainerName = null;
+
+        $path = $this->getDockerPath();
+        $instancePrefix = \CliTools\Utility\DockerUtility::getDockerInstancePrefix($path);
+
+        $containerNameList = PhpUtility::trimExplode(',', $containerName);
+        foreach ($containerNameList as $containerNameToTry) {
+            if ($this->checkIfDockerContainerIsAvailable($containerNameToTry, 'id')) {
+                $fullContainerName = $instancePrefix . '_' . $containerNameToTry . '_1';
+                break;
+            }
+        }
+
+        if (empty($fullContainerName)) {
+            throw new \RuntimeException('No running docker container found, tried: ' . implode(', ', $containerNameList));
+        }
+
+        // Cache running container
+        $this->runningContainerCache[$containerName] = $fullContainerName;
+
+        return $fullContainerName;
     }
 }

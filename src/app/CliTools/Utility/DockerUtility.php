@@ -28,6 +28,13 @@ class DockerUtility
 {
 
     /**
+     * Docker configuration cache
+     *
+     * @var array
+     */
+    static protected $dockerConfigurationCache = array();
+
+    /**
      * Parse docker configuration (from docker inspect)
      *
      * @param string $container Name of docker container
@@ -36,9 +43,13 @@ class DockerUtility
      */
     public static function getDockerConfiguration($container)
     {
+        // Use from cache
+        if (isset(self::$dockerConfigurationCache[$container])) {
+            return self::$dockerConfigurationCache[$container];
+        }
 
         // Build command
-        $command = new CommandBuilder('docker', 'inspect %s', array($container));
+        $command = new CommandBuilder('docker', 'inspect %s 2> /dev/null', array($container));
 
         // execute
         $executor = new Executor($command);
@@ -61,6 +72,9 @@ class DockerUtility
 
                 $conf->Config->Env = $envList;
             }
+
+            // store cache
+            self::$dockerConfigurationCache[$container] = $conf;
 
             return $conf;
         }
