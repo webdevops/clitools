@@ -36,7 +36,7 @@ wget -O/usr/local/bin/ct https://www.achenar.net/clicommand/clitools.phar
 chmod 777 /usr/local/bin/ct
 
 # MacOS/Linux: example configuration for Docker VM
-wget -O"$HOME/.clitools.ini" https://github.com/webdevops/clitools/blob/develop/Documentation/Examples/macos-docker-clitools.ini
+wget -O"$HOME/.clitools.ini" https://raw.githubusercontent.com/webdevops/clitools/develop/Documentation/Examples/macos-docker-clitools.ini
 ```
 
 ## Aliases
