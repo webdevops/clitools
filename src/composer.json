@@ -4,9 +4,9 @@
       { "type": "vcs", "url": "https://github.com/jamiebicknell/Growl-GNTP.git" }
     ],
     "require": {
-        "symfony/console": "2.*",
+        "symfony/console": "~2.8",
         "jamiebicknell/Growl-GNTP": "dev-master",
-        "symfony/yaml": "^2.6"
+        "symfony/yaml": "~2.8"
     },
     "autoload": {
         "psr-0": {

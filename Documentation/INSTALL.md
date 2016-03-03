@@ -88,7 +88,7 @@ ignore[] = "CliTools\Console\Command\System\RebootCommand"
 
 ```bash
 # Stable channel
-ct self-udpate
+ct self-update
 
 ## Beta channel
 ct self-update --beta
