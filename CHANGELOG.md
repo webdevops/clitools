@@ -4,6 +4,10 @@ CliTools Changelog
 next - UPCOMING
 ------------------
 
+2.3.3 - 2016-03-03
+------------------
+- Added main and app containers (see `config.ini`) for `docker:exec`, `docker:shell` and `docker:cli`
+
 2.3.2 - 2016-02-18
 ------------------
 - Fixed issue which prevented deletion of orpahend docker images 
