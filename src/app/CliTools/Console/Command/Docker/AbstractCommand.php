@@ -296,7 +296,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @param null $containerName Poissible Container name (csv)
      * @return null|string
      */
-    protected function findAndBuildContainerName($containerName = null) {
+    protected function findAndBuildContainerName($containerName = null)
+    {
         // Use cached container name
         if (isset($this->runningContainerCache[$containerName])) {
             return $this->runningContainerCache[$containerName];
@@ -305,15 +306,26 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $fullContainerName = null;
 
         $path = $this->getDockerPath();
-        $instancePrefix = \CliTools\Utility\DockerUtility::getDockerInstancePrefix($path);
+        $oldPath = getcwd();
+
+        chdir($path);
 
         $containerNameList = PhpUtility::trimExplode(',', $containerName);
         foreach ($containerNameList as $containerNameToTry) {
-            if ($this->checkIfDockerContainerIsAvailable($containerNameToTry, 'id')) {
-                $fullContainerName = $instancePrefix . '_' . $containerNameToTry . '_1';
+            try {
+                $command = new CommandBuilder('docker-compose');
+                $command
+                    ->addArgumentTemplate('ps -q %s', $containerNameToTry)
+                    ->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_NO_STDERR);
+                $fullContainerName = $command->execute()->getOutputString();
                 break;
+            } catch (\Exception $e) {
+                // container not running
+                continue;
             }
         }
+
+        chdir($oldPath);
 
         if (empty($fullContainerName)) {
             throw new \RuntimeException('No running docker container found, tried: ' . implode(', ', $containerNameList));
