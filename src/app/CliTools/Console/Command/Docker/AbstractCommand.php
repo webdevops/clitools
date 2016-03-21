@@ -184,10 +184,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @param  string                  $containerName Container name
      * @param  CommandBuilderInterface $comamnd       Command
+     * @param  callback|null           $dockerCommandCallback   Docker command callback
      *
      * @return int|null|void
      */
-    protected function executeDockerExec($containerName, CommandBuilderInterface $command)
+    protected function executeDockerExec($containerName, CommandBuilderInterface $command, callable $dockerCommandCallback = null)
     {
         if (empty($containerName)) {
             $this->output->writeln('<p-error>No container specified</p-error>');
@@ -216,7 +217,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
                 ) . '" in docker container "' . $dockerContainerName . '" ...</info>'
             );
 
-            $dockerCommand = new CommandBuilder('docker', 'exec -ti %s', array($dockerContainerName));
+            $dockerCommand = new CommandBuilder('docker', 'exec -ti');
+            if ($dockerCommandCallback) {
+                $dockerCommandCallback($dockerCommand);
+            }
+            $dockerCommand->addArgument($dockerContainerName);
+
             $dockerCommand->append($command, false);
             $dockerCommand->executeInteractive();
         } else {
