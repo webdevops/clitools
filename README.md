@@ -1,6 +1,6 @@
 # CliTools for Docker, PHP und MySQL development
 
-[![latest v2.3.3](https://img.shields.io/badge/latest-v2.3.3-green.svg?style=flat)](https://github.com/webdevops/clitools/releases/tag/2.3.3)
+[![latest v2.3.4](https://img.shields.io/badge/latest-v2.3.4-green.svg?style=flat)](https://github.com/webdevops/clitools/releases/tag/2.3.4)
 [![License GPL3](https://img.shields.io/badge/license-GPL3-blue.svg?style=flat)](/LICENSE)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/webdevops/clitools.svg)](http://isitmaintained.com/project/webdevops/clitools "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/webdevops/clitools.svg)](http://isitmaintained.com/project/webdevops/clitools "Percentage of issues still open")
