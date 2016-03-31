@@ -184,10 +184,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @param  string                  $containerName Container name
      * @param  CommandBuilderInterface $comamnd       Command
+     * @param  callback|null           $dockerCommandCallback   Docker command callback
      *
      * @return int|null|void
      */
-    protected function executeDockerExec($containerName, CommandBuilderInterface $command)
+    protected function executeDockerExec($containerName, CommandBuilderInterface $command, callable $dockerCommandCallback = null)
     {
         if (empty($containerName)) {
             $this->output->writeln('<p-error>No container specified</p-error>');
@@ -216,7 +217,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
                 ) . '" in docker container "' . $dockerContainerName . '" ...</info>'
             );
 
-            $dockerCommand = new CommandBuilder('docker', 'exec -ti %s', array($dockerContainerName));
+            $dockerCommand = new CommandBuilder('docker', 'exec -ti');
+            if ($dockerCommandCallback) {
+                $dockerCommandCallback($dockerCommand);
+            }
+            $dockerCommand->addArgument($dockerContainerName);
+
             $dockerCommand->append($command, false);
             $dockerCommand->executeInteractive();
         } else {
@@ -296,7 +302,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      * @param null $containerName Poissible Container name (csv)
      * @return null|string
      */
-    protected function findAndBuildContainerName($containerName = null) {
+    protected function findAndBuildContainerName($containerName = null)
+    {
         // Use cached container name
         if (isset($this->runningContainerCache[$containerName])) {
             return $this->runningContainerCache[$containerName];
@@ -305,15 +312,26 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $fullContainerName = null;
 
         $path = $this->getDockerPath();
-        $instancePrefix = \CliTools\Utility\DockerUtility::getDockerInstancePrefix($path);
+        $oldPath = getcwd();
+
+        chdir($path);
 
         $containerNameList = PhpUtility::trimExplode(',', $containerName);
         foreach ($containerNameList as $containerNameToTry) {
-            if ($this->checkIfDockerContainerIsAvailable($containerNameToTry, 'id')) {
-                $fullContainerName = $instancePrefix . '_' . $containerNameToTry . '_1';
+            try {
+                $command = new CommandBuilder('docker-compose');
+                $command
+                    ->addArgumentTemplate('ps -q %s', $containerNameToTry)
+                    ->setOutputRedirect(CommandBuilder::OUTPUT_REDIRECT_NO_STDERR);
+                $fullContainerName = $command->execute()->getOutputString();
                 break;
+            } catch (\Exception $e) {
+                // container not running
+                continue;
             }
         }
+
+        chdir($oldPath);
 
         if (empty($fullContainerName)) {
             throw new \RuntimeException('No running docker container found, tried: ' . implode(', ', $containerNameList));

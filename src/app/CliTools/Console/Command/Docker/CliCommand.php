@@ -21,6 +21,7 @@ namespace CliTools\Console\Command\Docker;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
 use CliTools\Utility\PhpUtility;
 use Symfony\Component\Console\Input\InputInterface;
@@ -86,14 +87,16 @@ class CliCommand extends AbstractCommand implements \CliTools\Console\Filter\Any
                 $command->parse($cliScript)
                         ->addArgumentList($paramList);
 
+                $dockerCommandCallback = null;
+
                 if (!empty($cliUser)) {
-                    // sudo wrapping as cli user
-                    $commandSudo = new RemoteCommandBuilder('sudo', '-H -E -u %s', array($cliUser));
-                    $commandSudo->append($command, false);
-                    $command = $commandSudo;
+                    // Run script as specific user
+                    $dockerCommandCallback = function(CommandBuilder $command) use ($cliUser) {
+                        $command->addArgumentTemplate('-u %s', $cliUser);
+                    };
                 }
 
-                $this->executeDockerExec($container, $command);
+                $this->executeDockerExec($container, $command, $dockerCommandCallback);
                 break;
 
             ###########################

@@ -1,8 +1,10 @@
 CliTools Changelog
 ==================
 
-next - UPCOMING
+2.3.4 - 2016-03-31
 ------------------
+- Implement docker container name fetching by using docker-compose
+- Implement docker exec without needing sudo
 
 2.3.3 - 2016-03-03
 ------------------
