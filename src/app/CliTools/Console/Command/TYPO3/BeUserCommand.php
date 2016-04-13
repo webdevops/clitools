@@ -172,7 +172,6 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand
             'options.clearCache.system = 1',
             'options.clearCache.all = 1',
             'options.enableShowPalettes = 1',
-            'options.alertPopups = 254',
             'options.pageTree.showPageIdWithTitle = 1',
             'options.pageTree.showPathAboveMounts = 1',
             'options.pageTree.showDomainNameWithTitle = 1',
