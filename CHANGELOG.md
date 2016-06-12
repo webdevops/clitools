@@ -1,6 +1,10 @@
 CliTools Changelog
 ==================
 
+?.?.? - ?
+---------
+- Add TYPO3 extensionmanager tables to default TYPO3 filter
+
 2.3.4 - 2016-03-31
 ------------------
 - Implement docker container name fetching by using docker-compose
