@@ -139,7 +139,7 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand
                     $clearTable = true;
                     break;
 
-                case 'sys_dmain':
+                case 'sys_domain':
                     // EXT:direct_mail
                     $clearTable = true;
                     break;
