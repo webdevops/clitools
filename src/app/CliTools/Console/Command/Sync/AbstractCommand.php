@@ -1130,6 +1130,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         // Filter table list
         $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $filterList, $database);
 
+        // Determine size of tables to be dumped and abort if user wishes to
+        $size = $this->determineSizeOfTables($database, $ignoredTableList, $isRemote);
+        $question = sprintf('The tables in this MySQL dump have total size of %.2f MB! Proceed?', $size);
+        if (!ConsoleUtility::questionYesNo($question, 'no')) {
+            throw new \CliTools\Exception\StopException(1);
+        }
+
         // Dump only structure
         $commandStructure = clone $command;
         $commandStructure->addArgument('--no-data')
@@ -1159,4 +1166,41 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         return $command;
     }
 
+    /**
+     * Determine size of tables
+     *
+     * @param string                  $database         Database
+     * @param array                   $ignoredTableList List of ignored tables
+     * @param boolean                 $isRemote         Remote filter
+     *
+     * @return float|null
+     */
+    protected function determineSizeOfTables($database, $ignoredTableList, $isRemote = true)
+    {
+        if ($isRemote) {
+            $tableSizeCommand = $this->createRemoteMySqlCommand($database);
+        } else {
+            $tableSizeCommand = $this->createLocalMySqlCommand($database);
+        }
+
+        $ignoreTablesSQL = '';
+        if (!empty($ignoredTableList)) {
+            $ignoreTablesSQL = " AND CONCAT(TABLE_SCHEMA,'.',TABLE_NAME) NOT IN ('".join("','", $ignoredTableList)."')";
+        }
+
+        $query  = sprintf("SELECT SUM(ROUND(((data_length + index_length) / 1024 / 1024),2)) 'Size in MB' FROM information_schema.TABLES WHERE table_schema = '%s' AND TABLE_TYPE='BASE TABLE'%s", $database, $ignoreTablesSQL);
+
+        $tableSizeCommand->addArgumentTemplate('-e %s;', $query);
+        if ($isRemote) {
+            $tableSizeCommand = $this->wrapRemoteCommand($tableSizeCommand);
+        }
+        $tableSize = $tableSizeCommand->execute()
+                                      ->getOutput();
+
+        if ($tableSize && isset($tableSize[0])) {
+            return $tableSize[0];
+        }
+
+        return null;
+    }
 }
