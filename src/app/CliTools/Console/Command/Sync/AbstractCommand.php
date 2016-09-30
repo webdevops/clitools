@@ -1206,7 +1206,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     }
 
     /**
-     * Determine size of tables
+     * Determine which tables are biggest
      *
      * @param string                  $database         Database
      * @param array                   $ignoredTableList List of ignored tables
