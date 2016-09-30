@@ -1134,6 +1134,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $size = $this->determineSizeOfTables($database, $ignoredTableList, $isRemote);
         $question = sprintf('The tables in this MySQL dump have total size of %.2f MB! Proceed?', $size);
         if (!ConsoleUtility::questionYesNo($question, 'no')) {
+            $this->output->writeln($this->determineBiggestTables($database, $ignoredTableList, $isRemote));
             throw new \CliTools\Exception\StopException(1);
         }
 
@@ -1202,5 +1203,45 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         }
 
         return null;
+    }
+
+    /**
+     * Determine size of tables
+     *
+     * @param string                  $database         Database
+     * @param array                   $ignoredTableList List of ignored tables
+     * @param boolean                 $isRemote         Remote filter
+     *
+     * @return string
+     */
+    protected function determineBiggestTables($database, $ignoredTableList, $isRemote = true)
+    {
+        if ($isRemote) {
+            $tableSizeCommand = $this->createRemoteMySqlCommand($database);
+        } else {
+            $tableSizeCommand = $this->createLocalMySqlCommand($database);
+        }
+
+        $ignoreTablesSQL = '';
+        if (!empty($ignoredTableList)) {
+            $ignoreTablesSQL = " AND CONCAT(TABLE_SCHEMA,'.',TABLE_NAME) NOT IN ('".join("','", $ignoredTableList)."')";
+        }
+
+        $query  = sprintf("SELECT TABLE_NAME, ROUND(((data_length + index_length) / 1024 / 1024),2) 'Size in MB' FROM information_schema.TABLES WHERE table_schema = '%s' AND TABLE_TYPE='BASE TABLE'%s ORDER BY (data_length + index_length) DESC LIMIT 10", $database, $ignoreTablesSQL);
+
+        $tableSizeCommand->addArgumentTemplate('-e %s -t;', $query);
+        if ($isRemote) {
+            $tableSizeCommand = $this->wrapRemoteCommand($tableSizeCommand);
+        }
+        $bigTables = $tableSizeCommand->execute()
+                                      ->getOutput();
+
+        $output = '';
+        if ($bigTables) {
+            $output  = '<comment>These are the biggest tables (in MB):</comment>' . "\n";
+            $output .= join("\n", $bigTables) . "\n";
+            $output .= '<comment>Maybe some of them areņ\'t necessary at all and should be put on the \'filter\' list in your clisync.yml?</comment>';
+        }
+        return $output;
     }
 }
