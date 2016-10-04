@@ -1093,42 +1093,68 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     {
         $command = $commandDump;
 
-        $filter = $this->contextConfig->get('mysql.filter');
+        $filterWhitelist = $this->contextConfig->get('mysql.whitelist');
+        $filterBlacklist = $this->contextConfig->get('mysql.blacklist') ?: $this->contextConfig->get('mysql.filter');
 
-        // get filter
-        if (is_array($filter)) {
-            $filterList = (array)$filter;
-            $filter     = 'custom table filter';
-        } else {
-            $filterList = $this->getApplication()
-                               ->getConfigValue('mysql-backup-filter', $filter);
+        $whitelist = null;
+        $blacklist = null;
+        $ignoredTableList = null;
+
+        if ($filterWhitelist) {
+            // get whitelist filter
+            if (is_array($filterWhitelist)) {
+                $whitelist = (array)$filterWhitelist;
+                $filterWhitelist     = 'custom table whitelist filter';
+            } else {
+                $whitelist = $this->getApplication()
+                                  ->getConfigValue('mysql-backup-filter', $filterWhitelist);
+            }
+
+            if (empty($whitelist)) {
+                throw new \RuntimeException('MySQL dump whitelist filters "' . $filterWhitelist . '" not available"');
+            }
+
+            $this->output->writeln('<p>Using whitelist filter "' . $filterWhitelist . '"</p>');
         }
 
-        if (empty($filterList)) {
-            throw new \RuntimeException('MySQL dump filters "' . $filter . '" not available"');
+        if ($filterBlacklist) {
+            // get black filter
+            if (is_array($filterBlacklist)) {
+                $blacklist = (array)$filterBlacklist;
+                $filterBlacklist     = 'custom table blacklist filter';
+            } else {
+                $blacklist = $this->getApplication()
+                                  ->getConfigValue('mysql-backup-filter', $filterBlacklist);
+            }
+
+            if (empty($blacklist)) {
+                throw new \RuntimeException('MySQL dump blacklist filters "' . $filterBlacklist . '" not available"');
+            }
+
+            $this->output->writeln('<p>Using blacklist filter "' . $filterBlacklist . '"</p>');
         }
 
-        $this->output->writeln('<p>Using filter "' . $filter . '"</p>');
+        if ($whitelist || $blacklist) {
+            // Get table list (from cloned mysqldump command)
+            if ($isRemote) {
+                $tableListDumper = $this->createRemoteMySqlCommand($database);
+            } else {
+                $tableListDumper = $this->createLocalMySqlCommand($database);
+            }
 
-        // Get table list (from cloned mysqldump command)
-        if ($isRemote) {
-            $tableListDumper = $this->createRemoteMySqlCommand($database);
-        } else {
-            $tableListDumper = $this->createLocalMySqlCommand($database);
+            $tableListDumper->addArgumentTemplate('-e %s', 'show tables;');
+
+            // wrap with ssh (for remote execution)
+            if ($isRemote) {
+                $tableListDumper = $this->wrapRemoteCommand($tableListDumper);
+            }
+
+            $tableList = $tableListDumper->execute()
+                                         ->getOutput();
+
+            // Filter table list
+            $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $whitelist, $blacklist, $database);
         }
-
-        $tableListDumper->addArgumentTemplate('-e %s', 'show tables;');
-
-        // wrap with ssh (for remote execution)
-        if ($isRemote) {
-            $tableListDumper = $this->wrapRemoteCommand($tableListDumper);
-        }
-
-        $tableList = $tableListDumper->execute()
-                                     ->getOutput();
-
-        // Filter table list
-        $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $filterList, $database);
 
         // Dump only structure
         $commandStructure = clone $command;
