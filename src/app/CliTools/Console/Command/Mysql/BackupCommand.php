@@ -147,19 +147,52 @@ class BackupCommand extends AbstractCommand
     {
         $command = $commandDump;
 
-        // get filter
-        $filterList = $this->getApplication()
-                           ->getConfigValue('mysql-backup-filter', $filter);
+        $filterWhitelist = $this->contextConfig->get('mysql.whitelist');
+        $filterBlacklist = $this->contextConfig->get('mysql.blacklist') ?: $this->contextConfig->get('mysql.filter');
 
-        if (empty($filterList)) {
-            throw new \RuntimeException('MySQL dump filters "' . $filter . '" not available"');
+        $whitelist = null;
+        $blacklist = null;
+        $ignoredTableList = null;
+
+        if ($filterWhitelist) {
+            // get whitelist filter
+            if (is_array($filterWhitelist)) {
+                $whitelist = (array)$filterWhitelist;
+                $filterWhitelist     = 'custom table whitelist filter';
+            } else {
+                $whitelist = $this->getApplication()
+                                  ->getConfigValue('mysql-backup-filter', $filterWhitelist);
+            }
+
+            if (empty($whitelist)) {
+                throw new \RuntimeException('MySQL dump whitelist filters "' . $filterWhitelist . '" not available"');
+            }
+
+            $this->output->writeln('<p>Using whitelist filter "' . $filterWhitelist . '"</p>');
         }
 
-        $this->output->writeln('<comment>Using filter "' . $filter . '"</comment>');
+        if ($filterBlacklist) {
+            // get black filter
+            if (is_array($filterBlacklist)) {
+                $blacklist = (array)$filterBlacklist;
+                $filterBlacklist     = 'custom table blacklist filter';
+            } else {
+                $blacklist = $this->getApplication()
+                                  ->getConfigValue('mysql-backup-filter', $filterBlacklist);
+            }
 
-        // Get filtered tables
-        $tableList        = DatabaseConnection::tableList($database);
-        $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $filterList, $database);
+            if (empty($blacklist)) {
+                throw new \RuntimeException('MySQL dump blacklist filters "' . $filterBlacklist . '" not available"');
+            }
+
+            $this->output->writeln('<p>Using blacklist filter "' . $filterBlacklist . '"</p>');
+        }
+
+        if ($whitelist || $blacklist) {
+            // Get filtered tables
+            $tableList        = DatabaseConnection::tableList($database);
+            $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $whitelist, $blacklist, $database);
+        }
 
         // Dump only structure
         $commandStructure = clone $command;
