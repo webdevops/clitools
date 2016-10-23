@@ -1196,10 +1196,10 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $tableSizeCommand = $this->wrapRemoteCommand($tableSizeCommand);
         }
         $tableSize = $tableSizeCommand->execute()
-                                      ->getOutput();
+                                      ->getOutputString();
 
-        if ($tableSize && isset($tableSize[0])) {
-            return $tableSize[0];
+        if ($tableSize) {
+            return $tableSize;
         }
 
         return null;
