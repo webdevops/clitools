@@ -55,6 +55,7 @@ GLOBAL:
         workdir: ""
 
         # Additional options ("-rlptD --delete-after --progress --human-readable" is already set)
+        # Example: local macOS and remote Linux: " --iconv=UTF8-MAC,UTF8"
         opts: ""
 
         # exclude list/patterns for files and directories
