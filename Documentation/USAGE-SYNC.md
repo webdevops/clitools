@@ -19,7 +19,7 @@ to such settings.
 
 You can commit this clisync.yml into your project so other developers can use the sync feature, too.
 
-## Synchronisation with servers (ct sync:server)
+## Synchronisation with servers (ct sync server)
 
 The synchronisation with your servers is one way only, it just syncs your server installation to your 
 local installation (CliTools are no deployment tools!).
@@ -65,9 +65,9 @@ ct share:restore --rsync
 
 ```
 
-## Lightweight deployment (ct sync:deploy)
+## Lightweight deployment (ct deploy server)
 
-With `sync:deploy` you can push your files to your production servers.
+With `deploy` you can push your files to your production servers.
 Please keep in mind that this feature is just an wrapped rsync and should only be
 the simplest solution for deployment. For more advanced or centralized deployment try
 solutions build on Jenkis, Ansible and others.
