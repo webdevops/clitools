@@ -120,4 +120,4 @@ The steps are:
 2. Start main build script
 3. Copy the previously built phar file to `/usr/local/bin`, so that you can execute clitools just by typing ct.
 
-*Note*: If you're compiling clitools in OSX the easiest thing is to install requirements with homebrew: `brew install coreutils g-sed homebrew/php/box`
+*Note*: If you want to compile clitools in OSX by your own, use the homebrew package manager: `brew install coreutils g-sed homebrew/php/box`.
