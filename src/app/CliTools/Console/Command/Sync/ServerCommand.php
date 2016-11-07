@@ -167,7 +167,7 @@ class ServerCommand extends AbstractRemoteSyncCommand
                 $mysqldump = $this->addMysqlDumpFilterArguments(
                     $mysqldump,
                     $foreignDatabase,
-                    $this->contextConfig->get('mysql.filter')
+                    true
                 );
             }
 
