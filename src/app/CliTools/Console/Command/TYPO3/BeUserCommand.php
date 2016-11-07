@@ -202,6 +202,18 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand
         );
         $tsConfig = implode("\n", $tsConfig);
 
+        // Default uc
+        $uc = array(
+            'moduleData' => array(
+                'web_layout' => array(
+                    // not "quick edit" but "columns" should be the 
+                    // default submodule within the page module
+                    'function' => '1',
+                ),
+            ),
+        );
+        $uc = serialize($uc);
+        
         try {
             // Get uid from current dev user (if already existing)
             $query = 'SELECT uid
@@ -212,7 +224,7 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand
 
             // Insert or update user in TYPO3 database
             $query = 'INSERT INTO ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.be_users
-                                  (uid, tstamp, crdate, realName, username, password, TSconfig, admin, disable, starttime, endtime)
+                                  (uid, tstamp, crdate, realName, username, password, TSconfig, uc, admin, disable, starttime, endtime)
                        VALUES(
                           ' . DatabaseConnection::quote($beUserId) . ',
                           UNIX_TIMESTAMP(),
@@ -221,6 +233,7 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand
                           ' . DatabaseConnection::quote($username) . ',
                           ' . DatabaseConnection::quote($password) . ',
                           ' . DatabaseConnection::quote($tsConfig) . ',
+                          ' . DatabaseConnection::quote($uc) . ',
                           1,
                           0,
                           0,
