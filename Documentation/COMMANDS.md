@@ -90,19 +90,23 @@ All log commands are using a grep-filter (specified as optional argument)
 
 | Command                    | Description                                                               |
 |----------------------------|---------------------------------------------------------------------------|
-| ct sync:init               | Create example clisync.yml in current working directory                   |
-| ct sync:backup             | Search for clisync.yml in tree and start backup to shared server          |
-|                            | __ct sync:backup__ -> Backup files and database from share                |
-|                            | __ct sync:backup --rsync__ -> Backup only files from share                |
-|                            | __ct sync:backup --mysql__ -> Backup only database from share             |
-| ct sync:restore            | Search for clisync.yml in tree and start restore from shared server       |
-|                            | __ct sync:restore__ -> Restore files and database from share              |
-|                            | __ct sync:restore --rsync__ -> Restore only files from share              |
-|                            | __ct sync:restore --mysql__ -> Restore only database from share           |
-| ct sync:server             | Search for clisync.yml in tree and start server synchronization (eg. from live or preview to local development instance  |
-|                            | __ct sync:server production__ -> Use "production" configuration and start sync |
-|                            | __ct sync:server preview --rsync__ -> Use "preview" configuration and start only rsync |
-|                            | __ct sync:server staging --mysql__ -> Use "staging" configuration and start only mysql sync |
+| ct sync-init               | Create example clisync.yml in current working directory and open file for editing |
+| ct sync server             | Search for clisync.yml in tree and start server synchronization (eg. from live or preview to local development instance  |
+|                            | __ct sync production__ -> Use "production" configuration and start sync |
+|                            | __ct sync preview --rsync__ -> Use "preview" configuration and start only rsync |
+|                            | __ct sync staging --mysql__ -> Use "staging" configuration and start only mysql sync |
+| ct deploy server           | Search for clisync.yml in tree and start server deployment (eg. from local development to live or preview environment |
+|                            | __ct deploy production__ -> Use "production" configuration and start deployment |
+|                            | __ct deploy preview --rsync__ -> Use "preview" configuration and start only rsync |
+|                            | __ct deploy staging --mysql__ -> Use "staging" configuration and start only mysql sync |
+| ct share:backup             | Search for clisync.yml in tree and start backup to shared server          |
+|                            | __ct share:backup__ -> Backup files and database from share                |
+|                            | __ct share:backup --rsync__ -> Backup only files from share                |
+|                            | __ct share:backup --mysql__ -> Backup only database from share             |
+| ct share:restore            | Search for clisync.yml in tree and start restore from shared server       |
+|                            | __ct share:restore__ -> Restore files and database from share              |
+|                            | __ct share:restore --rsync__ -> Restore only files from share              |
+|                            | __ct share:restore --mysql__ -> Restore only database from share           |
 
 ### PHP commands
 

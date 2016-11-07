@@ -108,7 +108,7 @@ class RestoreCommand extends AbstractCommand
             case 'application/gzip':
             case 'application/x-gzip':
                 $output->writeln('<p>Using GZIP decompression</p>');
-                $commandFile->setCommand('gzcat');
+                $commandFile->setCommand('gzip')->addArgument('-dc');
                 break;
 
             case 'application/x-lzma':
