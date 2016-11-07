@@ -161,7 +161,9 @@ class ServerCommand extends AbstractRemoteSyncCommand
 
             $mysqldump = $this->createRemoteMySqlDumpCommand($foreignDatabase);
 
-            if ($this->contextConfig->exists('mysql.filter')) {
+            if ($this->contextConfig->exists('mysql.blacklist') ||
+                $this->contextConfig->exists('mysql.whitelist') ||
+                $this->contextConfig->exists('mysql.filter')) {
                 $mysqldump = $this->addMysqlDumpFilterArguments(
                     $mysqldump,
                     $foreignDatabase,

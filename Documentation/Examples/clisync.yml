@@ -28,11 +28,11 @@ GLOBAL:
         # mysql connection
         hostname: localhost
 
-        # MySQL predefined filter for typo3 (eg. no caching tables)
-        filter: typo3
+        # MySQL predefined blacklist filter for typo3 (eg. no caching tables)
+        blacklist: typo3
 
-        # MySQL custom filter (preg_match)
-        #filter:
+        # MySQL custom blacklist filter (preg_match)
+        #blacklist:
         #  - "/^cachingframework_.*/i"
         #  - "/^cf_.*/i"
         #  - "/^cache_.*/i"
@@ -41,6 +41,13 @@ GLOBAL:
         #  - "/^sys_history$/i"
         #  - "/^tx_extbase_cache.*/i"
         #  - "/^tx_extensionmanager_.*/i"
+
+        # MySQL custom whitelist filter (preg_match)
+        #whitelist:
+        #  - "/^pages.*/i"
+        #  - "/^tx_news.*/i"
+        #  - "/^sys_category.*/i"
+        #  - "/^sys_file.*/i"
 
         # Transfer compression (none if empty, bzip2 or gzip)
         compression: bzip2

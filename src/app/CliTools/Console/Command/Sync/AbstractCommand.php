@@ -851,19 +851,24 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Create mysql backup command
      *
-     * @param string      $database Database name
-     * @param string      $dumpFile MySQL dump file
-     * @param null|string $filter   Filter name
+     * @param string      $database            Database name
+     * @param string      $dumpFile            MySQL dump file
+     * @param null|string $filterNameBlacklist Filter name
+     * @param null|string $filterNameWhitelist Filter name
      *
      * @return SelfCommandBuilder
      */
-    protected function createMysqlBackupCommand($database, $dumpFile, $filter = null)
+    protected function createMysqlBackupCommand($database, $dumpFile, $filterNameBlacklist = null, $filterNameWhitelist = null)
     {
         $command = new SelfCommandBuilder();
         $command->addArgumentTemplate('mysql:backup %s %s', $database, $dumpFile);
 
-        if ($filter !== null) {
-            $command->addArgumentTemplate('--filter=%s', $filter);
+        if ($filterNameBlacklist !== null) {
+            $command->addArgumentTemplate('--blacklist=%s', $filterNameBlacklist);
+        }
+
+        if ($filterNameWhitelist !== null) {
+            $command->addArgumentTemplate('--whitelist=%s', $filterNameWhitelist);
         }
 
         return $command;
@@ -1093,29 +1098,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     {
         $command = $commandDump;
 
-        $filterWhitelist = $this->contextConfig->get('mysql.whitelist');
         $filterBlacklist = $this->contextConfig->get('mysql.blacklist') ?: $this->contextConfig->get('mysql.filter');
+        $filterWhitelist = $this->contextConfig->get('mysql.whitelist');
 
-        $whitelist = null;
         $blacklist = null;
+        $whitelist = null;
         $ignoredTableList = null;
-
-        if ($filterWhitelist) {
-            // get whitelist filter
-            if (is_array($filterWhitelist)) {
-                $whitelist = (array)$filterWhitelist;
-                $filterWhitelist     = 'custom table whitelist filter';
-            } else {
-                $whitelist = $this->getApplication()
-                                  ->getConfigValue('mysql-backup-filter', $filterWhitelist);
-            }
-
-            if (empty($whitelist)) {
-                throw new \RuntimeException('MySQL dump whitelist filters "' . $filterWhitelist . '" not available"');
-            }
-
-            $this->output->writeln('<p>Using whitelist filter "' . $filterWhitelist . '"</p>');
-        }
 
         if ($filterBlacklist) {
             // get black filter
@@ -1134,7 +1122,24 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $this->output->writeln('<p>Using blacklist filter "' . $filterBlacklist . '"</p>');
         }
 
-        if ($whitelist || $blacklist) {
+        if ($filterWhitelist) {
+            // get whitelist filter
+            if (is_array($filterWhitelist)) {
+                $whitelist = (array)$filterWhitelist;
+                $filterWhitelist     = 'custom table whitelist filter';
+            } else {
+                $whitelist = $this->getApplication()
+                                  ->getConfigValue('mysql-backup-filter', $filterWhitelist);
+            }
+
+            if (empty($whitelist)) {
+                throw new \RuntimeException('MySQL dump whitelist filters "' . $filterWhitelist . '" not available"');
+            }
+
+            $this->output->writeln('<p>Using whitelist filter "' . $filterWhitelist . '"</p>');
+        }
+
+        if ($blacklist || $whitelist) {
             // Get table list (from cloned mysqldump command)
             if ($isRemote) {
                 $tableListDumper = $this->createRemoteMySqlCommand($database);
@@ -1153,7 +1158,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
                                          ->getOutput();
 
             // Filter table list
-            $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $whitelist, $blacklist, $database);
+            $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $blacklist, $whitelist, $database);
         }
 
         // Dump only structure

@@ -54,10 +54,22 @@ class BackupCommand extends AbstractCommand
                  'File (mysql dump)'
              )
              ->addOption(
+                 'blacklist',
+                 'b',
+                 InputOption::VALUE_REQUIRED,
+                 'Blacklist filter name (eg. typo3)'
+             )
+             ->addOption(
+                 'whitelist',
+                 'w',
+                 InputOption::VALUE_REQUIRED,
+                 'Whitelist filter name (eg. all)'
+             )
+             ->addOption(
                  'filter',
                  'f',
                  InputOption::VALUE_REQUIRED,
-                 'Filter (eg. typo3)'
+                 'Filter name (Deprecated, use blacklist instead!)'
              );
     }
 
@@ -73,7 +85,8 @@ class BackupCommand extends AbstractCommand
     {
         $database = $input->getArgument('db');
         $dumpFile = $input->getArgument('file');
-        $filter   = $input->getOption('filter');
+        $filterNameBlacklist = $input->getOption('blacklist') ?: $input->getOption('filter');
+        $filterNameWhitelist = $input->getOption('whitelist');
 
         if (!DatabaseConnection::databaseExists($database)) {
             $output->writeln('<p-error>Database "' . $database . '" does not exists</p-error>');
@@ -117,8 +130,8 @@ class BackupCommand extends AbstractCommand
 
         $command = new MysqlCommandBuilder('mysqldump', '--single-transaction %s', array($database));
 
-        if (!empty($filter)) {
-            $command = $this->addFilterArguments($command, $database, $filter);
+        if (!empty($filterNameBlacklist) || !empty($filterNameWhitelist)) {
+            $command = $this->addFilterArguments($command, $database, $filterNameBlacklist, $filterNameWhitelist);
         }
 
         if (!empty($commandCompressor)) {
@@ -137,61 +150,49 @@ class BackupCommand extends AbstractCommand
     /**
      * Add filter to command
      *
-     * @param CommandBuilderInterface $command  Command
-     * @param string                  $database Database
-     * @param string                  $filter   Filter name
+     * @param CommandBuilderInterface $command             Command
+     * @param string                  $database            Database
+     * @param string                  $filterNameBlacklist Filter name
+     * @param string                  $filterNameWhitelist Filter name
      *
      * @return CommandBuilderInterface
      */
-    protected function addFilterArguments(CommandBuilderInterface $commandDump, $database, $filter)
+    protected function addFilterArguments(CommandBuilderInterface $commandDump, $database, $filterNameBlacklist, $filterNameWhitelist)
     {
         $command = $commandDump;
 
-        $filterWhitelist = $this->contextConfig->get('mysql.whitelist');
-        $filterBlacklist = $this->contextConfig->get('mysql.blacklist') ?: $this->contextConfig->get('mysql.filter');
-
-        $whitelist = null;
         $blacklist = null;
+        $whitelist = null;
         $ignoredTableList = null;
 
-        if ($filterWhitelist) {
-            // get whitelist filter
-            if (is_array($filterWhitelist)) {
-                $whitelist = (array)$filterWhitelist;
-                $filterWhitelist     = 'custom table whitelist filter';
-            } else {
-                $whitelist = $this->getApplication()
-                                  ->getConfigValue('mysql-backup-filter', $filterWhitelist);
-            }
-
-            if (empty($whitelist)) {
-                throw new \RuntimeException('MySQL dump whitelist filters "' . $filterWhitelist . '" not available"');
-            }
-
-            $this->output->writeln('<p>Using whitelist filter "' . $filterWhitelist . '"</p>');
-        }
-
-        if ($filterBlacklist) {
+        if ($filterNameBlacklist) {
             // get black filter
-            if (is_array($filterBlacklist)) {
-                $blacklist = (array)$filterBlacklist;
-                $filterBlacklist     = 'custom table blacklist filter';
-            } else {
-                $blacklist = $this->getApplication()
-                                  ->getConfigValue('mysql-backup-filter', $filterBlacklist);
-            }
+            $blacklist = $this->getApplication()
+                              ->getConfigValue('mysql-backup-filter', $filterNameBlacklist);
 
             if (empty($blacklist)) {
-                throw new \RuntimeException('MySQL dump blacklist filters "' . $filterBlacklist . '" not available"');
+                throw new \RuntimeException('MySQL dump blacklist filters "' . $filterNameBlacklist . '" not available"');
             }
 
-            $this->output->writeln('<p>Using blacklist filter "' . $filterBlacklist . '"</p>');
+            $this->output->writeln('<p>Using blacklist filter "' . $filterNameBlacklist . '"</p>');
         }
 
-        if ($whitelist || $blacklist) {
+        if ($filterNameWhitelist) {
+            // get whitelist filter
+            $whitelist = $this->getApplication()
+                              ->getConfigValue('mysql-backup-filter', $filterNameWhitelist);
+
+            if (empty($whitelist)) {
+                throw new \RuntimeException('MySQL dump whitelist filters "' . $filterNameWhitelist . '" not available"');
+            }
+
+            $this->output->writeln('<p>Using whitelist filter "' . $filterNameWhitelist . '"</p>');
+        }
+
+        if ($blacklist || $whitelist) {
             // Get filtered tables
             $tableList        = DatabaseConnection::tableList($database);
-            $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $whitelist, $blacklist, $database);
+            $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $blacklist, $whitelist, $database);
         }
 
         // Dump only structure
