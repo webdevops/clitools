@@ -215,6 +215,15 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand
                     'bigControlPanel' => '1',
                     'localization' => '1',
                 ),
+                'web_ts' => array(
+                    // not "constant editor" but "object browser"
+                    'function' => 'TYPO3\CMS\Tstemplate\Controller\TypoScriptTemplateObjectBrowserModuleFunctionController',
+                    // better defaults for immediate debugging the actual typoscript
+                    'ts_browser_type' => 'setup',
+                    'ts_browser_const' => 'subst',
+                    'ts_browser_fixedLgd' => '0',
+                    'ts_browser_showComments' => '1',
+                ),
             ),
         );
         $uc = serialize($uc);
