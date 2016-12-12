@@ -206,14 +206,19 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand
         $uc = array(
             'moduleData' => array(
                 'web_layout' => array(
-                    // not "quick edit" but "columns" should be the 
+                    // not "quick edit" but "columns" should be the
                     // default submodule within the page module
                     'function' => '1',
+                ),
+                'web_list' => array(
+                    // check the important boxes right away
+                    'bigControlPanel' => '1',
+                    'localization' => '1',
                 ),
             ),
         );
         $uc = serialize($uc);
-        
+
         try {
             // Get uid from current dev user (if already existing)
             $query = 'SELECT uid
