@@ -22,6 +22,7 @@ namespace CliTools\Console\Command\Mysql;
  */
 
 use CliTools\Database\DatabaseConnection;
+use CliTools\Shell\CommandBuilder\DockerExecCommandBuilder;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -54,6 +55,7 @@ class SlowLogCommand extends AbstractCommand
                  InputOption::VALUE_NONE,
                  'Enable log queries without indexes log'
              );
+        parent::configure();
     }
 
     /**
@@ -66,8 +68,6 @@ class SlowLogCommand extends AbstractCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->elevateProcess($input, $output);
-
         $slowLogQueryTime     = 1;
         $logNonIndexedQueries = false;
 
@@ -97,74 +97,80 @@ class SlowLogCommand extends AbstractCommand
 
         if (!empty($debugLogLocation)) {
             $debugLogLocation .= 'mysql_' . getmypid() . '.log';
-            $query = 'SET GLOBAL slow_query_log_file = ' . DatabaseConnection::quote($debugLogLocation);
-            DatabaseConnection::exec($query);
+            $query = 'SET GLOBAL slow_query_log_file = ' . $this->mysqlQuote($debugLogLocation);
+            $this->execSqlCommand($query);
         }
 
         // Fetch log file
         $query      = 'SHOW VARIABLES LIKE \'slow_query_log_file\'';
-        $logFileRow = DatabaseConnection::getRow($query);
+        $logFileRow = $this->execSqlCommand($query);
 
-        if (!empty($logFileRow['Value'])) {
-            // Enable slow log
-            $output->writeln('<p>Enabling slow log</p>');
-            $query = 'SET GLOBAL slow_query_log = \'ON\'';
-            DatabaseConnection::exec($query);
-
-            // Enable slow log
-            $output->writeln('<p>Set long_query_time to ' . (int)abs($slowLogQueryTime) . ' seconds</p>');
-            $query = 'SET GLOBAL long_query_time = ' . (int)abs($slowLogQueryTime);
-            DatabaseConnection::exec($query);
-
-            // Enable log queries without indexes log
-            if ($logNonIndexedQueries) {
-                $output->writeln('<p>Enabling logging of queries without using indexes</p>');
-                $query = 'SET GLOBAL log_queries_not_using_indexes = \'ON\'';
-                DatabaseConnection::exec($query);
-            } else {
-                $output->writeln('<p>Disabling logging of queries without using indexes</p>');
-                $query = 'SET GLOBAL log_queries_not_using_indexes = \'OFF\'';
-                DatabaseConnection::exec($query);
-            }
-
-            // Setup teardown cleanup
-            $tearDownFunc = function () use ($output, $logNonIndexedQueries) {
-                // Disable general log
-                $output->writeln('<p>Disable slow log</p>');
-                $query = 'SET GLOBAL slow_query_log = \'OFF\'';
-                DatabaseConnection::exec($query);
-
-                if ($logNonIndexedQueries) {
-                    // Disable log queries without indexes log
-                    $query = 'SET GLOBAL log_queries_not_using_indexes = \'OFF\'';
-                    DatabaseConnection::exec($query);
-                }
-            };
-            $this->getApplication()
-                 ->registerTearDown($tearDownFunc);
-
-            // Read grep value
-            $grep = null;
-            if ($input->hasArgument('grep')) {
-                $grep = $input->getArgument('grep');
-            }
-
-            // Tail logfile
-            $logList = array(
-                $logFileRow['Value'],
-            );
-
-            $optionList = array(
-                '-n 0',
-            );
-
-            $this->showLog($logList, $input, $output, $grep, $optionList);
-
-            return 0;
-        } else {
+        if (empty($logFileRow)) {
             $output->writeln('<p-error>MySQL general_log_file not set</p-error>');
-
             return 1;
         }
+
+        // Enable slow log
+        $output->writeln('<p>Enabling slow log</p>');
+        $query = 'SET GLOBAL slow_query_log = \'ON\'';
+        $this->execSqlCommand($query);
+
+        // Enable slow log
+        $output->writeln('<p>Set long_query_time to ' . (int)abs($slowLogQueryTime) . ' seconds</p>');
+        $query = 'SET GLOBAL long_query_time = ' . (int)abs($slowLogQueryTime);
+        $this->execSqlCommand($query);
+
+        // Enable log queries without indexes log
+        if ($logNonIndexedQueries) {
+            $output->writeln('<p>Enabling logging of queries without using indexes</p>');
+            $query = 'SET GLOBAL log_queries_not_using_indexes = \'ON\'';
+            $this->execSqlCommand($query);
+        } else {
+            $output->writeln('<p>Disabling logging of queries without using indexes</p>');
+            $query = 'SET GLOBAL log_queries_not_using_indexes = \'OFF\'';
+            $this->execSqlCommand($query);
+        }
+
+        // Setup teardown cleanup
+        $tearDownFunc = function () use ($output, $logNonIndexedQueries) {
+            // Disable general log
+            $output->writeln('<p>Disable slow log</p>');
+            $query = 'SET GLOBAL slow_query_log = \'OFF\'';
+            $this->execSqlCommand($query);
+
+            if ($logNonIndexedQueries) {
+                // Disable log queries without indexes log
+                $query = 'SET GLOBAL log_queries_not_using_indexes = \'OFF\'';
+                $this->execSqlCommand($query);
+            }
+        };
+        $this->getApplication()
+             ->registerTearDown($tearDownFunc);
+
+        // Read grep value
+        $grep = null;
+        if ($input->hasArgument('grep')) {
+            $grep = $input->getArgument('grep');
+        }
+
+        // Tail logfile
+        $logList = array(
+            $debugLogLocation,
+        );
+
+        $optionList = array(
+            '-n 0',
+        );
+
+        if ($this->input->getOption('docker-compose') || $this->input->getOption('docker')) {
+            $command = new DockerExecCommandBuilder('tail', ['-f']);
+            $command->setDockerContainer($this->dockerContainer);
+            $command->addArgumentList($logList);
+            $command->executeInteractive();
+        } else {
+            $this->showLog($logList, $input, $output, $grep, $optionList);
+        }
+
+        return 0;
     }
 }

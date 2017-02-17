@@ -22,6 +22,7 @@ namespace CliTools\Console\Command\Mysql;
  */
 
 use CliTools\Database\DatabaseConnection;
+use CliTools\Shell\CommandBuilder\DockerExecCommandBuilder;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -44,6 +45,7 @@ class DebugCommand extends AbstractCommand
                  InputArgument::OPTIONAL,
                  'Grep'
              );
+        parent::configure();
     }
 
     /**
@@ -56,8 +58,6 @@ class DebugCommand extends AbstractCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->elevateProcess($input, $output);
-
         $debugLogLocation = $this->getApplication()
                                  ->getConfigValue('db', 'debug_log_dir');
         $debugLogDir      = dirname($debugLogLocation);
@@ -76,52 +76,58 @@ class DebugCommand extends AbstractCommand
             $debugLogLocation .= 'mysql_' . getmypid() . '.log';
 
             $query = 'SET GLOBAL general_log_file = ' . DatabaseConnection::quote($debugLogLocation);
-            DatabaseConnection::exec($query);
+            $this->execSqlCommand($query);
         }
 
         // Fetch log file
         $query      = 'SHOW VARIABLES LIKE \'general_log_file\'';
-        $logFileRow = DatabaseConnection::getRow($query);
+        $logFileRow = $this->execSqlCommand($query);
 
-        if (!empty($logFileRow['Value'])) {
-
-            // Enable general log
-            $output->writeln('<p>Enabling general log</p>');
-            $query = 'SET GLOBAL general_log = \'ON\'';
-            DatabaseConnection::exec($query);
-
-            // Setup teardown cleanup
-            $tearDownFunc = function () use ($output) {
-                // Disable general log
-                $output->writeln('<p>Disabling general log</p>');
-                $query = 'SET GLOBAL general_log = \'OFF\'';
-                DatabaseConnection::exec($query);
-            };
-            $this->getApplication()
-                 ->registerTearDown($tearDownFunc);
-
-            // Read grep value
-            $grep = null;
-            if ($input->hasArgument('grep')) {
-                $grep = $input->getArgument('grep');
-            }
-
-            // Tail logfile
-            $logList = array(
-                $logFileRow['Value'],
-            );
-
-            $optionList = array(
-                '-n 0',
-            );
-
-            $this->showLog($logList, $input, $output, $grep, $optionList);
-
-            return 0;
-        } else {
+        if (empty($logFileRow)) {
             $output->writeln('<p-error>MySQL general_log_file not set</p-error>');
-
             return 1;
         }
+
+        // Enable general log
+        $output->writeln('<p>Enabling general log</p>');
+        $query = 'SET GLOBAL general_log = \'ON\'';
+        $this->execSqlCommand($query);
+
+        // Setup teardown cleanup
+        $tearDownFunc = function () use ($output) {
+            // Disable general log
+            $output->writeln('<p>Disabling general log</p>');
+            $query = 'SET GLOBAL general_log = \'OFF\'';
+            $this->execSqlCommand($query);
+        };
+        $this->getApplication()
+             ->registerTearDown($tearDownFunc);
+
+        // Read grep value
+        $grep = null;
+        if ($input->hasArgument('grep')) {
+            $grep = $input->getArgument('grep');
+        }
+
+        // Tail logfile
+        $logList = array(
+            $debugLogLocation,
+        );
+
+        $optionList = array(
+            '-n 0',
+        );
+
+
+        if ($this->input->getOption('docker-compose') || $this->input->getOption('docker')) {
+            $command = new DockerExecCommandBuilder('tail', ['-f']);
+            $command->setDockerContainer($this->dockerContainer);
+            $command->addArgumentList($logList);
+            $command->executeInteractive();
+        } else {
+            $this->showLog($logList, $input, $output, $grep, $optionList);
+        }
+
+        return 0;
     }
 }
