@@ -33,6 +33,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 {
 
     /**
+     * Docker container
+     */
+    protected $dockerContainer;
+
+    /**
      * Configure command
      */
     protected function configure()
@@ -94,6 +99,15 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $host     = DatabaseConnection::getDbHostname();
         $port     = DatabaseConnection::getDbPort();
 
+        // init docker environment
+        if ($this->input->getOption('docker-compose')) {
+            $this->dockerContainer = DockerUtility::lookupDockerComposeContainerId($this->input->getOption('docker-compose'));
+            $password = $this->getDockerMysqlRootPassword($this->dockerContainer);
+        } elseif ($this->input->getOption('docker')) {
+            $this->dockerContainer = $this->input->getOption('docker');
+            $password = $this->getDockerMysqlRootPassword($this->dockerContainer);
+        }
+
         // host
         if ($this->input->hasOption('host') && $this->input->getOption('host')) {
             $host = $this->input->getOption('host');
@@ -126,6 +140,10 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         }
     }
 
+    protected function mysqlQuote($value) {
+        return '\'' . addslashes($value) . '\'';
+    }
+
     protected function execSqlCommand($sql)
     {
         return $this->createMysqlCommand('-e', $sql)->execute()->getOutput();
@@ -134,24 +152,41 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     protected function mysqlTableList($database)
     {
         $sql = sprintf(
-            'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = \'%s\'',
-            addslashes($database)
+            'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s',
+            $this->mysqlQuote($database)
         );
         return $this->execSqlCommand($sql);
+    }
+
+
+    protected function mysqlDatabaseList()
+    {
+        $sql = 'SELECT SCHEMA_NAME FROM information_schema.SCHEMATA';
+        $ret = $this->execSqlCommand($sql);
+
+        // Filter mysql specific databases
+        $ret = array_diff($ret, array('mysql', 'information_schema', 'performance_schema'));
+
+        return $ret;
     }
 
     // ##########################################
     // MySQL command building
     // ##########################################
 
+    protected function getDockerMysqlRootPassword($container)
+    {
+        $command = new DockerExecCommandBuilder('printf');
+        $command->addArgumentRaw('$MYSQL_ROOT_PASSWORD');
+        $command->setDockerContainer($container);
+        return $command->execute()->getOutputString();
+    }
+
     protected function createMysqlCommand($args)
     {
-        if ($this->input->getOption('docker-compose')) {
-            $this->output->writeln('<info>Using Docker-Compose container</info>');
-            $command = $this->createDockerComposeMysqlCommand($this->input->getOption('docker-compose'), func_get_args());
-        } elseif ($this->input->getOption('docker')) {
+        if ($this->input->getOption('docker-compose') || $this->input->getOption('docker')) {
             $this->output->writeln('<info>Using Docker container</info>');
-            $command = $this->createDockerMysqlCommand($this->input->getOption('docker'), func_get_args());
+            $command = $this->createDockerMysqlCommand($this->dockerContainer, func_get_args());
         } else {
             $this->output->writeln('<info>Using local mysql command</info>');
             $command = $this->createLocalMysqlCommand(func_get_args());
@@ -190,24 +225,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         return $command;
     }
 
-    protected function createDockerComposeMysqlCommand($container, $args)
-    {
-        $container = DockerUtility::lookupDockerComposeContainerId($container);
-
-        return $this->createDockerMysqlCommand($container, $args);
-    }
-
     protected function createDockerMysqlCommand($container, $args)
     {
-        $command = new DockerExecCommandBuilder('printf');
-        $command->addArgumentRaw('$MYSQL_ROOT_PASSWORD');
-        $command->setDockerContainer($container);
-        $mysqlRootPasswd = $command->execute()->getOutputString();
-
         $command = new DockerExecCommandBuilder('mysql', ['-N', '-B', '-e']);
         $command->setDockerContainer($container);
         $command->setArgumentList($args);
-        $command->addEnvironmentVar('MYSQL_PWD', $mysqlRootPasswd);
+        $command->addEnvironmentVar('MYSQL_PWD', DatabaseConnection::getDbPassword());
         return $command;
     }
 
@@ -218,12 +241,9 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
     protected function createMysqldumpCommand($args)
     {
-        if ($this->input->getOption('docker-compose')) {
-            $this->output->writeln('<info>Using Docker-Compose container</info>');
-            $command = $this->createDockerComposeMysqldumpCommand($this->input->getOption('docker-compose'), func_get_args());
-        } elseif ($this->input->getOption('docker')) {
+        if ($this->input->getOption('docker-compose') || $this->input->getOption('docker')) {
             $this->output->writeln('<info>Using Docker container</info>');
-            $command = $this->createDockerMysqldumpCommand($this->input->getOption('docker'), func_get_args());
+            $command = $this->createDockerMysqldumpCommand($this->dockerContainer, func_get_args());
         } else {
             $this->output->writeln('<info>Using local mysqldump command</info>');
             $command = $this->createLocalMysqldumpCommand(func_get_args());
@@ -262,25 +282,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         return $command;
     }
 
-    protected function createDockerComposeMysqldumpCommand($container, $args)
-    {
-        $container = DockerUtility::lookupDockerComposeContainerId($container);
-
-        return $this->createDockerMysqldumpCommand($container, $args);
-    }
-
     protected function createDockerMysqldumpCommand($container, $args)
     {
-        var_dump($container, $args);
-        $command = new DockerExecCommandBuilder('printf');
-        $command->addArgumentRaw('$MYSQL_ROOT_PASSWORD');
-        $command->setDockerContainer($container);
-        $mysqlRootPasswd = $command->execute()->getOutputString();
-
         $command = new DockerExecCommandBuilder('mysqldump', ['--single-transaction']);
         $command->setDockerContainer($container);
         $command->addArgumentList($args);
-        $command->addEnvironmentVar('MYSQL_PWD', $mysqlRootPasswd);
+        $command->addEnvironmentVar('MYSQL_PWD', DatabaseConnection::getDbPassword());
         return $command;
     }
 }

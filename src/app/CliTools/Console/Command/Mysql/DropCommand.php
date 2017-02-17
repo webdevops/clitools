@@ -58,8 +58,7 @@ class DropCommand extends AbstractCommand
         $database = $input->getArgument('db');
 
         $output->writeln('<h2>Dropping Database "' . $database . '"...</h2>');
-        $query = 'DROP DATABASE IF EXISTS ' . DatabaseConnection::sanitizeSqlDatabase($database);
-        DatabaseConnection::exec($query);
+        $this->execSqlCommand('DROP DATABASE IF EXISTS ' . addslashes($database));
 
         $output->writeln('<p>Database dropped</p>');
 

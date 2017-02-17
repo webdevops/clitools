@@ -845,6 +845,22 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $command = new SelfCommandBuilder();
         $command->addArgumentTemplate('mysql:restore %s %s', $database, $dumpFile);
 
+        if ($this->config->exists('LOCAL.mysql.docker')) {
+            $command->addArgumentTemplate('--docker %s', $this->config->get('LOCAL.mysql.docker'));
+        } elseif ($this->config->exists('LOCAL.mysql.docker-compose')) {
+            $command->addArgumentTemplate('--docker-compose %s', $this->config->get('LOCAL.mysql.docker-compose'));
+        } elseif ($this->config->exists('LOCAL.mysql.hostname')) {
+            $command->addArgumentTemplate('--host %s', $this->config->get('LOCAL.mysql.hostname'));
+        }
+
+        if ($this->config->exists('LOCAL.mysql.username')) {
+            $command->addArgumentTemplate('--user %s', $this->config->get('LOCAL.mysql.username'));
+        }
+
+        if ($this->config->exists('LOCAL.mysql.password')) {
+            $command->addArgumentTemplate('--password %s', $this->config->get('LOCAL.mysql.password'));
+        }
+
         return $command;
     }
 
