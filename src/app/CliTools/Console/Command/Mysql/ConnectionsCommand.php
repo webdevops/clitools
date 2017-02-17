@@ -50,12 +50,8 @@ class ConnectionsCommand extends AbstractCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        // Get current connection id
-        $query = 'SELECT CONNECTION_ID()';
-        $conId = DatabaseConnection::getOne($query);
-
         $query       = 'SHOW PROCESSLIST';
-        $processList = DatabaseConnection::getAll($query);
+        $processList = $this->execSqlQuery($query);
 
         // ########################
         // Output
@@ -67,7 +63,7 @@ class ConnectionsCommand extends AbstractCommand
 
         foreach ($processList as $row) {
             // Exclude current connection id
-            if ($row['Id'] === $conId) {
+            if ($row['Info'] === 'SHOW PROCESSLIST') {
                 continue;
             }
 

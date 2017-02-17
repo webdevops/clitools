@@ -36,6 +36,8 @@ class SlowLogCommand extends AbstractCommand
      */
     protected function configure()
     {
+        parent::configure();
+
         $this->setName('mysql:slowlog')
              ->setDescription('Enable and show slow query log')
              ->addArgument(
@@ -54,8 +56,13 @@ class SlowLogCommand extends AbstractCommand
                  'i',
                  InputOption::VALUE_NONE,
                  'Enable log queries without indexes log'
-             );
-        parent::configure();
+             )
+            ->addOption(
+                'keep-log',
+                null,
+                InputOption::VALUE_NONE,
+                'Do not delete log after closing'
+            );
     }
 
     /**
@@ -69,16 +76,12 @@ class SlowLogCommand extends AbstractCommand
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $slowLogQueryTime     = 1;
-        $logNonIndexedQueries = false;
+        $logNonIndexedQueries = (bool)$input->getOption('no-index');
+        $keepLog              = (bool)$input->getOption('keep-log');
 
         // Slow log threshold
         if ($input->getOption('time')) {
             $slowLogQueryTime = $input->getOption('time');
-        }
-
-        // Also show not using indexes queries
-        if ($input->getOption('no-index')) {
-            $logNonIndexedQueries = true;
         }
 
         $debugLogLocation = $this->getApplication()
@@ -96,6 +99,7 @@ class SlowLogCommand extends AbstractCommand
         }
 
         $debugLogLocation .= 'mysql_' . getmypid() . '.log';
+        $output->writeln('<p>Set general_log_file to ' . $debugLogLocation . '</p>');
         $query = 'SET GLOBAL slow_query_log_file = ' . $this->mysqlQuote($debugLogLocation);
         $this->execSqlCommand($query);
 
@@ -121,7 +125,7 @@ class SlowLogCommand extends AbstractCommand
         }
 
         // Setup teardown cleanup
-        $tearDownFunc = function () use ($output, $logNonIndexedQueries) {
+        $tearDownFunc = function () use ($output, $debugLogLocation, $logNonIndexedQueries, $keepLog) {
             // Disable general log
             $output->writeln('<p>Disable slow log</p>');
             $query = 'SET GLOBAL slow_query_log = \'OFF\'';
@@ -131,6 +135,14 @@ class SlowLogCommand extends AbstractCommand
                 // Disable log queries without indexes log
                 $query = 'SET GLOBAL log_queries_not_using_indexes = \'OFF\'';
                 $this->execSqlCommand($query);
+            }
+
+            if (!$keepLog) {
+                $output->writeln('<p>Deleting logfile</p>');
+                $command = $this->commandBuilderFactory('rm', ['-f', $debugLogLocation]);
+                $command->executeInteractive();
+            } else {
+                $output->writeln('<p>Keeping logfile</p>');
             }
         };
         $this->getApplication()
@@ -142,22 +154,12 @@ class SlowLogCommand extends AbstractCommand
             $grep = $input->getArgument('grep');
         }
 
-        // Tail logfile
-        $logList = array(
-            $debugLogLocation,
-        );
-
-        $optionList = array(
-            '-n 0',
-        );
-
         if ($this->input->getOption('docker-compose') || $this->input->getOption('docker')) {
-            $command = new DockerExecCommandBuilder('tail', ['-f']);
+            $command = new DockerExecCommandBuilder('tail', ['-f', $debugLogLocation]);
             $command->setDockerContainer($this->dockerContainer);
-            $command->addArgumentList($logList);
             $command->executeInteractive();
         } else {
-            $this->showLog($logList, $input, $output, $grep, $optionList);
+            $this->showLog([$debugLogLocation], $input, $output, $grep, ['-n 0']);
         }
 
         return 0;

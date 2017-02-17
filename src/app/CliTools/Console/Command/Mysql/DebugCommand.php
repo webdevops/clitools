@@ -26,6 +26,7 @@ use CliTools\Shell\CommandBuilder\DockerExecCommandBuilder;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 class DebugCommand extends AbstractCommand
 {
@@ -35,17 +36,24 @@ class DebugCommand extends AbstractCommand
      */
     protected function configure()
     {
+        parent::configure();
+
         $this->setName('mysql:debug')
              ->setAliases(array('mysql:querylog'))
              ->setDescription(
-                 'Debug mysql connections'
+                'Debug mysql connections'
              )
              ->addArgument(
-                 'grep',
-                 InputArgument::OPTIONAL,
-                 'Grep'
-             );
-        parent::configure();
+                'grep',
+                InputArgument::OPTIONAL,
+                'Grep'
+             )
+            ->addOption(
+                'keep-log',
+                null,
+                InputOption::VALUE_NONE,
+                'Do not delete log after closing'
+            );
     }
 
     /**
@@ -62,6 +70,8 @@ class DebugCommand extends AbstractCommand
                                  ->getConfigValue('db', 'debug_log_dir', '/tmp');
         $debugLogDir      = dirname($debugLogLocation);
 
+        $keepLog  = (bool)$input->getOption('keep-log');
+
         $output->writeln('<h2>Starting MySQL general query log</h2>');
 
         // Create directory if not exists
@@ -73,6 +83,7 @@ class DebugCommand extends AbstractCommand
         }
 
         $debugLogLocation .= 'mysql_' . getmypid() . '.log';
+        $output->writeln('<p>Set general_log_file to ' . $debugLogLocation . '</p>');
         $query = 'SET GLOBAL general_log_file = ' . $this->mysqlQuote($debugLogLocation);
         $this->execSqlCommand($query);
 
@@ -82,11 +93,19 @@ class DebugCommand extends AbstractCommand
         $this->execSqlCommand($query);
 
         // Setup teardown cleanup
-        $tearDownFunc = function () use ($output) {
+        $tearDownFunc = function () use ($output, $debugLogLocation, $keepLog) {
             // Disable general log
             $output->writeln('<p>Disabling general log</p>');
             $query = 'SET GLOBAL general_log = \'OFF\'';
             $this->execSqlCommand($query);
+
+            if (!$keepLog) {
+                $output->writeln('<p>Deleting logfile</p>');
+                $command = $this->commandBuilderFactory('rm', ['-f', $debugLogLocation]);
+                $command->executeInteractive();
+            } else {
+                $output->writeln('<p>Keeping logfile</p>');
+            }
         };
         $this->getApplication()
              ->registerTearDown($tearDownFunc);
@@ -97,23 +116,12 @@ class DebugCommand extends AbstractCommand
             $grep = $input->getArgument('grep');
         }
 
-        // Tail logfile
-        $logList = array(
-            $debugLogLocation,
-        );
-
-        $optionList = array(
-            '-n 0',
-        );
-
-
         if ($this->input->getOption('docker-compose') || $this->input->getOption('docker')) {
-            $command = new DockerExecCommandBuilder('tail', ['-f']);
+            $command = new DockerExecCommandBuilder('tail', ['-f', $debugLogLocation]);
             $command->setDockerContainer($this->dockerContainer);
-            $command->addArgumentList($logList);
             $command->executeInteractive();
         } else {
-            $this->showLog($logList, $input, $output, $grep, $optionList);
+            $this->showLog([$debugLogLocation], $input, $output, $grep, ['-n 0']);
         }
 
         return 0;

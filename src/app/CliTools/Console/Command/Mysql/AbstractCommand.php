@@ -167,6 +167,40 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         return $this->createMysqlCommand('-e', $sql)->execute()->getOutput();
     }
 
+
+    /**
+     * Execute sql command (using local mysql command)
+     *
+     * @param string $sql
+     * @param boolean $assoc associate array
+     * @return array|null
+     */
+    protected function execSqlQuery($sql, $assoc = true)
+    {
+        $delimiter = "\t";
+        $ret = array();
+        $result = $this->createMysqlCommand('--column-names', '-e', $sql)->execute()->getOutput();
+
+        if (empty($result)) {
+            return [];
+        }
+
+        $columnList = explode($delimiter, $result[0]);
+        unset($result[0]);
+
+        foreach ($result as $line) {
+            $values = explode($delimiter, $line);
+
+            if ($assoc) {
+                $ret[] = array_combine($columnList, $values);
+            } else {
+                $ret[] = $values;
+            }
+        }
+
+        return $ret;
+    }
+
     /**
      * Fetch list of mysql tables
      *
@@ -196,6 +230,21 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $ret = array_diff($ret, array('mysql', 'information_schema', 'performance_schema'));
 
         return $ret;
+    }
+    // ##########################################
+    // General command building
+    // ##########################################
+
+    protected function commandBuilderFactory($command, $args)
+    {
+        if ($this->input->getOption('docker-compose') || $this->input->getOption('docker')) {
+            $command = new DockerExecCommandBuilder($command, $args);
+            $command->setDockerContainer($this->dockerContainer);
+        } else {
+            $command = new CommandBuilder($command, $args);
+        }
+
+        return $command;
     }
 
     // ##########################################

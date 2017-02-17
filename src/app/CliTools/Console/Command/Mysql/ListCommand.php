@@ -79,45 +79,84 @@ class ListCommand extends AbstractCommand
     {
 
         // Get list of databases
-        $databaseList = DatabaseConnection::databaseList();
+        $databaseList = $this->mysqlDatabaseList();
         if (!empty($databaseList)) {
+
+            $rekeyCallback = function($array, $singleValue = false) {
+                $keyList = array_map(function($v) {
+                    return $v[0];
+                },$array);
+
+                $valueList = array_map(function($v) use ($singleValue) {
+                    if ($singleValue) {
+                        return $v[1];
+                    } else {
+                        unset($v[0]);
+                        return $v;
+                    }
+                },$array);
+
+                return array_combine($keyList, $valueList);
+            };
 
             // ########################
             // Fetch statistics
             // ########################
 
+            $query = 'SELECT TABLE_SCHEMA, COUNT(*) AS count
+                            FROM information_schema.tables
+                           WHERE TABLE_TYPE = \'BASE TABLE\'
+                        GROUP BY TABLE_SCHEMA';
+            $tableCountList = $this->execSqlQuery($query, false);
+            $tableCountList = $rekeyCallback($tableCountList, true);
+
+            $query = 'SELECT COUNT(*) AS count
+                        FROM information_schema.tables
+                       WHERE TABLE_TYPE LIKE \' % VIEW\'
+                    GROUP BY TABLE_SCHEMA';
+            $viewCountList = $this->execSqlQuery($query, false);
+            $viewCountList = $rekeyCallback($viewCountList, true);
+
+            // Get size of database
+            $query = 'SELECT TABLE_SCHEMA, 
+                             SUM(data_length) AS data_size,
+                             SUM(index_length) AS index_size,
+                             SUM(data_length + index_length) AS total_size
+                        FROM information_schema.tables
+                    GROUP BY TABLE_SCHEMA';
+            $statsRowList = $this->execSqlQuery($query, false);
+            $statsRowList = $rekeyCallback($statsRowList);
+
             $databaseRowList = array();
             foreach ($databaseList as $database) {
-                // Get all tables
-                $query = 'SELECT COUNT(*) AS count
-                            FROM information_schema.tables
-                           WHERE TABLE_SCHEMA = ' . DatabaseConnection::quote($database) . '
-                             AND TABLE_TYPE = \'BASE TABLE\'';
-                $tableCount = DatabaseConnection::getOne($query);
+                $tableCount = 0;
+                $viewCount = 0;
 
-                // Get all views
-                $query = 'SELECT COUNT(*) AS count
-                            FROM information_schema.tables
-                           WHERE TABLE_SCHEMA = ' . DatabaseConnection::quote($database) . '
-                             AND TABLE_TYPE LIKE \'%VIEW\'';
-                $viewCount = DatabaseConnection::getOne($query);
+                $statsRow = array(
+                    1 => 0,
+                    2 => 0,
+                    3 => 0,
+                );
 
-                // Get size of database
-                $query = 'SELECT SUM(data_length) AS data_size,
-                                 SUM(index_length) AS index_size,
-                                 SUM(data_length + index_length) AS total_size
-                            FROM information_schema.tables
-                           WHERE TABLE_SCHEMA = ' . DatabaseConnection::quote($database);
-                $statsRow = DatabaseConnection::getRow($query);
+                if (!empty($tableCountList[$database])) {
+                    $tableCount = $tableCountList[$database];
+                }
 
+                if (!empty($viewCountList[$database])) {
+                    $viewCount = $viewCountList[$database];
+                }
+
+                if (!empty($statsRowList[$database])) {
+                    $statsRow = $statsRowList[$database];
+                }
 
                 $databaseRowList[$database] = array(
                     'name'        => $database,
                     'table_count' => $tableCount,
                     'view_count'  => $viewCount,
-                    'data_size'   => $statsRow['data_size'],
-                    'index_size'  => $statsRow['index_size'],
-                    'total_size'  => $statsRow['total_size'],
+                    'data_size'   => $statsRow[1],
+                    'index_size'  => $statsRow[2],
+                    'total_size'  => $statsRow[3],
                 );
             }
 
