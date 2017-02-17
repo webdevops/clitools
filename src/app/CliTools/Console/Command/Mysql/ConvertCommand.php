@@ -99,15 +99,15 @@ class ConvertCommand extends AbstractCommand
         $query = 'ALTER DATABASE %s CHARACTER SET %s COLLATE %s';
         $query = sprintf(
             $query,
-            DatabaseConnection::sanitizeSqlDatabase($database),
-            DatabaseConnection::quote($charset),
-            DatabaseConnection::quote($collation)
+            addslashes($database),
+            addslashes($charset),
+            addslashes($collation)
         );
 
         if (!$stdout) {
             // Execute
             $output->writeln('<h2>Converting database ' . $database . '</h2>');
-            DatabaseConnection::exec($query);
+            $this->execSqlCommand($query);
         } else {
             // Show only
             $output->writeln($query . ';');
@@ -116,7 +116,7 @@ class ConvertCommand extends AbstractCommand
         // ##################
         // Alter tables
         // ##################
-        $tableList = DatabaseConnection::tableList($database);
+        $tableList = $this->mysqlTableList($database);
 
         foreach ($tableList as $table) {
             // Build statement
@@ -132,7 +132,7 @@ class ConvertCommand extends AbstractCommand
             if (!$stdout) {
                 // Execute
                 $output->writeln('<p>Converting table ' . $table . '</p>');
-                DatabaseConnection::exec($query);
+                $this->execSqlCommand($query);
             } else {
                 // Show only
                 $output->writeln($query . ';');

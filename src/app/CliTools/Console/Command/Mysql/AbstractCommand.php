@@ -137,7 +137,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = \'%s\'',
             addslashes($database)
         );
-        return $this->execSqlCommand();
+        return $this->execSqlCommand($sql);
     }
 
     // ##########################################
