@@ -26,7 +26,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CleanupCommand extends \CliTools\Console\Command\AbstractCommand
+class CleanupCommand extends \CliTools\Console\Command\Mysql\AbstractCommand
 {
 
     /**
@@ -34,6 +34,8 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function configure()
     {
+        parent::configure();
+
         $this->setName('typo3:cleanup')
              ->setDescription('Cleanup caches, logs and indexed search')
              ->addArgument(
@@ -70,22 +72,16 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand
             // ##############
 
             // Get list of databases
-            $query = 'SELECT SCHEMA_NAME
-                        FROM information_schema.SCHEMATA';
-            $databaseList = DatabaseConnection::getCol($query);
+            $databaseList = $this->mysqlDatabaseList();
 
             foreach ($databaseList as $dbName) {
-                // Skip internal mysql databases
-                if (in_array(strtolower($dbName), array('mysql', 'information_schema', 'performance_schema'))) {
-                    continue;
-                }
-
                 // Check if database is TYPO3 instance
                 $query = 'SELECT COUNT(*) as count
                             FROM information_schema.tables
-                           WHERE table_schema = ' . DatabaseConnection::quote($dbName) . '
+                           WHERE table_schema = ' . $this->mysqlQuote($dbName) . '
                              AND table_name = \'be_users\'';
-                $isTypo3Database = DatabaseConnection::getOne($query);
+                $isTypo3Database = $this->execSqlCommand($query);
+                $isTypo3Database = reset($isTypo3Database);
 
                 if ($isTypo3Database) {
                     $this->cleanupTypo3Database($dbName);
@@ -111,7 +107,7 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand
         $cleanupTableList = array();
 
         // Check if database is TYPO3 instance
-        $tableList = DatabaseConnection::tableList($database);
+        $tableList = $this->mysqlTableList($database);
 
         foreach ($tableList as $table) {
             $clearTable = false;
@@ -171,11 +167,9 @@ class CleanupCommand extends \CliTools\Console\Command\AbstractCommand
 
         $this->output->writeln('<p>Starting cleanup of database "' . $database . '"</p>');
 
-        DatabaseConnection::switchDatabase(DatabaseConnection::sanitizeSqlDatabase($database));
-
         foreach ($cleanupTableList as $table) {
-            $query = 'TRUNCATE ' . DatabaseConnection::sanitizeSqlTable($table);
-            DatabaseConnection::exec($query);
+            $query = 'TRUNCATE ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.' . DatabaseConnection::sanitizeSqlTable($table);
+            $this->execSqlCommand($query);
 
             if ($this->output->isVerbose()) {
                 $this->output->writeln('<p>Truncating table ' . $table . '</p>');
