@@ -227,9 +227,9 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
     protected function createDockerMysqlCommand($container, $args)
     {
-        $command = new DockerExecCommandBuilder('mysql', ['-N', '-B', '-e']);
+        $command = new DockerExecCommandBuilder('mysql', ['-N', '-B']);
         $command->setDockerContainer($container);
-        $command->setArgumentList($args);
+        $command->addArgumentList($args);
         $command->addEnvironmentVar('MYSQL_PWD', DatabaseConnection::getDbPassword());
         return $command;
     }
