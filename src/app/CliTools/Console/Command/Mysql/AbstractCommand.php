@@ -101,9 +101,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         // init docker environment
         if ($this->input->getOption('docker-compose')) {
+            $this->output->writeln('<info>Using Docker-Compose container</info>');
             $this->dockerContainer = DockerUtility::lookupDockerComposeContainerId($this->input->getOption('docker-compose'));
             $password = $this->getDockerMysqlRootPassword($this->dockerContainer);
         } elseif ($this->input->getOption('docker')) {
+            $this->output->writeln('<info>Using Docker container</info>');
             $this->dockerContainer = $this->input->getOption('docker');
             $password = $this->getDockerMysqlRootPassword($this->dockerContainer);
         }
@@ -185,10 +187,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     protected function createMysqlCommand($args)
     {
         if ($this->input->getOption('docker-compose') || $this->input->getOption('docker')) {
-            $this->output->writeln('<info>Using Docker container</info>');
             $command = $this->createDockerMysqlCommand($this->dockerContainer, func_get_args());
         } else {
-            $this->output->writeln('<info>Using local mysql command</info>');
             $command = $this->createLocalMysqlCommand(func_get_args());
         }
 
@@ -242,10 +242,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     protected function createMysqldumpCommand($args)
     {
         if ($this->input->getOption('docker-compose') || $this->input->getOption('docker')) {
-            $this->output->writeln('<info>Using Docker container</info>');
             $command = $this->createDockerMysqldumpCommand($this->dockerContainer, func_get_args());
         } else {
-            $this->output->writeln('<info>Using local mysqldump command</info>');
             $command = $this->createLocalMysqldumpCommand(func_get_args());
         }
 
