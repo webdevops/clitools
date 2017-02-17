@@ -1,0 +1,238 @@
+###########################################################
+# Global (applied to all server sections)
+###########################################################
+#
+# Configuration merge order:
+# 1. context configuration will override all settings
+# 2. sync/deploy/share GLOBAL will override default settings
+# 3. GLOBAL are the defaults
+#
+# EXAMPLE:
+# if you ned eg. another mysql hostname just set it in the
+# context:
+#
+#   sync:
+#       production:
+#           mysql:
+#               hostname: 192.168.56.2
+#
+# All other configurations can be overwritten as well
+#
+# HINT:
+#   You can check the configuration with the "--config" option
+#
+
+LOCAL:
+    mysql:
+        # docker-compose: mysql
+        # docker: mysql-container
+        # hostname: localhost
+        # port: 3306
+        # username: foo
+        # password: bar
+
+GLOBAL:
+    ## MYSQL
+    mysql:
+        # mysql connection
+        hostname: localhost
+
+        # MySQL predefined filter for typo3 (eg. no caching tables)
+        filter: typo3
+
+        # MySQL custom filter (preg_match)
+        #filter:
+        #  - "/^cachingframework_.*/i"
+        #  - "/^cf_.*/i"
+        #  - "/^cache_.*/i"
+        #  - "/^index_.*/i"
+        #  - "/^sys_log$/i"
+        #  - "/^sys_history$/i"
+        #  - "/^tx_extbase_cache.*/i"
+
+        # Transfer compression (none if empty, bzip2 or gzip)
+        compression: bzip2
+
+        # specific mysqldump settings
+        mysqldump:
+            option: "--opt --skip-lock-tables --single-transaction"
+
+    ## RSYNC
+    rsync:
+        # set target as sub directroy (will be appended to working directory)
+        workdir: ""
+
+        # Additional options ("-rlptD --delete-after --progress --human-readable" is already set)
+        opts: ""
+
+        # exclude list/patterns for files and directories
+        exclude:
+            # Temp files
+            - "*~"
+            - "._*"
+
+            # VCS
+            - ".git*"
+            - ".svn*"
+
+            # Build files
+            - "composer.json"
+            - "bower.json"
+            - "gulpfile.js"
+            - "Gruntfile.js"
+            - "Makefile"
+
+            # Caches and other files
+            - "node_modules"
+            - ".sass-cache"
+            - ".settings"
+            - ".bowerrc"
+            - ".buildpath"
+            - ".project"
+
+    ## commands
+    command:
+        # Start-Tasks: shell command which should be run before run
+        startup:
+            # add some here
+
+        # Final-Tasks: shell command which should be after run
+        finalize:
+            # add some here
+
+            # EXAMPLE: local task
+            # - date
+
+            # EXAMPLE: remote task (will be send over ssh)
+            #- { type: 'remote', command: 'date' }
+
+            # EXAMPLE: create user "dev" with password "dev"
+            - "ct typo3:beuser"
+            # EXAMPLE: append toplevel-domain .vm to all domains
+            - "ct typo3:domain"
+
+
+
+
+###########################################################
+# Sync from server (eg. live server)
+###########################################################
+sync:
+
+    ##################
+    # Global config (for sync)
+    ##################
+    GLOBAL:
+        mysql:
+            ## put your mysql settings here (see global conf)
+
+        rsync:
+            # directory list/patterns for synchronization
+            directory:
+                - "/fileadmin/"
+                - "/uploads/"
+                - "/typo3conf/l10n/"
+
+            # directory exclude list/patterns
+            exclude:
+                - "/fileadmin/_processed_/**"
+                - "/fileadmin/_temp_/**"
+
+    ##################
+    # Context "production"
+    ##################
+    production:
+        # ssh server host or name (see .ssh/config, eg for mysql/mysqldump)
+        ssh:
+            hostname: live-server
+
+        # rsync for some directories
+        rsync:
+            # server and source directory (server host or name - see .ssh/config)
+            path: "live-server:/var/www/website/htdocs"
+
+            #conf:
+            #    maxSize: 20M
+            #    minSize: 10kb
+
+        mysql:
+            username: typo3
+            password: loremipsum
+
+            # List of databases for synchronization
+            #   examples:
+            #       local:foreign
+            #       samename
+            database:
+                - typo3:website_live
+
+
+
+
+###########################################################
+# Deployment to server
+###########################################################
+deploy:
+
+    ##################
+    # Global config (for deploy)
+    ##################
+    GLOBAL:
+        mysql:
+            # global mysql configuration
+
+        rsync:
+            # directory list/patterns for synchronization
+            directory:
+                - "/typo3conf/ext/"
+
+            # directory exclude list/patterns
+            exclude:
+                - "/fileadmin/"
+                - "/uploads/"
+                - "/typo3conf/l10n/"
+
+   ##################
+   # Context "production"
+   ##################
+    production:
+        # ssh server host or name (see .ssh/config, eg for mysql/mysqldump)
+        ssh:
+            hostname: live-server
+
+        # rsync for some directories
+        rsync:
+            # server and source directory (server host or name - see .ssh/config)
+            path: "live-server:/var/www/website/htdocs"
+
+
+
+
+###########################################################
+# Shared server (sharing between developers)
+###########################################################
+share:
+
+    ##################
+    # Global config (for share)
+    ##################
+    GLOBAL:
+        mysql:
+            # List of databases for backup
+            database:
+                - typo3
+
+        rsync:
+            # List of directories for backup
+            directory:
+                - "/fileadmin/"
+                - "/uploads/"
+                - "/typo3conf/l10n/"
+
+   ##################
+   # Context "development"
+   ##################
+    development:
+        rsync:
+            # source/target directory or server via ssh (eg. backup-server:/backup/projectname)
+            path: "/tmp/foo/"
