@@ -59,7 +59,7 @@ class DebugCommand extends AbstractCommand
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $debugLogLocation = $this->getApplication()
-                                 ->getConfigValue('db', 'debug_log_dir');
+                                 ->getConfigValue('db', 'debug_log_dir', '/tmp');
         $debugLogDir      = dirname($debugLogLocation);
 
         $output->writeln('<h2>Starting MySQL general query log</h2>');
@@ -72,21 +72,9 @@ class DebugCommand extends AbstractCommand
             }
         }
 
-        if (!empty($debugLogLocation)) {
-            $debugLogLocation .= 'mysql_' . getmypid() . '.log';
-
-            $query = 'SET GLOBAL general_log_file = ' . DatabaseConnection::quote($debugLogLocation);
-            $this->execSqlCommand($query);
-        }
-
-        // Fetch log file
-        $query      = 'SHOW VARIABLES LIKE \'general_log_file\'';
-        $logFileRow = $this->execSqlCommand($query);
-
-        if (empty($logFileRow)) {
-            $output->writeln('<p-error>MySQL general_log_file not set</p-error>');
-            return 1;
-        }
+        $debugLogLocation .= 'mysql_' . getmypid() . '.log';
+        $query = 'SET GLOBAL general_log_file = ' . $this->mysqlQuote($debugLogLocation);
+        $this->execSqlCommand($query);
 
         // Enable general log
         $output->writeln('<p>Enabling general log</p>');

@@ -82,7 +82,7 @@ class SlowLogCommand extends AbstractCommand
         }
 
         $debugLogLocation = $this->getApplication()
-                                 ->getConfigValue('db', 'debug_log_dir');
+                                 ->getConfigValue('db', 'debug_log_dir', '/tmp');
         $debugLogDir      = dirname($debugLogLocation);
 
         $output->writeln('<h2>Starting MySQL slow query log</h2>');
@@ -95,20 +95,9 @@ class SlowLogCommand extends AbstractCommand
             }
         }
 
-        if (!empty($debugLogLocation)) {
-            $debugLogLocation .= 'mysql_' . getmypid() . '.log';
-            $query = 'SET GLOBAL slow_query_log_file = ' . $this->mysqlQuote($debugLogLocation);
-            $this->execSqlCommand($query);
-        }
-
-        // Fetch log file
-        $query      = 'SHOW VARIABLES LIKE \'slow_query_log_file\'';
-        $logFileRow = $this->execSqlCommand($query);
-
-        if (empty($logFileRow)) {
-            $output->writeln('<p-error>MySQL general_log_file not set</p-error>');
-            return 1;
-        }
+        $debugLogLocation .= 'mysql_' . getmypid() . '.log';
+        $query = 'SET GLOBAL slow_query_log_file = ' . $this->mysqlQuote($debugLogLocation);
+        $this->execSqlCommand($query);
 
         // Enable slow log
         $output->writeln('<p>Enabling slow log</p>');

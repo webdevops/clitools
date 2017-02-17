@@ -125,8 +125,8 @@ class ConvertCommand extends AbstractCommand
                 $query,
                 DatabaseConnection::sanitizeSqlDatabase($database),
                 DatabaseConnection::sanitizeSqlTable($table),
-                DatabaseConnection::quote($charset),
-                DatabaseConnection::quote($collation)
+                $this->mysqlQuote($charset),
+                $this->mysqlQuote($collation)
             );
 
             if (!$stdout) {
