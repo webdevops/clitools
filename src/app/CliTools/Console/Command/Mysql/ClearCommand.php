@@ -62,15 +62,9 @@ class ClearCommand extends AbstractCommand
 
         $output->writeln('<h2>Clearing database "' . $database . '"</h2>');
 
-        if (DatabaseConnection::databaseExists($database)) {
-            $output->writeln('<p>Dropping database</p>');
-            $query = 'DROP DATABASE ' . DatabaseConnection::sanitizeSqlDatabase($database);
-            DatabaseConnection::exec($query);
-        }
-
         $output->writeln('<p>Creating database</p>');
-        $query = 'CREATE DATABASE ' . DatabaseConnection::sanitizeSqlDatabase($database);
-        DatabaseConnection::exec($query);
+        $this->execSqlCommand('DROP DATABASE IF EXISTS ' . addslashes($database));
+        $this->execSqlCommand('CREATE DATABASE ' . addslashes($database));
 
         $output->writeln('<h2>Database "' . $database . '" recreated</h2>');
 
