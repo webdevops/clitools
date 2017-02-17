@@ -21,9 +21,12 @@ namespace CliTools\Console\Command;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Database\DatabaseConnection;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\DockerExecCommandBuilder;
 use CliTools\Shell\CommandBuilder\FullSelfCommandBuilder;
 use CliTools\Utility\ConsoleUtility;
+use CliTools\Utility\DockerUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -58,6 +61,11 @@ abstract class AbstractCommand extends Command
      * @var bool
      */
     protected $automaticTerminalTitle = true;
+
+    /**
+     * Docker container
+     */
+    protected $dockerContainer;
 
     /**
      * Initializes the command just after the input has been validated.
@@ -284,5 +292,263 @@ abstract class AbstractCommand extends Command
              ->setTerminalTitle($title);
 
         return $this;
+    }
+
+    /**
+     * MySQL quote (for use in commands)
+     *
+     * @param string $value
+     * @return string
+     */
+    protected function mysqlQuote($value) {
+        return '\'' . addslashes($value) . '\'';
+    }
+
+    /**
+     * Execute sql command (using local mysql command)
+     *
+     * @param string $sql
+     * @return array|null
+     */
+    protected function execSqlCommand($sql)
+    {
+        return $this->createMysqlCommand('-e', $sql)->execute()->getOutput();
+    }
+
+
+    /**
+     * Execute sql command (using local mysql command)
+     *
+     * @param string $sql
+     * @param boolean $assoc associate array
+     * @return array|null
+     */
+    protected function execSqlQuery($sql, $assoc = true)
+    {
+        $delimiter = "\t";
+        $ret = array();
+        $result = $this->createMysqlCommand('--column-names', '-e', $sql)->execute()->getOutput();
+
+        if (empty($result)) {
+            return [];
+        }
+
+        $columnList = explode($delimiter, $result[0]);
+        unset($result[0]);
+
+        foreach ($result as $line) {
+            $values = explode($delimiter, $line);
+
+            if ($assoc) {
+                $ret[] = array_combine($columnList, $values);
+            } else {
+                $ret[] = $values;
+            }
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Fetch list of mysql tables
+     *
+     * @param string $database MySQL database
+     * @return array|null
+     */
+    protected function mysqlTableList($database)
+    {
+        $sql = sprintf(
+            'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s',
+            $this->mysqlQuote($database)
+        );
+        return $this->execSqlCommand($sql);
+    }
+
+    /**
+     * Fetch list of mysql databases
+     *
+     * @return array|null
+     */
+    protected function mysqlDatabaseList()
+    {
+        $sql = 'SELECT SCHEMA_NAME FROM information_schema.SCHEMATA';
+        $ret = $this->execSqlCommand($sql);
+
+        // Filter mysql specific databases
+        $ret = array_diff($ret, array('mysql', 'information_schema', 'performance_schema'));
+
+        return $ret;
+    }
+    // ##########################################
+    // General command building
+    // ##########################################
+
+    protected function commandBuilderFactory($command, $args=[])
+    {
+        if ($this->dockerContainer) {
+            $command = new DockerExecCommandBuilder($command, $args);
+            $command->setDockerContainer($this->dockerContainer);
+        } else {
+            $command = new CommandBuilder($command, $args);
+        }
+
+        return $command;
+    }
+
+    // ##########################################
+    // MySQL command building
+    // ##########################################
+
+    /**
+     * Fetch docker mysql root password from environment variable
+     *
+     * @param $container
+     * @return null|string
+     */
+    protected function getDockerMysqlRootPassword($container)
+    {
+        return DockerUtility::getDockerContainerEnv($container, 'MYSQL_ROOT_PASSWORD');
+    }
+
+    /**
+     * Create mysql CommandBuilder (local or docker)
+     *
+     *
+     * @param $args...
+     * @return CommandBuilder|DockerExecCommandBuilder
+     */
+    protected function createMysqlCommand($args)
+    {
+        if ($this->dockerContainer) {
+            $command = $this->createDockerMysqlCommand($this->dockerContainer, func_get_args());
+        } else {
+            $command = $this->createLocalMysqlCommand(func_get_args());
+        }
+
+        return $command;
+    }
+
+    /**
+     * Create local mysql command
+     *
+     * @param array $args
+     * @return CommandBuilder
+     */
+    protected function createLocalMysqlCommand($args)
+    {
+        $dbHostname = DatabaseConnection::getDbHostname();
+        $dbPort     = DatabaseConnection::getDbPort();
+        $dbUser     = DatabaseConnection::getDbUsername();
+        $dbPassword = DatabaseConnection::getDbPassword();
+
+        $command = new CommandBuilder('mysql', ['-N', '-B']);
+
+        if (!empty($dbUser)) {
+            $command->addArgumentTemplate('--user=%s', $dbUser);
+        }
+
+        if (!empty($dbHostname)) {
+            $command->addArgumentTemplate('--host=%s', $dbHostname);
+        }
+
+        if (!empty($dbPort)) {
+            $command->addArgumentTemplate('--port=%s', $dbPort);
+        }
+
+        $command->addArgumentList($args);
+
+        if (!empty($dbPassword)) {
+            $command->addEnvironmentVar('MYSQL_PWD', $dbPassword);
+        }
+
+        return $command;
+    }
+
+    /**
+     * Create dockerized mysql command (using docker exec)
+     *
+     * @param array $args
+     * @return CommandBuilder
+     */
+    protected function createDockerMysqlCommand($container, $args)
+    {
+        $command = new DockerExecCommandBuilder('mysql', ['-N', '-B']);
+        $command->setDockerContainer($container);
+        $command->addArgumentList($args);
+        $command->addEnvironmentVar('MYSQL_PWD', DatabaseConnection::getDbPassword());
+        return $command;
+    }
+
+    // ##########################################
+    // MySQL command building
+    // ##########################################
+
+    /**
+     * Create mysqldump CommandBuilder (local or docker)
+     *
+     *
+     * @param $args...
+     * @return CommandBuilder|DockerExecCommandBuilder
+     */
+    protected function createMysqldumpCommand($args)
+    {
+        if ($this->dockerContainer) {
+            $command = $this->createDockerMysqldumpCommand($this->dockerContainer, func_get_args());
+        } else {
+            $command = $this->createLocalMysqldumpCommand(func_get_args());
+        }
+
+        return $command;
+    }
+
+    /**
+     * Create local mysqldump command
+     *
+     * @param array $args
+     * @return CommandBuilder
+     */
+    protected function createLocalMysqldumpCommand($args)
+    {
+        $dbHostname = DatabaseConnection::getDbHostname();
+        $dbPort     = DatabaseConnection::getDbPort();
+        $dbUser     = DatabaseConnection::getDbUsername();
+        $dbPassword = DatabaseConnection::getDbPassword();
+
+        $command = new CommandBuilder('mysqldump', ['--single-transaction']);
+
+        if (!empty($dbUser)) {
+            $command->addArgumentTemplate('--user=%s', $dbUser);
+        }
+
+        if (!empty($dbHostname)) {
+            $command->addArgumentTemplate('--host=%s', $dbHostname);
+        }
+
+        if (!empty($dbPort)) {
+            $command->addArgumentTemplate('--port=%s', $dbPort);
+        }
+
+        if (!empty($dbPassword)) {
+            $command->addEnvironmentVar('MYSQL_PWD', $dbPassword);
+        }
+
+        $command->addArgumentList($args);
+
+        return $command;
+    }
+
+    /**
+     * Create dockerized mysqldump command (using docker exec)
+     *
+     * @param array $args
+     * @return CommandBuilder
+     */
+    protected function createDockerMysqldumpCommand($container, $args)
+    {
+        $command = new DockerExecCommandBuilder('mysqldump', ['--single-transaction']);
+        $command->setDockerContainer($container);
+        $command->addArgumentList($args);
+        $command->addEnvironmentVar('MYSQL_PWD', DatabaseConnection::getDbPassword());
+        return $command;
     }
 }

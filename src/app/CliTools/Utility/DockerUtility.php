@@ -22,6 +22,7 @@ namespace CliTools\Utility;
  */
 
 use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\DockerExecCommandBuilder;
 use CliTools\Shell\Executor;
 
 class DockerUtility
@@ -52,6 +53,20 @@ class DockerUtility
         }
 
         return $ret;
+    }
+
+    /**
+     * Get Docker container Environment variable
+     *
+     * @param $container
+     * @return null|string
+     */
+    public static function getDockerContainerEnv($container, $env)
+    {
+        $command = new DockerExecCommandBuilder('printf');
+        $command->addArgumentRaw('$' . $env);
+        $command->setDockerContainer($container);
+        return $command->execute()->getOutputString();
     }
 
     /**

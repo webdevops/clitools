@@ -25,13 +25,16 @@ use CliTools\Database\DatabaseConnection;
 use CliTools\Reader\ConfigReader;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
 use CliTools\Shell\CommandBuilder\CommandBuilderInterface;
+use CliTools\Shell\CommandBuilder\DockerExecCommandBuilder;
 use CliTools\Shell\CommandBuilder\OutputCombineCommandBuilder;
 use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
 use CliTools\Shell\CommandBuilder\SelfCommandBuilder;
 use CliTools\Utility\ConsoleUtility;
+use CliTools\Utility\DockerUtility;
 use CliTools\Utility\FilterUtility;
 use CliTools\Utility\PhpUtility;
 use CliTools\Utility\UnixUtility;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -147,6 +150,24 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         // Read configuration
         $this->readConfiguration();
+
+        $this->initDockerContainer();
+    }
+
+    /**
+     * Init docker container setting
+     */
+    protected function initDockerContainer()
+    {
+        if ($this->config->exists('LOCAL.mysql.docker')) {
+            $this->dockerContainer = $this->config->get('LOCAL.mysql.docker');
+
+            $password = DockerUtility::getDockerContainerEnv($this->dockerContainer, 'MYSQL_ROOT_PASSWORD');
+            DatabaseConnection::setDsn('mysql:host=localhost', 'root', $password);
+        } elseif ($this->config->exists('LOCAL.mysql.docker-compose')) {
+            $this->dockerContainer = $this->config->get('LOCAL.mysql.docker-compose');
+            $this->dockerContainer = DockerUtility::lookupDockerComposeContainerId($this->dockerContainer);
+        }
     }
 
     /**
@@ -845,10 +866,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $command = new SelfCommandBuilder();
         $command->addArgumentTemplate('mysql:restore %s %s', $database, $dumpFile);
 
-        if ($this->config->exists('LOCAL.mysql.docker')) {
-            $command->addArgumentTemplate('--docker %s', $this->config->get('LOCAL.mysql.docker'));
-        } elseif ($this->config->exists('LOCAL.mysql.docker-compose')) {
-            $command->addArgumentTemplate('--docker-compose %s', $this->config->get('LOCAL.mysql.docker-compose'));
+        if ($this->dockerContainer) {
+            $command->addArgumentTemplate('--docker %s', $this->dockerContainer);
         } elseif ($this->config->exists('LOCAL.mysql.hostname')) {
             $command->addArgumentTemplate('--host %s', $this->config->get('LOCAL.mysql.hostname'));
         }
@@ -877,6 +896,20 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     {
         $command = new SelfCommandBuilder();
         $command->addArgumentTemplate('mysql:backup %s %s', $database, $dumpFile);
+
+        if ($this->dockerContainer) {
+            $command->addArgumentTemplate('--docker %s', $this->dockerContainer);
+        } elseif ($this->config->exists('LOCAL.mysql.hostname')) {
+            $command->addArgumentTemplate('--host %s', $this->config->get('LOCAL.mysql.hostname'));
+        }
+
+        if ($this->config->exists('LOCAL.mysql.username')) {
+            $command->addArgumentTemplate('--user %s', $this->config->get('LOCAL.mysql.username'));
+        }
+
+        if ($this->config->exists('LOCAL.mysql.password')) {
+            $command->addArgumentTemplate('--password %s', $this->config->get('LOCAL.mysql.password'));
+        }
 
         if ($filter !== null) {
             $command->addArgumentTemplate('--filter=%s', $filter);
@@ -954,16 +987,28 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function createLocalMySqlCommand($database = null)
     {
-        $command = new RemoteCommandBuilder('mysql');
+        $command = $this->commandBuilderFactory('mysql');
         $command
             // batch mode
             ->addArgument('-B')
             // skip column names
             ->addArgument('-N');
 
-        // Add username
-        if (DatabaseConnection::getDbUsername()) {
-            $command->addArgumentTemplate('-u%s', DatabaseConnection::getDbUsername());
+        if (!$this->dockerContainer) {
+            // Add username
+            if (DatabaseConnection::getDbUsername()) {
+                $command->addArgumentTemplate('-u%s', DatabaseConnection::getDbUsername());
+            }
+
+            // Add hostname
+            if (DatabaseConnection::getDbHostname()) {
+                $command->addArgumentTemplate('-h%s', DatabaseConnection::getDbHostname());
+            }
+
+            // Add hostname
+            if (DatabaseConnection::getDbPort()) {
+                $command->addArgumentTemplate('-P%s', DatabaseConnection::getDbPort());
+            }
         }
 
         // Add password
@@ -971,15 +1016,6 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $command->addArgumentTemplate('-p%s', DatabaseConnection::getDbPassword());
         }
 
-        // Add hostname
-        if (DatabaseConnection::getDbHostname()) {
-            $command->addArgumentTemplate('-h%s', DatabaseConnection::getDbHostname());
-        }
-
-        // Add hostname
-        if (DatabaseConnection::getDbPort()) {
-            $command->addArgumentTemplate('-P%s', DatabaseConnection::getDbPort());
-        }
 
         if ($database !== null) {
             $command->addArgument($database);
@@ -1048,11 +1084,23 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function createLocalMySqlDumpCommand($database = null)
     {
-        $command = new RemoteCommandBuilder('mysqldump');
+        $command = $this->commandBuilderFactory('mysqldump');
 
-        // Add username
-        if (DatabaseConnection::getDbUsername()) {
-            $command->addArgumentTemplate('-u%s', DatabaseConnection::getDbUsername());
+        if (!$this->dockerContainer) {
+            // Add username
+            if (DatabaseConnection::getDbUsername()) {
+                $command->addArgumentTemplate('-u%s', DatabaseConnection::getDbUsername());
+            }
+
+            // Add hostname
+            if (DatabaseConnection::getDbHostname()) {
+                $command->addArgumentTemplate('-h%s', DatabaseConnection::getDbHostname());
+            }
+
+            // Add port
+            if (DatabaseConnection::getDbPort()) {
+                $command->addArgumentTemplate('-P%s', DatabaseConnection::getDbPort());
+            }
         }
 
         // Add password
@@ -1060,15 +1108,6 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             $command->addArgumentTemplate('-p%s', DatabaseConnection::getDbPassword());
         }
 
-        // Add hostname
-        if (DatabaseConnection::getDbHostname()) {
-            $command->addArgumentTemplate('-h%s', DatabaseConnection::getDbHostname());
-        }
-
-        // Add hostname
-        if (DatabaseConnection::getDbPort()) {
-            $command->addArgumentTemplate('-P%s', DatabaseConnection::getDbPort());
-        }
 
         // Add custom options
         if ($this->contextConfig->exists('mysql.mysqldump.option')) {
