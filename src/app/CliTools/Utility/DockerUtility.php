@@ -35,6 +35,26 @@ class DockerUtility
     static protected $dockerConfigurationCache = array();
 
     /**
+     * Lookup ID of docker-compose container
+     *
+     * @param string $container Name of docker container
+     *
+     * @throws \Exception
+     * @return string
+     */
+    public static function lookupDockerComposeContainerId($container)
+    {
+        $command = new CommandBuilder('docker-compose', ['ps', '-q', $container]);
+        $ret = $command->execute()->getOutputString();
+
+        if (empty($ret)) {
+            throw new \Exception('Docker-Compose container ' . $container . ' not found');
+        }
+
+        return $ret;
+    }
+
+    /**
      * Parse docker configuration (from docker inspect)
      *
      * @param string $container Name of docker container

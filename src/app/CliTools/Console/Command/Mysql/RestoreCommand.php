@@ -76,24 +76,11 @@ class RestoreCommand extends AbstractCommand
 
         $output->writeln('<h2>Restoring dump "' . $dumpFile . '" into database "' . $database . '"</h2>');
 
-        if (DatabaseConnection::databaseExists($database)) {
-            // Dropping
-            $output->writeln('<p>Dropping database</p>');
-            $query = 'DROP DATABASE IF EXISTS ' . DatabaseConnection::sanitizeSqlDatabase($database);
-            DatabaseConnection::exec($query);
-        }
-
-        // Creating
         $output->writeln('<p>Creating database</p>');
-        $query = 'CREATE DATABASE ' . DatabaseConnection::sanitizeSqlDatabase($database);
-        DatabaseConnection::exec($query);
+        $this->execSqlCommand('DROP DATABASE IF EXISTS ' . addslashes($database));
+        $this->execSqlCommand('CREATE DATABASE ' . addslashes($database));
 
-        // Inserting
-        putenv('USER=' . DatabaseConnection::getDbUsername());
-        putenv('MYSQL_PWD=' . DatabaseConnection::getDbPassword());
-
-
-        $commandMysql = new MysqlCommandBuilder('mysql', '%s --one-database', array($database));
+        $commandMysql = $this->createMysqlCommand($database, '--one-database');
 
         $commandFile = new CommandBuilder();
         $commandFile->addArgument($dumpFile);
