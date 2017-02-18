@@ -316,7 +316,21 @@ abstract class AbstractCommand extends Command
     public function setLocalDockerContainer($alias, $dockerContainer, $dockerComposeLookup = false)
     {
         if ($dockerComposeLookup) {
+            $dockerComposeContainer = $dockerContainer;
             $dockerContainer = DockerUtility::lookupDockerComposeContainerId($dockerContainer);
+
+            $this->output->writeln(sprintf(
+                '<p>Using local Docker-Compose container %s (ID: %s) for %s usage</p>',
+                $dockerComposeContainer,
+                $dockerContainer,
+                $alias
+            ));
+        } else {
+            $this->output->writeln(sprintf(
+                '<p>Using local Docker container ID %s for %s usage</p>',
+                $dockerContainer,
+                $alias
+            ));
         }
 
         $this->dockerContainer['local'][$alias] = $dockerContainer;
