@@ -63,10 +63,17 @@ class DockerUtility
      */
     public static function getDockerContainerEnv($container, $env)
     {
-        $command = new DockerExecCommandBuilder('printf');
-        $command->addArgumentRaw('$' . $env);
-        $command->setDockerContainer($container);
-        return $command->execute()->getOutputString();
+        $conf = DockerUtility::getDockerConfiguration($container);
+
+        if (!empty($conf)
+            && !empty($conf->Config)
+            && !empty($conf->Config->Env)
+            && !empty($conf->Config->Env[$env]))
+        {
+            return $conf->Config->Env[$env];
+        }
+
+        return false;
     }
 
     /**

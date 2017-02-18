@@ -51,13 +51,13 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
             )
             ->addOption(
                 'docker',
-                null,
+                'd',
                 InputOption::VALUE_REQUIRED,
                 'Docker container id'
             )
             ->addOption(
                 'docker-compose',
-                null,
+                'D',
                 InputOption::VALUE_REQUIRED,
                 'Docker-Compose container name'
             )
@@ -96,17 +96,19 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 
         // init docker environment
         if ($this->input->getOption('docker-compose')) {
+            // Use docker-compose container
             $this->output->writeln('<info>Using Docker-Compose container</info>');
-            $this->dockerContainer = DockerUtility::lookupDockerComposeContainerId($this->input->getOption('docker-compose'));
+            $this->setLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL, $this->input->getOption('docker-compose'), true);
 
             $user = 'root';
-            $password = $this->getDockerMysqlRootPassword($this->dockerContainer);
+            $password = $this->getDockerMysqlRootPassword($this->getLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL));
         } elseif ($this->input->getOption('docker')) {
+            // Use general docker container
             $this->output->writeln('<info>Using Docker container</info>');
-            $this->dockerContainer = $this->input->getOption('docker');
+            $this->setLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL, $this->input->getOption('docker'));
 
             $user = 'root';
-            $password = $this->getDockerMysqlRootPassword($this->dockerContainer);
+            $password = $this->getDockerMysqlRootPassword($this->getLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL));
         }
 
         // host

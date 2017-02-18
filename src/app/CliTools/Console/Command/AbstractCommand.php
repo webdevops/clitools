@@ -34,6 +34,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 abstract class AbstractCommand extends Command
 {
 
+    const DOCKER_ALIAS_MYSQL = 'mysql';
+
     /**
      * Message list (will be shown at the end)
      *
@@ -295,6 +297,33 @@ abstract class AbstractCommand extends Command
     }
 
     /**
+     * @return mixed
+     */
+    public function getLocalDockerContainer($alias)
+    {
+        if (!empty($this->dockerContainer['local'][$alias])) {
+            return $this->dockerContainer['local'][$alias];
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $dockerContainer
+     * @param boolean $dockerComposeLookup Use docker compose lookup
+     * @return AbstractCommand
+     */
+    public function setLocalDockerContainer($alias, $dockerContainer, $dockerComposeLookup = false)
+    {
+        if ($dockerComposeLookup) {
+            $dockerContainer = DockerUtility::lookupDockerComposeContainerId($dockerContainer);
+        }
+
+        $this->dockerContainer['local'][$alias] = $dockerContainer;
+        return $this;
+    }
+
+    /**
      * MySQL quote (for use in commands)
      *
      * @param string $value
@@ -379,15 +408,24 @@ abstract class AbstractCommand extends Command
 
         return $ret;
     }
+
     // ##########################################
     // General command building
     // ##########################################
 
-    protected function commandBuilderFactory($command, $args=[])
+    /**
+     * Local Commander Builder Factory
+     *
+     * @param string $alias   Docker alias
+     * @param string $command Command
+     * @param array $args     Arguments
+     * @return CommandBuilder|DockerExecCommandBuilder
+     */
+    protected function localDockerCommandBuilderFactory($dockerAlias, $command, $args=[])
     {
-        if ($this->dockerContainer) {
+        if ($this->getLocalDockerContainer($dockerAlias)) {
             $command = new DockerExecCommandBuilder($command, $args);
-            $command->setDockerContainer($this->dockerContainer);
+            $command->setDockerContainer($this->getLocalDockerContainer($dockerAlias));
         } else {
             $command = new CommandBuilder($command, $args);
         }
@@ -419,8 +457,8 @@ abstract class AbstractCommand extends Command
      */
     protected function createMysqlCommand($args)
     {
-        if ($this->dockerContainer) {
-            $command = $this->createDockerMysqlCommand($this->dockerContainer, func_get_args());
+        if ($this->getLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL)) {
+            $command = $this->createDockerMysqlCommand($this->getLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL), func_get_args());
         } else {
             $command = $this->createLocalMysqlCommand(func_get_args());
         }
@@ -492,8 +530,8 @@ abstract class AbstractCommand extends Command
      */
     protected function createMysqldumpCommand($args)
     {
-        if ($this->dockerContainer) {
-            $command = $this->createDockerMysqldumpCommand($this->dockerContainer, func_get_args());
+        if ($this->getLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL)) {
+            $command = $this->createDockerMysqldumpCommand($this->getLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL), func_get_args());
         } else {
             $command = $this->createLocalMysqldumpCommand(func_get_args());
         }

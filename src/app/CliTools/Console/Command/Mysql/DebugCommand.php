@@ -100,7 +100,7 @@ class DebugCommand extends AbstractCommand
 
             if (!$keepLog) {
                 $output->writeln('<p>Deleting logfile</p>');
-                $command = $this->commandBuilderFactory('rm', ['-f', $debugLogLocation]);
+                $command = $this->localDockerCommandBuilderFactory(AbstractCommand::DOCKER_ALIAS_MYSQL, 'rm', ['-f', $debugLogLocation]);
                 $command->executeInteractive();
             } else {
                 $output->writeln('<p>Keeping logfile</p>');
@@ -115,9 +115,9 @@ class DebugCommand extends AbstractCommand
             $grep = $input->getArgument('grep');
         }
 
-        if ($this->input->getOption('docker-compose') || $this->input->getOption('docker')) {
+        if ($this->getLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL)) {
             $command = new DockerExecCommandBuilder('tail', ['-f', $debugLogLocation]);
-            $command->setDockerContainer($this->dockerContainer);
+            $command->setDockerContainer($this->getLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL));
             $command->executeInteractive();
         } else {
             $this->showLog([$debugLogLocation], $input, $output, $grep, ['-n 0']);
