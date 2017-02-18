@@ -21,12 +21,10 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Console\Application;
 use CliTools\Database\DatabaseConnection;
 use CliTools\Reader\ConfigReader;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
 use CliTools\Shell\CommandBuilder\CommandBuilderInterface;
-use CliTools\Shell\CommandBuilder\DockerExecCommandBuilder;
 use CliTools\Shell\CommandBuilder\OutputCombineCommandBuilder;
 use CliTools\Shell\CommandBuilder\RemoteCommandBuilder;
 use CliTools\Shell\CommandBuilder\SelfCommandBuilder;
@@ -35,7 +33,6 @@ use CliTools\Utility\DockerUtility;
 use CliTools\Utility\FilterUtility;
 use CliTools\Utility\PhpUtility;
 use CliTools\Utility\UnixUtility;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;

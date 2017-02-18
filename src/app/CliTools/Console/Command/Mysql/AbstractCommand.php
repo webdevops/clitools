@@ -22,12 +22,9 @@ namespace CliTools\Console\Command\Mysql;
  */
 
 use CliTools\Database\DatabaseConnection;
-use CliTools\Shell\CommandBuilder\CommandBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use CliTools\Shell\CommandBuilder\DockerExecCommandBuilder;
-use CliTools\Utility\DockerUtility;
 
 abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
 {
