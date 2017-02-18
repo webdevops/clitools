@@ -24,12 +24,7 @@ namespace CliTools\Console\Command;
 use CliTools\Database\DatabaseConnection;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
 use CliTools\Shell\CommandBuilder\DockerExecCommandBuilder;
-use CliTools\Shell\CommandBuilder\FullSelfCommandBuilder;
-use CliTools\Utility\ConsoleUtility;
 use CliTools\Utility\DockerUtility;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 abstract class AbstractDockerCommand extends AbstractCommand
 {
