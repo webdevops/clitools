@@ -21,6 +21,7 @@ namespace CliTools\Console\Command\Sync;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use CliTools\Console\Application;
 use CliTools\Database\DatabaseConnection;
 use CliTools\Reader\ConfigReader;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
@@ -1191,11 +1192,17 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $filterList, $database);
 
         // Determine size of tables to be dumped and abort if user wishes to
+        $this->output->writeln('<p>Checking size of remote database</p>');
         $size = $this->determineSizeOfTables($database, $ignoredTableList, $isRemote);
-        $question = sprintf('The tables in this MySQL dump have total size of %.2f MB! Proceed?', $size);
-        if (!ConsoleUtility::questionYesNo($question, 'no')) {
-            $this->output->writeln($this->determineBiggestTables($database, $ignoredTableList, $isRemote));
-            throw new \CliTools\Exception\StopException(1);
+
+        $warningSize = $this->getApplication()->getConfigValue('db', 'warning_transfer_size', 500);
+
+        if ($size >= $warningSize) {
+            $question = sprintf('The tables in this MySQL dump have total size of %.2f MB! Proceed?', $size);
+            if (!ConsoleUtility::questionYesNo($question, 'no')) {
+                $this->output->writeln($this->determineBiggestTables($database, $ignoredTableList, $isRemote));
+                throw new \CliTools\Exception\StopException(1);
+            }
         }
 
         // Dump only structure
