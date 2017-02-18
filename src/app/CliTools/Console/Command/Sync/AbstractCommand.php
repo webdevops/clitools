@@ -1192,10 +1192,14 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $filterList, $database);
 
         // Determine size of tables to be dumped and abort if user wishes to
-        $this->output->writeln('<p>Checking size of remote database</p>');
+        $warningSize = $this->getApplication()->getConfigValue('db', 'warning_transfer_size', 500);
+        $this->output->writeln(sprintf(
+            '<p>Checking size of remote database (threshold %s MiB)</p>',
+            $warningSize
+        ));
         $size = $this->determineSizeOfTables($database, $ignoredTableList, $isRemote);
 
-        $warningSize = $this->getApplication()->getConfigValue('db', 'warning_transfer_size', 500);
+
 
         if ($size >= $warningSize) {
             $question = sprintf('The tables in this MySQL dump have total size of %.2f MB! Proceed?', $size);
