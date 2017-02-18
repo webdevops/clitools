@@ -41,7 +41,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Yaml\Yaml;
 
-abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
+abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerCommand
 {
 
     const CONFIG_FILE = 'clisync.yml';
@@ -160,15 +160,15 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $useDockerMysql = false;
 
         if ($this->config->exists('LOCAL.mysql.docker')) {
-            $this->setLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL, $this->config->get('LOCAL.mysql.docker'));
+            $this->setLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL , $this->config->get('LOCAL.mysql.docker'));
             $useDockerMysql = true;
         } elseif ($this->config->exists('LOCAL.mysql.docker-compose')) {
-            $this->setLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL, $this->config->get('LOCAL.mysql.docker-compose'), true);
+            $this->setLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL , $this->config->get('LOCAL.mysql.docker-compose'), true);
             $useDockerMysql = true;
         }
 
         if ($useDockerMysql) {
-            $password = DockerUtility::getDockerContainerEnv($this->getLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL), 'MYSQL_ROOT_PASSWORD');
+            $password = DockerUtility::getDockerContainerEnv($this->getLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL ), 'MYSQL_ROOT_PASSWORD');
             DatabaseConnection::setDsn('mysql:host=localhost', 'root', $password);
         }
     }
@@ -869,8 +869,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $command = new SelfCommandBuilder();
         $command->addArgumentTemplate('mysql:restore %s %s', $database, $dumpFile);
 
-        if ($this->getLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL)) {
-            $command->addArgumentTemplate('--docker %s', $this->getLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL));
+        if ($this->getLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL )) {
+            $command->addArgumentTemplate('--docker %s', $this->getLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL ));
         } elseif ($this->config->exists('LOCAL.mysql.hostname')) {
             $command->addArgumentTemplate('--host %s', $this->config->get('LOCAL.mysql.hostname'));
         }
@@ -900,8 +900,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $command = new SelfCommandBuilder();
         $command->addArgumentTemplate('mysql:backup %s %s', $database, $dumpFile);
 
-        if ($this->getLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL)) {
-            $command->addArgumentTemplate('--docker %s', $this->getLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL));
+        if ($this->getLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL )) {
+            $command->addArgumentTemplate('--docker %s', $this->getLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL ));
         } elseif ($this->config->exists('LOCAL.mysql.hostname')) {
             $command->addArgumentTemplate('--host %s', $this->config->get('LOCAL.mysql.hostname'));
         }
@@ -990,14 +990,14 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function createLocalMySqlCommand($database = null)
     {
-        $command = $this->localDockerCommandBuilderFactory(AbstractCommand::DOCKER_ALIAS_MYSQL, 'mysql');
+        $command = $this->localDockerCommandBuilderFactory(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL , 'mysql');
         $command
             // batch mode
             ->addArgument('-B')
             // skip column names
             ->addArgument('-N');
 
-        if (!$this->getLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL)) {
+        if (!$this->getLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL )) {
             // Add username
             if (DatabaseConnection::getDbUsername()) {
                 $command->addArgumentTemplate('-u%s', DatabaseConnection::getDbUsername());
@@ -1087,9 +1087,9 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function createLocalMySqlDumpCommand($database = null)
     {
-        $command = $this->localDockerCommandBuilderFactory(AbstractCommand::DOCKER_ALIAS_MYSQL, 'mysqldump');
+        $command = $this->localDockerCommandBuilderFactory(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL , 'mysqldump');
 
-        if (!$this->getLocalDockerContainer(AbstractCommand::DOCKER_ALIAS_MYSQL)) {
+        if (!$this->getLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL )) {
             // Add username
             if (DatabaseConnection::getDbUsername()) {
                 $command->addArgumentTemplate('-u%s', DatabaseConnection::getDbUsername());
