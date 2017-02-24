@@ -2,4 +2,3 @@
 *.phar
 *.bak
 src/vendor/*
-src/conf/*

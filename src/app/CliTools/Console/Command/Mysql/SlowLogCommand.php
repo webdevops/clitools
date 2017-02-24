@@ -21,7 +21,7 @@ namespace CliTools\Console\Command\Mysql;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Database\DatabaseConnection;
+use CliTools\Shell\CommandBuilder\DockerExecCommandBuilder;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -35,6 +35,8 @@ class SlowLogCommand extends AbstractCommand
      */
     protected function configure()
     {
+        parent::configure();
+
         $this->setName('mysql:slowlog')
              ->setDescription('Enable and show slow query log')
              ->addArgument(
@@ -53,7 +55,13 @@ class SlowLogCommand extends AbstractCommand
                  'i',
                  InputOption::VALUE_NONE,
                  'Enable log queries without indexes log'
-             );
+             )
+            ->addOption(
+                'keep-log',
+                null,
+                InputOption::VALUE_NONE,
+                'Do not delete log after closing'
+            );
     }
 
     /**
@@ -66,23 +74,17 @@ class SlowLogCommand extends AbstractCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->elevateProcess($input, $output);
-
         $slowLogQueryTime     = 1;
-        $logNonIndexedQueries = false;
+        $logNonIndexedQueries = (bool)$input->getOption('no-index');
+        $keepLog              = (bool)$input->getOption('keep-log');
 
         // Slow log threshold
         if ($input->getOption('time')) {
             $slowLogQueryTime = $input->getOption('time');
         }
 
-        // Also show not using indexes queries
-        if ($input->getOption('no-index')) {
-            $logNonIndexedQueries = true;
-        }
-
         $debugLogLocation = $this->getApplication()
-                                 ->getConfigValue('db', 'debug_log_dir');
+                                 ->getConfigValue('db', 'debug_log_dir', '/tmp');
         $debugLogDir      = dirname($debugLogLocation);
 
         $output->writeln('<h2>Starting MySQL slow query log</h2>');
@@ -95,76 +97,70 @@ class SlowLogCommand extends AbstractCommand
             }
         }
 
-        if (!empty($debugLogLocation)) {
-            $debugLogLocation .= 'mysql_' . getmypid() . '.log';
-            $query = 'SET GLOBAL slow_query_log_file = ' . DatabaseConnection::quote($debugLogLocation);
-            DatabaseConnection::exec($query);
-        }
+        $debugLogLocation .= 'mysql_' . getmypid() . '.log';
+        $output->writeln('<p>Set general_log_file to ' . $debugLogLocation . '</p>');
+        $query = 'SET GLOBAL slow_query_log_file = ' . $this->mysqlQuote($debugLogLocation);
+        $this->execSqlCommand($query);
 
-        // Fetch log file
-        $query      = 'SHOW VARIABLES LIKE \'slow_query_log_file\'';
-        $logFileRow = DatabaseConnection::getRow($query);
+        // Enable slow log
+        $output->writeln('<p>Enabling slow log</p>');
+        $query = 'SET GLOBAL slow_query_log = \'ON\'';
+        $this->execSqlCommand($query);
 
-        if (!empty($logFileRow['Value'])) {
-            // Enable slow log
-            $output->writeln('<p>Enabling slow log</p>');
-            $query = 'SET GLOBAL slow_query_log = \'ON\'';
-            DatabaseConnection::exec($query);
+        // Enable slow log
+        $output->writeln('<p>Set long_query_time to ' . (int)abs($slowLogQueryTime) . ' seconds</p>');
+        $query = 'SET GLOBAL long_query_time = ' . (int)abs($slowLogQueryTime);
+        $this->execSqlCommand($query);
 
-            // Enable slow log
-            $output->writeln('<p>Set long_query_time to ' . (int)abs($slowLogQueryTime) . ' seconds</p>');
-            $query = 'SET GLOBAL long_query_time = ' . (int)abs($slowLogQueryTime);
-            DatabaseConnection::exec($query);
-
-            // Enable log queries without indexes log
-            if ($logNonIndexedQueries) {
-                $output->writeln('<p>Enabling logging of queries without using indexes</p>');
-                $query = 'SET GLOBAL log_queries_not_using_indexes = \'ON\'';
-                DatabaseConnection::exec($query);
-            } else {
-                $output->writeln('<p>Disabling logging of queries without using indexes</p>');
-                $query = 'SET GLOBAL log_queries_not_using_indexes = \'OFF\'';
-                DatabaseConnection::exec($query);
-            }
-
-            // Setup teardown cleanup
-            $tearDownFunc = function () use ($output, $logNonIndexedQueries) {
-                // Disable general log
-                $output->writeln('<p>Disable slow log</p>');
-                $query = 'SET GLOBAL slow_query_log = \'OFF\'';
-                DatabaseConnection::exec($query);
-
-                if ($logNonIndexedQueries) {
-                    // Disable log queries without indexes log
-                    $query = 'SET GLOBAL log_queries_not_using_indexes = \'OFF\'';
-                    DatabaseConnection::exec($query);
-                }
-            };
-            $this->getApplication()
-                 ->registerTearDown($tearDownFunc);
-
-            // Read grep value
-            $grep = null;
-            if ($input->hasArgument('grep')) {
-                $grep = $input->getArgument('grep');
-            }
-
-            // Tail logfile
-            $logList = array(
-                $logFileRow['Value'],
-            );
-
-            $optionList = array(
-                '-n 0',
-            );
-
-            $this->showLog($logList, $input, $output, $grep, $optionList);
-
-            return 0;
+        // Enable log queries without indexes log
+        if ($logNonIndexedQueries) {
+            $output->writeln('<p>Enabling logging of queries without using indexes</p>');
+            $query = 'SET GLOBAL log_queries_not_using_indexes = \'ON\'';
+            $this->execSqlCommand($query);
         } else {
-            $output->writeln('<p-error>MySQL general_log_file not set</p-error>');
-
-            return 1;
+            $output->writeln('<p>Disabling logging of queries without using indexes</p>');
+            $query = 'SET GLOBAL log_queries_not_using_indexes = \'OFF\'';
+            $this->execSqlCommand($query);
         }
+
+        // Setup teardown cleanup
+        $tearDownFunc = function () use ($output, $debugLogLocation, $logNonIndexedQueries, $keepLog) {
+            // Disable general log
+            $output->writeln('<p>Disable slow log</p>');
+            $query = 'SET GLOBAL slow_query_log = \'OFF\'';
+            $this->execSqlCommand($query);
+
+            if ($logNonIndexedQueries) {
+                // Disable log queries without indexes log
+                $query = 'SET GLOBAL log_queries_not_using_indexes = \'OFF\'';
+                $this->execSqlCommand($query);
+            }
+
+            if (!$keepLog) {
+                $output->writeln('<p>Deleting logfile</p>');
+                $command = $this->localDockerCommandBuilderFactory(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL , 'rm', ['-f', $debugLogLocation]);
+                $command->executeInteractive();
+            } else {
+                $output->writeln('<p>Keeping logfile</p>');
+            }
+        };
+        $this->getApplication()
+             ->registerTearDown($tearDownFunc);
+
+        // Read grep value
+        $grep = null;
+        if ($input->hasArgument('grep')) {
+            $grep = $input->getArgument('grep');
+        }
+
+        if ($this->getLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL )) {
+            $command = new DockerExecCommandBuilder('tail', ['-f', $debugLogLocation]);
+            $command->setDockerContainer($this->getLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL ));
+            $command->executeInteractive();
+        } else {
+            $this->showLog([$debugLogLocation], $input, $output, $grep, ['-n 0']);
+        }
+
+        return 0;
     }
 }

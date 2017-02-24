@@ -26,7 +26,7 @@ use CliTools\Shell\CommandBuilder\CommandBuilderInterface;
 use CliTools\Utility\DockerUtility;
 use CliTools\Utility\PhpUtility;
 
-abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
+abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerCommand
 {
 
     /**

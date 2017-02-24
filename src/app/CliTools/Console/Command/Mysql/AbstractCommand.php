@@ -35,29 +35,41 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
     protected function configure()
     {
         $this->addOption(
-            'host',
-            null,
-            InputOption::VALUE_REQUIRED,
-            'MySQL host'
-        )
-             ->addOption(
-                 'port',
-                 null,
-                 InputOption::VALUE_REQUIRED,
-                 'MySQL port'
-             )
-             ->addOption(
-                 'user',
-                 'u',
-                 InputOption::VALUE_REQUIRED,
-                 'MySQL user'
-             )
-             ->addOption(
-                 'password',
-                 'p',
-                 InputOption::VALUE_REQUIRED,
-                 'MySQL host'
-             );
+                'host',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'MySQL host'
+            )
+            ->addOption(
+                'port',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'MySQL port'
+            )
+            ->addOption(
+                'docker',
+                'd',
+                InputOption::VALUE_REQUIRED,
+                'Docker container id'
+            )
+            ->addOption(
+                'docker-compose',
+                'D',
+                InputOption::VALUE_REQUIRED,
+                'Docker-Compose container name'
+            )
+            ->addOption(
+                'user',
+                'u',
+                InputOption::VALUE_REQUIRED,
+                'MySQL user'
+            )
+            ->addOption(
+                'password',
+                'p',
+                InputOption::VALUE_REQUIRED,
+                'MySQL host'
+            );
     }
 
     /**
@@ -78,6 +90,21 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractCommand
         $password = null;
         $host     = DatabaseConnection::getDbHostname();
         $port     = DatabaseConnection::getDbPort();
+
+        // init docker environment
+        if ($this->input->getOption('docker-compose')) {
+            // Use docker-compose container
+            $this->setLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL , $this->input->getOption('docker-compose'), true);
+
+            $user = 'root';
+            $password = $this->getDockerMysqlRootPassword($this->getLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL ));
+        } elseif ($this->input->getOption('docker')) {
+            // Use general docker container
+            $this->setLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL , $this->input->getOption('docker'));
+
+            $user = 'root';
+            $password = $this->getDockerMysqlRootPassword($this->getLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL ));
+        }
 
         // host
         if ($this->input->hasOption('host') && $this->input->getOption('host')) {

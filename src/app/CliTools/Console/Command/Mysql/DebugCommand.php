@@ -21,10 +21,11 @@ namespace CliTools\Console\Command\Mysql;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Database\DatabaseConnection;
+use CliTools\Shell\CommandBuilder\DockerExecCommandBuilder;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 class DebugCommand extends AbstractCommand
 {
@@ -34,16 +35,24 @@ class DebugCommand extends AbstractCommand
      */
     protected function configure()
     {
+        parent::configure();
+
         $this->setName('mysql:debug')
              ->setAliases(array('mysql:querylog'))
              ->setDescription(
-                 'Debug mysql connections'
+                'Debug mysql connections'
              )
              ->addArgument(
-                 'grep',
-                 InputArgument::OPTIONAL,
-                 'Grep'
-             );
+                'grep',
+                InputArgument::OPTIONAL,
+                'Grep'
+             )
+            ->addOption(
+                'keep-log',
+                null,
+                InputOption::VALUE_NONE,
+                'Do not delete log after closing'
+            );
     }
 
     /**
@@ -56,11 +65,11 @@ class DebugCommand extends AbstractCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->elevateProcess($input, $output);
-
         $debugLogLocation = $this->getApplication()
-                                 ->getConfigValue('db', 'debug_log_dir');
+                                 ->getConfigValue('db', 'debug_log_dir', '/tmp');
         $debugLogDir      = dirname($debugLogLocation);
+
+        $keepLog  = (bool)$input->getOption('keep-log');
 
         $output->writeln('<h2>Starting MySQL general query log</h2>');
 
@@ -72,56 +81,48 @@ class DebugCommand extends AbstractCommand
             }
         }
 
-        if (!empty($debugLogLocation)) {
-            $debugLogLocation .= 'mysql_' . getmypid() . '.log';
+        $debugLogLocation .= 'mysql_' . getmypid() . '.log';
+        $output->writeln('<p>Set general_log_file to ' . $debugLogLocation . '</p>');
+        $query = 'SET GLOBAL general_log_file = ' . $this->mysqlQuote($debugLogLocation);
+        $this->execSqlCommand($query);
 
-            $query = 'SET GLOBAL general_log_file = ' . DatabaseConnection::quote($debugLogLocation);
-            DatabaseConnection::exec($query);
-        }
+        // Enable general log
+        $output->writeln('<p>Enabling general log</p>');
+        $query = 'SET GLOBAL general_log = \'ON\'';
+        $this->execSqlCommand($query);
 
-        // Fetch log file
-        $query      = 'SHOW VARIABLES LIKE \'general_log_file\'';
-        $logFileRow = DatabaseConnection::getRow($query);
+        // Setup teardown cleanup
+        $tearDownFunc = function () use ($output, $debugLogLocation, $keepLog) {
+            // Disable general log
+            $output->writeln('<p>Disabling general log</p>');
+            $query = 'SET GLOBAL general_log = \'OFF\'';
+            $this->execSqlCommand($query);
 
-        if (!empty($logFileRow['Value'])) {
-
-            // Enable general log
-            $output->writeln('<p>Enabling general log</p>');
-            $query = 'SET GLOBAL general_log = \'ON\'';
-            DatabaseConnection::exec($query);
-
-            // Setup teardown cleanup
-            $tearDownFunc = function () use ($output) {
-                // Disable general log
-                $output->writeln('<p>Disabling general log</p>');
-                $query = 'SET GLOBAL general_log = \'OFF\'';
-                DatabaseConnection::exec($query);
-            };
-            $this->getApplication()
-                 ->registerTearDown($tearDownFunc);
-
-            // Read grep value
-            $grep = null;
-            if ($input->hasArgument('grep')) {
-                $grep = $input->getArgument('grep');
+            if (!$keepLog) {
+                $output->writeln('<p>Deleting logfile</p>');
+                $command = $this->localDockerCommandBuilderFactory(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL , 'rm', ['-f', $debugLogLocation]);
+                $command->executeInteractive();
+            } else {
+                $output->writeln('<p>Keeping logfile</p>');
             }
+        };
+        $this->getApplication()
+             ->registerTearDown($tearDownFunc);
 
-            // Tail logfile
-            $logList = array(
-                $logFileRow['Value'],
-            );
-
-            $optionList = array(
-                '-n 0',
-            );
-
-            $this->showLog($logList, $input, $output, $grep, $optionList);
-
-            return 0;
-        } else {
-            $output->writeln('<p-error>MySQL general_log_file not set</p-error>');
-
-            return 1;
+        // Read grep value
+        $grep = null;
+        if ($input->hasArgument('grep')) {
+            $grep = $input->getArgument('grep');
         }
+
+        if ($this->getLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL )) {
+            $command = new DockerExecCommandBuilder('tail', ['-f', $debugLogLocation]);
+            $command->setDockerContainer($this->getLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL ));
+            $command->executeInteractive();
+        } else {
+            $this->showLog([$debugLogLocation], $input, $output, $grep, ['-n 0']);
+        }
+
+        return 0;
     }
 }
