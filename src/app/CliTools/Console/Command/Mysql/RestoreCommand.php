@@ -21,9 +21,7 @@ namespace CliTools\Console\Command\Mysql;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Database\DatabaseConnection;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
-use CliTools\Shell\CommandBuilder\MysqlCommandBuilder;
 use CliTools\Utility\PhpUtility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -76,24 +74,11 @@ class RestoreCommand extends AbstractCommand
 
         $output->writeln('<h2>Restoring dump "' . $dumpFile . '" into database "' . $database . '"</h2>');
 
-        if (DatabaseConnection::databaseExists($database)) {
-            // Dropping
-            $output->writeln('<p>Dropping database</p>');
-            $query = 'DROP DATABASE IF EXISTS ' . DatabaseConnection::sanitizeSqlDatabase($database);
-            DatabaseConnection::exec($query);
-        }
-
-        // Creating
         $output->writeln('<p>Creating database</p>');
-        $query = 'CREATE DATABASE ' . DatabaseConnection::sanitizeSqlDatabase($database);
-        DatabaseConnection::exec($query);
+        $this->execSqlCommand('DROP DATABASE IF EXISTS ' . addslashes($database));
+        $this->execSqlCommand('CREATE DATABASE ' . addslashes($database));
 
-        // Inserting
-        putenv('USER=' . DatabaseConnection::getDbUsername());
-        putenv('MYSQL_PWD=' . DatabaseConnection::getDbPassword());
-
-
-        $commandMysql = new MysqlCommandBuilder('mysql', '%s --one-database', array($database));
+        $commandMysql = $this->createMysqlCommand($database, '--one-database');
 
         $commandFile = new CommandBuilder();
         $commandFile->addArgument($dumpFile);
@@ -108,7 +93,7 @@ class RestoreCommand extends AbstractCommand
             case 'application/gzip':
             case 'application/x-gzip':
                 $output->writeln('<p>Using GZIP decompression</p>');
-                $commandFile->setCommand('gzcat');
+                $commandFile->setCommand('gzip')->addArgument('-dc');
                 break;
 
             case 'application/x-lzma':

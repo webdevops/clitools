@@ -22,6 +22,15 @@
 #   You can check the configuration with the "--config" option
 #
 
+LOCAL:
+    mysql:
+        # docker-compose: mysql
+        # docker: mysql-container
+        # hostname: localhost
+        # port: 3306
+        # username: foo
+        # password: bar
+
 GLOBAL:
     ## MYSQL
     mysql:
@@ -40,7 +49,6 @@ GLOBAL:
         #  - "/^sys_log$/i"
         #  - "/^sys_history$/i"
         #  - "/^tx_extbase_cache.*/i"
-        #  - "/^tx_extensionmanager_domain_model_extension.*/i"
 
         # Transfer compression (none if empty, bzip2 or gzip)
         compression: bzip2
@@ -55,7 +63,6 @@ GLOBAL:
         workdir: ""
 
         # Additional options ("-rlptD --delete-after --progress --human-readable" is already set)
-        # Example: local macOS and remote Linux: " --iconv=UTF8-MAC,UTF8"
         opts: ""
 
         # exclude list/patterns for files and directories

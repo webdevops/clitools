@@ -188,6 +188,18 @@ class AbstractCommandBuilder implements CommandBuilderInterface
     }
 
     /**
+     * Clear environment
+     *
+     * @return $this
+     */
+    public function clearEnvironment()
+    {
+        $this->envList = array();
+
+        return $this;
+    }
+
+    /**
      * Add argument separator
      *
      * @return $this

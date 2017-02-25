@@ -28,7 +28,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BeUserCommand extends \CliTools\Console\Command\AbstractCommand
+class BeUserCommand extends \CliTools\Console\Command\Mysql\AbstractCommand
 {
 
     /**
@@ -36,6 +36,8 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function configure()
     {
+        parent::configure();
+
         $this->setName('typo3:beuser')
              ->setDescription('Add backend admin user to database')
              ->addArgument(
@@ -44,12 +46,12 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand
                  'Database name'
              )
              ->addArgument(
-                 'user',
+                 'typo3-user',
                  InputArgument::OPTIONAL,
                  'Username'
              )
              ->addArgument(
-                 'password',
+                 'typo3-password',
                  InputArgument::OPTIONAL,
                  'Password'
              )
@@ -75,8 +77,8 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand
         // Init
         // ##################
         $dbName   = $input->getArgument('database');
-        $username = $input->getArgument('user');
-        $password = $input->getArgument('password');
+        $username = $input->getArgument('typo3-user');
+        $password = $input->getArgument('typo3-password');
 
         $output->writeln('<h2>Injecting TYPO3 backend user</h2>');
 
@@ -123,16 +125,17 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand
             // All databases
             // ##############
 
-            $databaseList = DatabaseConnection::databaseList();
+            $databaseList = $this->mysqlDatabaseList();
 
             $dbFound = false;
             foreach ($databaseList as $dbName) {
                 // Check if database is TYPO3 instance
                 $query = 'SELECT COUNT(*) as count
                             FROM information_schema.tables
-                           WHERE table_schema = ' . DatabaseConnection::quote($dbName) . '
+                           WHERE table_schema = ' . $this->mysqlQuote($dbName) . '
                              AND table_name = \'be_users\'';
-                $isTypo3Database = DatabaseConnection::getOne($query);
+                $isTypo3Database = $this->execSqlCommand($query);
+                $isTypo3Database = reset($isTypo3Database);
 
                 if ($isTypo3Database) {
                     $this->setTypo3UserForDatabase($dbName, $username, $password);
@@ -172,7 +175,6 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand
             'options.clearCache.system = 1',
             'options.clearCache.all = 1',
             'options.enableShowPalettes = 1',
-            'options.alertPopups = 254',
             'options.pageTree.showPageIdWithTitle = 1',
             'options.pageTree.showPathAboveMounts = 1',
             'options.pageTree.showDomainNameWithTitle = 1',
@@ -248,22 +250,23 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand
             // Get uid from current dev user (if already existing)
             $query = 'SELECT uid
                         FROM ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.be_users
-                       WHERE username = ' . DatabaseConnection::quote($username) . '
+                       WHERE username = ' . $this->mysqlQuote($username) . '
                          AND deleted = 0';
-            $beUserId = DatabaseConnection::getOne($query);
+            $beUserId = $this->execSqlCommand($query);
+            $beUserId = reset($beUserId);
 
             // Insert or update user in TYPO3 database
             $query = 'INSERT INTO ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.be_users
                                   (uid, tstamp, crdate, realName, username, password, TSconfig, uc, admin, disable, starttime, endtime)
                        VALUES(
-                          ' . DatabaseConnection::quote($beUserId) . ',
+                          ' . $this->mysqlQuote($beUserId) . ',
                           UNIX_TIMESTAMP(),
                           UNIX_TIMESTAMP(),
-                          ' . DatabaseConnection::quote('DEVELOPMENT') . ',
-                          ' . DatabaseConnection::quote($username) . ',
-                          ' . DatabaseConnection::quote($password) . ',
-                          ' . DatabaseConnection::quote($tsConfig) . ',
-                          ' . DatabaseConnection::quote($uc) . ',
+                          ' . $this->mysqlQuote('DEVELOPMENT') . ',
+                          ' . $this->mysqlQuote($username) . ',
+                          ' . $this->mysqlQuote($password) . ',
+                          ' . $this->mysqlQuote($tsConfig) . ',
+                          ' . $this->mysqlQuote($uc) . ',
                           1,
                           0,
                           0,
@@ -275,7 +278,7 @@ class BeUserCommand extends \CliTools\Console\Command\AbstractCommand
                             disable   = VALUES(disable),
                             starttime = VALUES(starttime),
                             endtime   = VALUES(endtime)';
-            DatabaseConnection::exec($query);
+            $this->execSqlCommand($query);
 
             if ($beUserId) {
                 $this->output->writeln('<p>User successfully updated to "' . $database . '"</p>');
