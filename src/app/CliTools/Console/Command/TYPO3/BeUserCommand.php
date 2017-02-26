@@ -204,6 +204,48 @@ class BeUserCommand extends \CliTools\Console\Command\Mysql\AbstractCommand
         );
         $tsConfig = implode("\n", $tsConfig);
 
+        // Default uc
+        $uc = array(
+            'thumbnailsByDefault' => 1,
+            'recursiveDelete' => 1,
+            'showHiddenFilesAndFolders' => 1,
+            'edit_RTE' => 1,
+            'resizeTextareas' => 1,
+            'resizeTextareas_Flexible' => 1,
+            'copyLevels' => 99,
+            'rteResize' => 99,
+            'moduleData' => array(
+                'web_layout' => array(
+                    // not "quick edit" but "columns" should be the
+                    // default submodule within the page module
+                    'function' => '1',
+                ),
+                'web_list' => array(
+                    // check the important boxes right away
+                    'bigControlPanel' => '1',
+                    'clipBoard' => '1',
+                    'localization' => '1',
+                    'showPalettes' => '1',
+                ),
+                'web_ts' => array(
+                    // not "constant editor" but "object browser"
+                    'function' => 'TYPO3\CMS\Tstemplate\Controller\TypoScriptTemplateObjectBrowserModuleFunctionController',
+                    // better defaults for immediate debugging the actual typoscript
+                    'ts_browser_type' => 'setup',
+                    'ts_browser_const' => 'subst',
+                    'ts_browser_fixedLgd' => '0',
+                    'ts_browser_showComments' => '1',
+                ),
+                'file_list' => array(
+                    'bigControlPanel' => '1',
+                    'clipBoard' => '1',
+                    'localization' => '1',
+                    'showPalettes' => '1',
+                ),
+            ),
+        );
+        $uc = serialize($uc);
+
         try {
             // Get uid from current dev user (if already existing)
             $query = 'SELECT uid
@@ -215,7 +257,7 @@ class BeUserCommand extends \CliTools\Console\Command\Mysql\AbstractCommand
 
             // Insert or update user in TYPO3 database
             $query = 'INSERT INTO ' . DatabaseConnection::sanitizeSqlDatabase($database) . '.be_users
-                                  (uid, tstamp, crdate, realName, username, password, TSconfig, admin, disable, starttime, endtime)
+                                  (uid, tstamp, crdate, realName, username, password, TSconfig, uc, admin, disable, starttime, endtime)
                        VALUES(
                           ' . $this->mysqlQuote($beUserId) . ',
                           UNIX_TIMESTAMP(),
@@ -224,6 +266,7 @@ class BeUserCommand extends \CliTools\Console\Command\Mysql\AbstractCommand
                           ' . $this->mysqlQuote($username) . ',
                           ' . $this->mysqlQuote($password) . ',
                           ' . $this->mysqlQuote($tsConfig) . ',
+                          ' . $this->mysqlQuote($uc) . ',
                           1,
                           0,
                           0,
