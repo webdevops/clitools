@@ -27,7 +27,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DomainCommand extends \CliTools\Console\Command\AbstractCommand
+class DomainCommand extends \CliTools\Console\Command\Mysql\AbstractCommand
 {
 
     /**
@@ -35,6 +35,8 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function configure()
     {
+        parent::configure();
+
         $this->setName('typo3:domain')
              ->setDescription('Add common development domains to database')
              ->addArgument(
@@ -65,7 +67,13 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand
                  null,
                  InputOption::VALUE_REQUIRED,
                  'Add duplication domains (will duplicate all domains in system, eg. for vagrant share)'
-             );
+             )
+            ->addOption(
+                'suffix',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Domain suffix'
+            );
     }
 
     /**
@@ -93,15 +101,16 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand
             // ##############
             // All databases
             // ##############
-            $databaseList = DatabaseConnection::databaseList();
+            $databaseList = $this->mysqlDatabaseList();
 
             foreach ($databaseList as $dbName) {
                 // Check if database is TYPO3 instance
                 $query = 'SELECT COUNT(*) as count
                             FROM information_schema.tables
-                           WHERE table_schema = ' . DatabaseConnection::quote($dbName) . '
+                           WHERE table_schema = ' . $this->mysqlQuote($dbName) . '
                              AND table_name = \'sys_domain\'';
-                $isTypo3Database = DatabaseConnection::getOne($query);
+                $isTypo3Database = $this->execSqlCommand($query);
+                $isTypo3Database = reset($isTypo3Database);
 
                 if ($isTypo3Database) {
                     $this->runTaskForDomain($dbName);
@@ -120,28 +129,26 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand
      */
     protected function runTaskForDomain($dbName)
     {
-        DatabaseConnection::switchDatabase($dbName);
-
         if ($this->input->getOption('list')) {
             // Show domain list (and skip all other tasks)
             $this->showDomainList($dbName);
         } else {
             // Remove domains (eg. for cleanup)
             if ($this->input->getOption('remove')) {
-                $this->removeDomains($this->input->getOption('remove'));
+                $this->removeDomains($dbName, $this->input->getOption('remove'));
             }
 
             // Set development domains
-            $this->manipulateDomains();
+            $this->manipulateDomains($dbName);
 
             // Add sharing domains
             if ($this->input->getOption('baseurl')) {
-                $this->updateBaseUrlConfig();
+                $this->updateBaseUrlConfig($dbName);
             }
 
             // Add sharing domains
             if ($this->input->getOption('duplicate')) {
-                $this->addDuplicateDomains($this->input->getOption('duplicate'));
+                $this->addDuplicateDomains($dbName, $this->input->getOption('duplicate'));
             }
 
             // Show domain list
@@ -152,19 +159,19 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand
     /**
      * Remove domains
      */
-    protected function removeDomains($pattern)
+    protected function removeDomains($dbName, $pattern)
     {
         $pattern = str_replace('*', '%', $pattern);
 
-        $query = 'DELETE FROM sys_domain WHERE domainName LIKE %s';
-        $query = sprintf($query, DatabaseConnection::quote($pattern));
-        DatabaseConnection::exec($query);
+        $query = 'DELETE FROM ' . $dbName . '.sys_domain WHERE domainName LIKE %s';
+        $query = sprintf($query, $this->mysqlQuote($pattern));
+        $this->execSqlCommand($query);
     }
 
     /**
      * Update baseURL config
      */
-    protected function updateBaseUrlConfig()
+    protected function updateBaseUrlConfig($dbName)
     {
         $query = 'SELECT st.uid as template_id,
                          st.config as template_config,
@@ -175,11 +182,11 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand
                         ORDER BY sd.forced DESC,
                                  sd.sorting ASC
                            LIMIT 1) as domain_name
-                    FROM sys_template st
+                    FROM ' . $dbName . '.sys_template st
                    WHERE st.root = 1
                      AND st.deleted  = 0
                   HAVING domain_name IS NOT NULL';
-        $templateIdList = DatabaseConnection::getAll($query);
+        $templateIdList = $this->execSqlQuery($query);
 
         foreach ($templateIdList as $row) {
             $templateId   = $row['template_id'];
@@ -193,9 +200,9 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand
             // Add new baseURL
             $templateConf .= "\n" . 'config.baseURL = http://' . $domainName . '/';
 
-            $query = 'UPDATE sys_template SET config = %s WHERE uid = %s';
-            $query = sprintf($query, DatabaseConnection::quote($templateConf), (int)$templateId);
-            DatabaseConnection::exec($query);
+            $query = 'UPDATE ' . $dbName . '.sys_template SET config = %s WHERE uid = %s';
+            $query = sprintf($query, $this->mysqlQuote($templateConf), (int)$templateId);
+            $this->execSqlCommand($query);
         }
     }
 
@@ -204,13 +211,13 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @param string $suffix Domain suffix
      */
-    protected function addDuplicateDomains($suffix)
+    protected function addDuplicateDomains($dbName, $suffix)
     {
         $devDomain = '.' . $this->getApplication()
                                 ->getConfigValue('config', 'domain_dev');
 
-        $query      = 'SELECT * FROM sys_domain';
-        $domainList = DatabaseConnection::getAll($query);
+        $query      = 'SELECT * FROM ' . $dbName . '.sys_domain';
+        $domainList = $this->execSqlQuery($query);
 
         foreach ($domainList as $domain) {
             unset($domain['uid']);
@@ -225,7 +232,18 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand
 
             $domain['domainName'] = $domainName;
 
-            DatabaseConnection::insert('sys_domain', $domain);
+            // create insert
+            $table = 'sys_domain';
+            $fieldList = array_keys($domain);
+
+            $valueList = array();
+            foreach ($domain as $value) {
+                $valueList[] = $this->mysqlQuote($value);
+            }
+
+            $query = 'INSERT INTO %s (%s) VALUES (%s)';
+            $query = sprintf($query, $table, implode(',', $fieldList), implode(',', $valueList));
+            $this->execSqlCommand($query);
         }
     }
 
@@ -237,15 +255,15 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand
     protected function showDomainList($dbName)
     {
         $query = 'SELECT domainName
-                    FROM sys_domain
+                    FROM ' . $dbName . '.sys_domain
                    WHERE hidden = 0
                 ORDER BY domainName ASC';
-        $domainList = DatabaseConnection::getCol($query);
+        $domainList = $this->execSqlQuery($query);
 
         $this->output->writeln('<p>Domain list of "' . $dbName . '":</p>');
 
         foreach ($domainList as $domain) {
-            $this->output->writeln('<p>  ' . $domain . '</p>');
+            $this->output->writeln('<p>  ' . reset($domain) . '</p>');
         }
         $this->output->writeln('');
     }
@@ -255,18 +273,23 @@ class DomainCommand extends \CliTools\Console\Command\AbstractCommand
      *
      * @return void
      */
-    protected function manipulateDomains()
+    protected function manipulateDomains($dbName)
     {
         $devDomain    = '.' . $this->getApplication()
                                    ->getConfigValue('config', 'domain_dev');
+
+        if ($this->input->getOption('suffix')) {
+            $devDomain = $this->input->getOption('suffix');
+        }
+
         $domainLength = strlen($devDomain);
 
         // ##################
         // Fix domains
         // ##################
-        $query = 'UPDATE sys_domain
-                     SET domainName = CONCAT(domainName, ' . DatabaseConnection::quote($devDomain) . ')
-                   WHERE RIGHT(domainName, ' . $domainLength . ') <> ' . DatabaseConnection::quote($devDomain);
-        DatabaseConnection::exec($query);
+        $query = 'UPDATE ' . $dbName . '.sys_domain
+                     SET domainName = CONCAT(domainName, ' . $this->mysqlQuote($devDomain) . ')
+                   WHERE RIGHT(domainName, ' . $domainLength . ') <> ' . $this->mysqlQuote($devDomain);
+        $this->execSqlCommand($query);
     }
 }

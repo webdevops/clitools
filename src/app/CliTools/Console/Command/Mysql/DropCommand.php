@@ -21,7 +21,6 @@ namespace CliTools\Console\Command\Mysql;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Database\DatabaseConnection;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -58,8 +57,7 @@ class DropCommand extends AbstractCommand
         $database = $input->getArgument('db');
 
         $output->writeln('<h2>Dropping Database "' . $database . '"...</h2>');
-        $query = 'DROP DATABASE IF EXISTS ' . DatabaseConnection::sanitizeSqlDatabase($database);
-        DatabaseConnection::exec($query);
+        $this->execSqlCommand('DROP DATABASE IF EXISTS ' . addslashes($database));
 
         $output->writeln('<p>Database dropped</p>');
 

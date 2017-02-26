@@ -21,10 +21,8 @@ namespace CliTools\Console\Command\Mysql;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use CliTools\Database\DatabaseConnection;
 use CliTools\Shell\CommandBuilder\CommandBuilder;
 use CliTools\Shell\CommandBuilder\CommandBuilderInterface;
-use CliTools\Shell\CommandBuilder\MysqlCommandBuilder;
 use CliTools\Utility\FilterUtility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -43,6 +41,12 @@ class BackupCommand extends AbstractCommand
 
         $this->setName('mysql:backup')
              ->setDescription('Backup database')
+            ->addOption(
+                'port',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'MySQL port'
+            )
              ->addArgument(
                  'db',
                  InputArgument::REQUIRED,
@@ -88,19 +92,9 @@ class BackupCommand extends AbstractCommand
         $filterNameBlacklist = $input->getOption('blacklist') ?: $input->getOption('filter');
         $filterNameWhitelist = $input->getOption('whitelist');
 
-        if (!DatabaseConnection::databaseExists($database)) {
-            $output->writeln('<p-error>Database "' . $database . '" does not exists</p-error>');
-
-            return 1;
-        }
-
         $output->writeln('<h2>Dumping database "' . $database . '" into file "' . $dumpFile . '"</h2>');
 
         $fileExt = pathinfo($dumpFile, PATHINFO_EXTENSION);
-
-        // Inserting
-        putenv('USER=' . DatabaseConnection::getDbUsername());
-        putenv('MYSQL_PWD=' . DatabaseConnection::getDbPassword());
 
         $commandCompressor = null;
 
@@ -127,8 +121,7 @@ class BackupCommand extends AbstractCommand
                                   ->addArgument('--stdout');
                 break;
         }
-
-        $command = new MysqlCommandBuilder('mysqldump', '--single-transaction %s', array($database));
+        $command = $this->createMysqldumpCommand($database);
 
         if (!empty($filterNameBlacklist) || !empty($filterNameWhitelist)) {
             $command = $this->addFilterArguments($command, $database, $filterNameBlacklist, $filterNameWhitelist);

@@ -22,6 +22,7 @@ namespace CliTools\Utility;
  */
 
 use CliTools\Shell\CommandBuilder\CommandBuilder;
+use CliTools\Shell\CommandBuilder\DockerExecCommandBuilder;
 use CliTools\Shell\Executor;
 
 class DockerUtility
@@ -33,6 +34,47 @@ class DockerUtility
      * @var array
      */
     static protected $dockerConfigurationCache = array();
+
+    /**
+     * Lookup ID of docker-compose container
+     *
+     * @param string $container Name of docker container
+     *
+     * @throws \Exception
+     * @return string
+     */
+    public static function lookupDockerComposeContainerId($container)
+    {
+        $command = new CommandBuilder('docker-compose', ['ps', '-q', $container]);
+        $ret = $command->execute()->getOutputString();
+
+        if (empty($ret)) {
+            throw new \Exception('Docker-Compose container ' . $container . ' not found');
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Get Docker container Environment variable
+     *
+     * @param $container
+     * @return null|string
+     */
+    public static function getDockerContainerEnv($container, $env)
+    {
+        $conf = DockerUtility::getDockerConfiguration($container);
+
+        if (!empty($conf)
+            && !empty($conf->Config)
+            && !empty($conf->Config->Env)
+            && !empty($conf->Config->Env[$env]))
+        {
+            return $conf->Config->Env[$env];
+        }
+
+        return false;
+    }
 
     /**
      * Parse docker configuration (from docker inspect)

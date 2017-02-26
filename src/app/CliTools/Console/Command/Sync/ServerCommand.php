@@ -99,7 +99,10 @@ class ServerCommand extends AbstractRemoteSyncCommand
 
         // Check database connection
         if ($runMysql && $this->contextConfig->exists('mysql')) {
-            DatabaseConnection::ping();
+            // ping only on mysql connection, not dockerized exec calling
+            if (!$this->config->exists('LOCAL.mysql.docker') && !$this->config->exists('LOCAL.mysql.docker-compose')) {
+                DatabaseConnection::ping();
+            }
         }
 
         // Sync files with rsync to local storage
