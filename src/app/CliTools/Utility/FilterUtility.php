@@ -34,7 +34,7 @@ class FilterUtility
      */
     public static function mysqlTableFilter(array $tables, array $filters)
     {
-        $ret = array();
+        $ignoredTables = array();
 
         foreach ($tables as $table) {
             foreach ($filters as $filter) {
@@ -42,39 +42,63 @@ class FilterUtility
                     continue 2;
                 }
             }
-            $ret[] = $table;
+            $ignoredTables[] = $table;
         }
 
-        return $ret;
+        return $ignoredTables;
     }
 
     /**
      * Filter mysql table list by filter
      *
-     * @param array       $tables   List of tables
-     * @param array       $filters  List of filters
-     * @param string|null $database Database
+     * @param array       $tables    List of tables
+     * @param array|null  $blacklist List of negative filters
+     * @param array|null  $whitelist List of positive filters
+     * @param string|null $database  Database
      *
      * @return array
      */
-    public static function mysqlIgnoredTableFilter(array $tables, array $filters, $database = null)
+    public static function mysqlIgnoredTableFilter(array $tables, array $blacklist = null, array $whitelist = null, $database = null)
     {
-        $ret = array();
+        $ignoredTables = array();
 
-        foreach ($tables as $table) {
-            foreach ($filters as $filter) {
-                if (preg_match($filter, $table)) {
-
-                    if ($database !== null) {
-                        $ret[] = $database . '.' . $table;
-                    } else {
-                        $ret[] = $table;
+        // first of all: put all non-whitelisted tables on "ignore list"
+        if ($whitelist && is_array($whitelist)) {
+            foreach ($tables as &$table) {
+                $allowed = false;
+                foreach ($whitelist as $filter) {
+                    if (preg_match($filter, $table)) {
+                        $allowed = true;
                     }
-                    continue 2;
+                }
+                if (!$allowed) {
+                    if ($database !== null) {
+                       $ignoredTables[] = $database . '.' . $table;
+                    } else {
+                       $ignoredTables[] = $table;
+                    }
+                }
+                continue 1;
+            }
+        }
+
+        // secondly: put blacklisted tables on "ignore list" too
+        if ($blacklist && is_array($blacklist)) {
+            foreach ($tables as $table) {
+                foreach ($blacklist as $filter) {
+                    if (preg_match($filter, $table)) {
+                        if ($database !== null) {
+                            $ignoredTables[] = $database . '.' . $table;
+                        } else {
+                            $ignoredTables[] = $table;
+                        }
+                        continue 2;
+                    }
                 }
             }
         }
 
-        return $ret;
+        sort($ignoredTables);
+        return array_unique($ignoredTables);
     }
 }

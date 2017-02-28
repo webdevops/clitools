@@ -889,13 +889,14 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerC
     /**
      * Create mysql backup command
      *
-     * @param string      $database Database name
-     * @param string      $dumpFile MySQL dump file
-     * @param null|string $filter   Filter name
+     * @param string      $database            Database name
+     * @param string      $dumpFile            MySQL dump file
+     * @param null|string $filterNameBlacklist Filter name
+     * @param null|string $filterNameWhitelist Filter name
      *
      * @return SelfCommandBuilder
      */
-    protected function createMysqlBackupCommand($database, $dumpFile, $filter = null)
+    protected function createMysqlBackupCommand($database, $dumpFile, $filterNameBlacklist = null, $filterNameWhitelist = null)
     {
         $command = new SelfCommandBuilder();
         $command->addArgumentTemplate('mysql:backup %s %s', $database, $dumpFile);
@@ -914,8 +915,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerC
             $command->addArgumentTemplate('--password %s', $this->config->get('LOCAL.mysql.password'));
         }
 
-        if ($filter !== null) {
-            $command->addArgumentTemplate('--filter=%s', $filter);
+        if ($filterNameBlacklist !== null) {
+            $command->addArgumentTemplate('--blacklist=%s', $filterNameBlacklist);
+        }
+
+        if ($filterNameWhitelist !== null) {
+            $command->addArgumentTemplate('--whitelist=%s', $filterNameWhitelist);
         }
 
         return $command;
@@ -1151,42 +1156,68 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerC
     {
         $command = $commandDump;
 
-        $filter = $this->contextConfig->get('mysql.filter');
+        $filterBlacklist = $this->contextConfig->get('mysql.blacklist') ?: $this->contextConfig->get('mysql.filter');
+        $filterWhitelist = $this->contextConfig->get('mysql.whitelist');
 
-        // get filter
-        if (is_array($filter)) {
-            $filterList = (array)$filter;
-            $filter     = 'custom table filter';
-        } else {
-            $filterList = $this->getApplication()
-                               ->getConfigValue('mysql-backup-filter', $filter);
+        $blacklist = null;
+        $whitelist = null;
+        $ignoredTableList = null;
+
+        if ($filterBlacklist) {
+            // get black filter
+            if (is_array($filterBlacklist)) {
+                $blacklist = (array)$filterBlacklist;
+                $filterBlacklist     = 'custom table blacklist filter';
+            } else {
+                $blacklist = $this->getApplication()
+                                  ->getConfigValue('mysql-backup-filter', $filterBlacklist);
+            }
+
+            if (empty($blacklist)) {
+                throw new \RuntimeException('MySQL dump blacklist filters "' . $filterBlacklist . '" not available"');
+            }
+
+            $this->output->writeln('<p>Using blacklist filter "' . $filterBlacklist . '"</p>');
         }
 
-        if (empty($filterList)) {
-            throw new \RuntimeException('MySQL dump filters "' . $filter . '" not available"');
+        if ($filterWhitelist) {
+            // get whitelist filter
+            if (is_array($filterWhitelist)) {
+                $whitelist = (array)$filterWhitelist;
+                $filterWhitelist     = 'custom table whitelist filter';
+            } else {
+                $whitelist = $this->getApplication()
+                                  ->getConfigValue('mysql-backup-filter', $filterWhitelist);
+            }
+
+            if (empty($whitelist)) {
+                throw new \RuntimeException('MySQL dump whitelist filters "' . $filterWhitelist . '" not available"');
+            }
+
+            $this->output->writeln('<p>Using whitelist filter "' . $filterWhitelist . '"</p>');
         }
 
-        $this->output->writeln('<p>Using filter "' . $filter . '"</p>');
+        if ($blacklist || $whitelist) {
+            // Get table list (from cloned mysqldump command)
+            if ($isRemote) {
+                $tableListDumper = $this->createRemoteMySqlCommand($database);
+            } else {
+                $tableListDumper = $this->createLocalMySqlCommand($database);
+            }
 
-        // Get table list (from cloned mysqldump command)
-        if ($isRemote) {
-            $tableListDumper = $this->createRemoteMySqlCommand($database);
-        } else {
-            $tableListDumper = $this->createLocalMySqlCommand($database);
+            $tableListDumper->addArgumentTemplate('-e %s', 'show tables;');
+
+            // wrap with ssh (for remote execution)
+            if ($isRemote) {
+                $tableListDumper = $this->wrapRemoteCommand($tableListDumper);
+            }
+
+            $tableList = $tableListDumper->execute()
+                                         ->getOutput();
+
+            // Filter table list
+            $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $blacklist, $whitelist, $database);
         }
-
-        $tableListDumper->addArgumentTemplate('-e %s', 'show tables;');
-
-        // wrap with ssh (for remote execution)
-        if ($isRemote) {
-            $tableListDumper = $this->wrapRemoteCommand($tableListDumper);
-        }
-
-        $tableList = $tableListDumper->execute()
-                                     ->getOutput();
-
-        // Filter table list
-        $ignoredTableList = FilterUtility::mysqlIgnoredTableFilter($tableList, $filterList, $database);
 
         // Determine size of tables to be dumped and abort if user wishes to
         $warningSize = $this->getApplication()->getConfigValue('db', 'warning_transfer_size', 500);
