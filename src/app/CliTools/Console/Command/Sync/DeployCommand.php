@@ -85,7 +85,7 @@ class DeployCommand extends AbstractRemoteSyncCommand
         // Sync database to local server
         if ($runMysql && $this->contextConfig->exists('mysql')) {
             $this->output->writeln('<h1>Starting MYSQL deployment</h1>');
-            $this->output->writeln('<p>TODO - not implemented</h1>');
+            $this->output->writeln('<p>TODO - not implemented</p>');
         }
     }
 
