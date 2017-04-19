@@ -1222,7 +1222,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerC
         // Determine size of tables to be dumped and abort if user wishes to
         $warningSize = $this->getApplication()->getConfigValue('db', 'warning_transfer_size', 500);
         $this->output->writeln(sprintf(
-            '<p>Checking size of remote database (threshold %s MiB)</p>',
+            '<p>Checking size of %s database (threshold %s MiB)</p>',
+            $isRemote?'remote':'local',
             $warningSize
         ));
         $size = $this->determineSizeOfTables($database, $ignoredTableList, $isRemote);
