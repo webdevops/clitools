@@ -22,6 +22,8 @@ namespace CliTools\Console\Command\Sync;
  */
 
 use CliTools\Database\DatabaseConnection;
+use CliTools\Shell\CommandBuilder\OutputCombineCommandBuilder;
+use CliTools\Shell\CommandBuilder\CommandBuilder;
 
 class DeployCommand extends AbstractRemoteSyncCommand
 {
@@ -85,7 +87,7 @@ class DeployCommand extends AbstractRemoteSyncCommand
         // Sync database to local server
         if ($runMysql && $this->contextConfig->exists('mysql')) {
             $this->output->writeln('<h1>Starting MYSQL deployment</h1>');
-            $this->output->writeln('<p>TODO - not implemented</h1>');
+            $this->runTaskDatabase();
         }
     }
 
@@ -103,6 +105,77 @@ class DeployCommand extends AbstractRemoteSyncCommand
         $command = $this->createRsyncCommandWithConfiguration($source, $target, 'rsync');
 
         $command->executeInteractive();
+    }
+
+    /**
+     * Sync database
+     */
+    protected function runTaskDatabase()
+    {
+        // ##################
+        // Sync databases
+        // ##################
+        foreach ($this->contextConfig->getArray('mysql.database') as $databaseConf) {
+            if (strpos($databaseConf, ':') !== false) {
+                // local and foreign database in one string
+                list($localDatabase, $foreignDatabase) = explode(':', $databaseConf, 2);
+            } else {
+                // database equal
+                $localDatabase   = $databaseConf;
+                $foreignDatabase = $databaseConf;
+            }
+
+            // make sure we don't have any leading whitespaces
+            $localDatabase   = trim($localDatabase);
+            $foreignDatabase = trim($foreignDatabase);
+
+            $dumpFile = $this->tempDir . '/' . $localDatabase . '.sql.dump';
+
+            // ##############
+            // Dump local DB
+            // ##############
+            $this->output->writeln('<p>Dumping local database "' . $localDatabase . '"</p>');
+
+            $mysqldump = $this->createLocalMySqlDumpCommand($localDatabase);
+
+            if ($this->contextConfig->exists('mysql.blacklist') ||
+                $this->contextConfig->exists('mysql.whitelist') ||
+                $this->contextConfig->exists('mysql.filter')) {
+                $mysqldump = $this->addMysqlDumpFilterArguments(
+                    $mysqldump,
+                    $localDatabase,
+                    false
+                );
+            }
+
+            $command = new OutputCombineCommandBuilder();
+            $command->addCommandForCombinedOutput($mysqldump);
+
+            $command->setOutputRedirectToFile($dumpFile)
+                    ->executeInteractive();
+
+            ######################
+            #Pushing DB to remote
+            ######################
+            $this->output->writeln('<p>Pushing "' . $dumpFile . '" into remote database "' . $foreignDatabase . '"</p>');
+
+            switch ($this->contextConfig->get('mysql.compression')) {
+                case 'bzip2':
+                    $command = new CommandBuilder('bzcat', $dumpFile);
+                    break;
+                case 'gzip':
+                    $command = new CommandBuilder('gzip', '-dc ' . $dumpFile);
+                    break;
+                default:
+                    $command = new CommandBuilder('cat', $dumpFile);
+            }
+
+            $mysqlImportRemote = $this->createRemoteMySqlCommand($foreignDatabase);
+            $mysqlImportRemote = $this->wrapRemoteCommand($mysqlImportRemote);
+            $command->addPipeCommand($mysqlImportRemote);
+
+            $command->executeInteractive();
+        }
     }
 
 }
