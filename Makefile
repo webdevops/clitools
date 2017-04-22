@@ -1,6 +1,8 @@
-all: clear autoload build
+TAG ?= $(shell git describe --tags)
 
-clear:
+all: clean autoload build
+
+clean:
 	rm -f clitools.phar
 
 build:
@@ -22,7 +24,7 @@ install-box:
 	curl -LSs https://box-project.github.io/box2/installer.php | php
 	mv box.phar /usr/local/bin
 
-release: build
+release: all
 ifndef desc
 	@echo "Run it as 'make release desc=tralala'"
 else
