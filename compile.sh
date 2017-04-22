@@ -44,3 +44,5 @@ fi
 php -d phar.readonly=0 "$BOX_PATH" build -c box.json
 
 cd "$OLD_PWD"
+
+echo "Build finished, for installation run: make install"
