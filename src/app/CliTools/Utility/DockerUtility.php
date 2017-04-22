@@ -22,7 +22,6 @@ namespace CliTools\Utility;
  */
 
 use CliTools\Shell\CommandBuilder\CommandBuilder;
-use CliTools\Shell\CommandBuilder\DockerExecCommandBuilder;
 use CliTools\Shell\Executor;
 
 class DockerUtility
