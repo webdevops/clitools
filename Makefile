@@ -26,9 +26,9 @@ release: build
 ifndef desc
 	@echo "Run it as 'make release desc=tralala'"
 else
-	echo github-release release -u webdevops -r clitools -t "$(TAG)" -n "$(TAG)" --description "$(desc)"
+	github-release release -u webdevops -r clitools -t "$(TAG)" -n "$(TAG)" --description "$(desc)"
 	echo "Uploading clitools.phar" && \
-	echo github-release upload -u webdevops \
+	github-release upload -u webdevops \
 	                      -r clitools \
 	                      -t $(TAG) \
 	                      -f "clitools.phar" \
