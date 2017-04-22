@@ -1,9 +1,11 @@
 CliTools Changelog
 ==================
 
-?.?.? - ?
----------
+2.4.0 - ????-??-??
+------------------
 - Add TYPO3 extensionmanager tables to default TYPO3 filter
+- Add support for docker containers (and automatic translation of docker-compose container names) for mysql commands
+- Add support for running mysql commands inside docker containers for sync
 
 2.3.4 - 2016-03-31
 ------------------
