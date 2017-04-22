@@ -32,12 +32,15 @@ composer dump-autoload --optimize --no-dev
 cd "$SCRIPT_DIR/"
 
 if hash box.phar 2>/dev/null; then
-	box.phar build -c box.json
+    BOX_PATH=$(which box.phar)
 elif hash box 2>/dev/null; then
-	box build -c box.json
+    BOX_PATH=$(which box)
 else
 	echo 'ERROR: box.phar (box-project/box2) not found'
+	echo 'Try >> make install-box'
 	exit 1
 fi
+
+php -d phar.readonly=0 "$BOX_PATH" build -c box.json
 
 cd "$OLD_PWD"
