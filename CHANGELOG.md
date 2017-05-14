@@ -1,6 +1,10 @@
 CliTools Changelog
 ==================
 
+2.4.2 - 2017-05-14
+------------------
+- Remove mysql warnings (mysql ping)
+
 2.4.1 - 2017-05-14
 ------------------
 - Fix sync problems after deletion of database
