@@ -353,9 +353,15 @@ abstract class AbstractCommand extends Command
      * @param string $sql
      * @return array|null
      */
-    protected function execSqlCommand($sql)
+    protected function execSqlCommand($sql, $database = null)
     {
-        return $this->createMysqlCommand('-e', $sql)->execute()->getOutput();
+        $command = $this->createMysqlCommand('-e', $sql);
+
+        if ($database !== null) {
+            $command->addArgumentTemplate('-D %s', $database);
+        }
+
+        $command->execute()->getOutput();
     }
 
 

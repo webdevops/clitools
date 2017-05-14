@@ -75,7 +75,7 @@ class DeployCommand extends AbstractRemoteSyncCommand
 
         // Check database connection
         if ($runMysql && $this->contextConfig->exists('mysql')) {
-            DatabaseConnection::ping();
+            $this->localMysqlPing();
         }
 
         // Sync files with rsync to local storage

@@ -91,18 +91,6 @@ abstract class AbstractDockerCommand extends AbstractCommand
      * Execute sql command (using local mysql command)
      *
      * @param string $sql
-     * @return array|null
-     */
-    protected function execSqlCommand($sql)
-    {
-        return $this->createMysqlCommand('-e', $sql)->execute()->getOutput();
-    }
-
-
-    /**
-     * Execute sql command (using local mysql command)
-     *
-     * @param string $sql
      * @param boolean $assoc associate array
      * @return array|null
      */

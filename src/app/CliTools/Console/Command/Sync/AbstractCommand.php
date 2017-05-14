@@ -149,7 +149,32 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerC
         // Read configuration
         $this->readConfiguration();
 
+        $this->initDatabaseConfiguration();
         $this->initDockerContainer();
+    }
+
+    /**
+     * Init database configuration (for local one)
+     */
+    protected function initDatabaseConfiguration()
+    {
+        $hostname = DatabaseConnection::getDbHostname();
+        $username = DatabaseConnection::getDbUsername();
+        $password = DatabaseConnection::getDbPassword();
+
+        if ($this->config->exists('LOCAL.mysql.hostname')) {
+            $hostname = $this->config->get('LOCAL.mysql.hostname');
+        }
+
+        if ($this->config->exists('LOCAL.mysql.username')) {
+            $username = $this->config->get('LOCAL.mysql.username');
+        }
+
+        if ($this->config->exists('LOCAL.mysql.password')) {
+            $password = $this->config->get('LOCAL.mysql.password');
+        }
+
+        DatabaseConnection::setDsn('mysql:host=' . $hostname, $username, $password);
     }
 
     /**
@@ -883,6 +908,10 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerC
             $command->addArgumentTemplate('--password %s', $this->config->get('LOCAL.mysql.password'));
         }
 
+        if ($this->output->isVerbose()) {
+            $command->addArgument('-v');
+        }
+
         return $command;
     }
 
@@ -921,6 +950,10 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerC
 
         if ($filterNameWhitelist !== null) {
             $command->addArgumentTemplate('--whitelist=%s', $filterNameWhitelist);
+        }
+
+        if ($this->output->isVerbose()) {
+            $command->addArgument('-v');
         }
 
         return $command;
@@ -985,6 +1018,14 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerC
         return $command;
     }
 
+    protected function localMysqlPing()
+    {
+        $echoCommand = new CommandBuilder('echo', 'SELECT 1');
+        $mysqlCommand = $this->createLocalMySqlCommand();
+        $mysqlCommand->setOutputRedirect('> /dev/null');
+        $echoCommand->addPipeCommand($mysqlCommand);
+        $echoCommand->executeInteractive();
+    }
 
     /**
      * Create new mysql command
@@ -1013,7 +1054,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerC
                 $command->addArgumentTemplate('-h%s', DatabaseConnection::getDbHostname());
             }
 
-            // Add hostname
+            // Add port
             if (DatabaseConnection::getDbPort()) {
                 $command->addArgumentTemplate('-P%s', DatabaseConnection::getDbPort());
             }
