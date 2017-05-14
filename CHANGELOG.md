@@ -1,6 +1,11 @@
 CliTools Changelog
 ==================
 
+2.4.1 - 2017-05-14
+------------------
+- Fix sync problems after deletion of database
+- Fix compiling (auto install box.phar)
+
 2.4.0 - 2017-04-23
 ------------------
 - Add TYPO3 extensionmanager tables to default TYPO3 filter
