@@ -361,7 +361,7 @@ abstract class AbstractCommand extends Command
             $command->addArgumentTemplate('-D %s', $database);
         }
 
-        $command->execute()->getOutput();
+        return $command->execute()->getOutput();
     }
 
 
