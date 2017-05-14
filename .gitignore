@@ -2,3 +2,4 @@
 *.phar
 *.bak
 src/vendor/*
+vendor/*

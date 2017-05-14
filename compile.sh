@@ -31,15 +31,12 @@ composer dump-autoload --optimize --no-dev
 ## create phar
 cd "$SCRIPT_DIR/"
 
-if hash box.phar 2>/dev/null; then
-    BOX_PATH=$(which box.phar)
-elif hash box 2>/dev/null; then
-    BOX_PATH=$(which box)
-else
-	echo 'ERROR: box.phar (box-project/box2) not found'
-	echo 'Try >> make install-box'
-	exit 1
+if [[ ! -f vendor/box.phar ]]; then
+    mkdir -p vendor
+    wget -Ovendor/box.phar https://github.com/box-project/box2/releases/download/2.7.5/box-2.7.5.phar
 fi
+
+BOX_PATH=vendor/box.phar
 
 php -d phar.readonly=0 "$BOX_PATH" build -c box.json
 
