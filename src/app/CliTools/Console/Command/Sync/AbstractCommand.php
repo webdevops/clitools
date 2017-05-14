@@ -1062,7 +1062,7 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerC
 
         // Add password
         if (DatabaseConnection::getDbPassword()) {
-            $command->addArgumentTemplate('-p%s', DatabaseConnection::getDbPassword());
+            $command->addEnvironmentVar('MYSQL_PWD', DatabaseConnection::getDbPassword());
         }
 
 
