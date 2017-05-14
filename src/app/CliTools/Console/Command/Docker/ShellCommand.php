@@ -81,11 +81,10 @@ class ShellCommand extends AbstractCommand
         $command = new RemoteCommandBuilder('bash');
 
         if (!empty($cliUser)) {
-            // sudo wrapping as cli user
-            $commandSudo = new RemoteCommandBuilder('sudo', '-H -E -u %s', array($cliUser));
-            $commandSudo->addArgumentTemplate('TERM=%s', getenv('TERM'));
-            $commandSudo->append($command, false);
-            $command = $commandSudo;
+            // su wrapping as cli user
+            $commandSu = new RemoteCommandBuilder('su', '-l %s -m', array($cliUser));
+            $commandSu->addArgumentTemplate('-c "TERM=%s %s"', getenv('TERM'), $command);
+            $command = $commandSu;
         }
 
         $ret = $this->executeDockerExec($container, $command);
