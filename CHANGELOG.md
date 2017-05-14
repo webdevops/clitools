@@ -1,6 +1,10 @@
 CliTools Changelog
 ==================
 
+2.4.3 - 2017-05-14
+------------------
+- Fix mysql command not returning output (regression)
+
 2.4.2 - 2017-05-14
 ------------------
 - Remove mysql warnings (mysql ping)
