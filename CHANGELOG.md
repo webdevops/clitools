@@ -1,6 +1,10 @@
 CliTools Changelog
 ==================
 
+2.4.4 - 2017-05-14
+------------------
+- Fix regression in sync when mysql port is missing
+
 2.4.3 - 2017-05-14
 ------------------
 - Fix mysql command not returning output (regression)
