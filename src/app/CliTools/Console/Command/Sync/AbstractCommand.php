@@ -159,11 +159,16 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerC
     protected function initDatabaseConfiguration()
     {
         $hostname = DatabaseConnection::getDbHostname();
+        $port = DatabaseConnection::getDbPort();
         $username = DatabaseConnection::getDbUsername();
         $password = DatabaseConnection::getDbPassword();
 
         if ($this->config->exists('LOCAL.mysql.hostname')) {
             $hostname = $this->config->get('LOCAL.mysql.hostname');
+        }
+
+        if ($this->config->exists('LOCAL.mysql.port')) {
+            $port = $this->config->get('LOCAL.mysql.port');
         }
 
         if ($this->config->exists('LOCAL.mysql.username')) {
@@ -174,7 +179,9 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerC
             $password = $this->config->get('LOCAL.mysql.password');
         }
 
-        DatabaseConnection::setDsn('mysql:host=' . $hostname, $username, $password);
+        $dsn = 'mysql:host=' . urlencode($hostname) . ';port=' . (int)$port;
+
+        DatabaseConnection::setDsn($dsn, $username, $password);
     }
 
     /**
