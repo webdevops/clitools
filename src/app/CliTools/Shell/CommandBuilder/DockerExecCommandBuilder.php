@@ -82,6 +82,7 @@ class DockerExecCommandBuilder extends CommandBuilder
         }
 
         $subCommand = clone $this;
+        $subCommand->clearPipes();
         $subCommand->clearOutputRedirect();
         $subCommand->dockerInternalCommand = true;
 
