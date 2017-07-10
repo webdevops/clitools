@@ -48,6 +48,7 @@ GLOBAL:
         #  - "/^index_.*/i"
         #  - "/^sys_log$/i"
         #  - "/^sys_history$/i"
+        #  - "/^sys_registry$/i"
         #  - "/^tx_extbase_cache.*/i"
 
         # Transfer compression (none if empty, bzip2 or gzip)
