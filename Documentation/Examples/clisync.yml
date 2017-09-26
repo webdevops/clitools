@@ -158,6 +158,8 @@ sync:
         mysql:
             username: typo3
             password: loremipsum
+            #hostname: db.example.com
+            #defaultsFile: /var/www/.my-custom.cnf
 
             # List of databases for synchronization
             #   examples:
