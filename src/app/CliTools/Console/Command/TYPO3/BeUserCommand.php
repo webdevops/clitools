@@ -55,11 +55,10 @@ class BeUserCommand extends \CliTools\Console\Command\Mysql\AbstractCommand
                  InputArgument::OPTIONAL,
                  'Password'
              )
-             ->addOption(
-                 'plain',
-                 null,
-                 InputOption::VALUE_NONE,
-                 'Do not crypt password (non salted password)'
+             ->addArgument(
+                 'hash',
+                 InputArgument::OPTIONAL,
+                 'Choose the hashing algorithm for saving the password: md5, md5_salted, bcrypt, argon2i, argon2id'
              );
     }
 
@@ -103,18 +102,12 @@ class BeUserCommand extends \CliTools\Console\Command\Mysql\AbstractCommand
         $output->writeln('<p>Using pass: "' . htmlspecialchars($password) . '"</p>');
 
         // ##################
-        // Salting
+        // Password hashing
         // ##################
 
-        if ($input->getOption('plain')) {
-            // Standard md5
-            $password = Typo3Utility::generatePassword($password, Typo3Utility::PASSWORD_TYPE_MD5);
-            $this->output->writeln('<p>Generating plain (non salted) md5 password</p>');
-        } else {
-            // Salted md5
-            $password = Typo3Utility::generatePassword($password, Typo3Utility::PASSWORD_TYPE_MD5_SALTED);
-            $this->output->writeln('<p>Generating salted md5 password</p>');
-        }
+        $hash = $input->getArgument('hash');
+        list($password, $hash) = Typo3Utility::generatePassword($password, $hash);
+        $this->output->writeln('<p>Generating password with "' . htmlspecialchars($hash) . '" hashing algorithm</p>');
 
         // ##############
         // Loop through databases

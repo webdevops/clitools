@@ -27,8 +27,11 @@ use Symfony\Component\Console\Input\InputInterface;
 class Typo3Utility
 {
 
-    const PASSWORD_TYPE_MD5_SALTED = 'md5_salted';
     const PASSWORD_TYPE_MD5        = 'md5';
+    const PASSWORD_TYPE_MD5_SALTED = 'md5_salted';
+    const PASSWORD_TYPE_BCRYPT     = 'bcrypt';
+    const PASSWORD_TYPE_ARGON2I    = 'argon2i';
+    const PASSWORD_TYPE_ARGON2ID   = 'argon2id';
 
     /**
      * Generate TYPO3 password
@@ -42,15 +45,12 @@ class Typo3Utility
     {
         $ret = null;
 
-        if ($type === null) {
-            $type = self::PASSWORD_TYPE_MD5_SALTED;
-        }
-
         switch ($type) {
 
-            // ##############
-            // Salted MD5
-            // ##############
+            case self::PASSWORD_TYPE_MD5:
+                $ret = md5($password);
+                break;
+
             case self::PASSWORD_TYPE_MD5_SALTED:
                 // Salted md5
                 $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -58,15 +58,33 @@ class Typo3Utility
                 $ret   = crypt($password, $salt);
                 break;
 
-            // ##############
-            // MD5
-            // ##############
-            case self::PASSWORD_TYPE_MD5:
-                $ret = md5($password);
+            case self::PASSWORD_TYPE_BCRYPT:
+                $ret = password_hash($password, PASSWORD_BCRYPT);
                 break;
+
+            case self::PASSWORD_TYPE_ARGON2I:
+                $ret = password_hash($password, PASSWORD_ARGON2I);
+                break;
+
+            case self::PASSWORD_TYPE_ARGON2ID:
+                $ret = password_hash($password, PASSWORD_ARGON2ID);
+                break;
+
+            default:
+                $possibleAlgorithms = [];
+                defined('PASSWORD_ARGON2ID') && $possibleAlgorithms[PASSWORD_ARGON2ID] = self::PASSWORD_TYPE_ARGON2ID;
+                defined('PASSWORD_ARGON2I')  && $possibleAlgorithms[PASSWORD_ARGON2I]  = self::PASSWORD_TYPE_ARGON2I;
+                defined('PASSWORD_BCRYPT')   && $possibleAlgorithms[PASSWORD_BCRYPT]   = self::PASSWORD_TYPE_BCRYPT;
+
+                foreach ($possibleAlgorithms as $algorithm => $algorithmName) {
+                    $hash = password_hash($password, $algorithm);
+                    if ($hash !== false) {
+                        return [$hash, $algorithmName];
+                    }
+                }
         }
 
-        return $ret;
+        return [$ret, $type];
     }
 
 
