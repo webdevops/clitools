@@ -15,6 +15,5 @@
     ],
     "main": "src/command.php",
     "output": "clitools.phar",
-    "stub": true,
-    "compression": "GZ"
+    "stub": true
 }
