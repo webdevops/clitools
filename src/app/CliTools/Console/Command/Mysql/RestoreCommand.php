@@ -75,8 +75,8 @@ class RestoreCommand extends AbstractCommand
         $output->writeln('<h2>Restoring dump "' . $dumpFile . '" into database "' . $database . '"</h2>');
 
         $output->writeln('<p>Creating database</p>');
-        $this->execSqlCommand('DROP DATABASE IF EXISTS ' . addslashes($database), 'mysql');
-        $this->execSqlCommand('CREATE DATABASE ' . addslashes($database),'mysql');
+        $this->execSqlCommand('DROP DATABASE IF EXISTS ' . addslashes($database));
+        $this->execSqlCommand('CREATE DATABASE ' . addslashes($database));
 
         $commandMysql = $this->createMysqlCommand($database, '--one-database');
 
