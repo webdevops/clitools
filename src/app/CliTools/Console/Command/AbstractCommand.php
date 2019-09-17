@@ -472,15 +472,19 @@ abstract class AbstractCommand extends Command
      * Create mysql CommandBuilder (local or docker)
      *
      *
-     * @param $args...
+     * @param string $arg
      * @return CommandBuilder|DockerExecCommandBuilder
      */
-    protected function createMysqlCommand($args)
+    protected function createMysqlCommand($arg)
     {
+        $args = func_get_args();
+        $args[] = '-u' . DatabaseConnection::getDbUsername();
+        $args[] = '-p' . DatabaseConnection::getDbPassword();
+
         if ($this->getLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL )) {
-            $command = $this->createDockerMysqlCommand($this->getLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL ), func_get_args());
+            $command = $this->createDockerMysqlCommand($this->getLocalDockerContainer(\CliTools\Console\Command\AbstractDockerCommand::DOCKER_ALIAS_MYSQL ), $args);
         } else {
-            $command = $this->createLocalMysqlCommand(func_get_args());
+            $command = $this->createLocalMysqlCommand($args);
         }
 
         return $command;
