@@ -997,6 +997,12 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerC
     protected function createRemoteMySqlCommand($database = null)
     {
         $command = new RemoteCommandBuilder('mysql');
+
+        // Add defaults-file
+        if ($this->contextConfig->exists('mysql.defaultsFile')) {
+            $command->addArgumentRaw($this->contextConfig->get('mysql.defaultsFile'));
+        }
+
         $command
             // batch mode
             ->addArgument('-B')
@@ -1090,6 +1096,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerC
     protected function createRemoteMySqlDumpCommand($database = null)
     {
         $command = new RemoteCommandBuilder('mysqldump');
+
+        // Add defaults-file
+        if ($this->contextConfig->exists('mysql.defaultsFile')) {
+            $command->addArgumentRaw($this->contextConfig->get('mysql.defaultsFile'));
+        }
 
         // Add username
         if ($this->contextConfig->exists('mysql.username')) {
