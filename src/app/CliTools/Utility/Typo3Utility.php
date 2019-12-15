@@ -72,7 +72,8 @@ class Typo3Utility
 
             default:
                 $possibleAlgorithms = [];
-                defined('PASSWORD_ARGON2ID') && $possibleAlgorithms[PASSWORD_ARGON2ID] = self::PASSWORD_TYPE_ARGON2ID;
+                # Commented out since TYPO3 9.5 doesn't support argon2id yet
+                #defined('PASSWORD_ARGON2ID') && $possibleAlgorithms[PASSWORD_ARGON2ID] = self::PASSWORD_TYPE_ARGON2ID;
                 defined('PASSWORD_ARGON2I')  && $possibleAlgorithms[PASSWORD_ARGON2I]  = self::PASSWORD_TYPE_ARGON2I;
                 defined('PASSWORD_BCRYPT')   && $possibleAlgorithms[PASSWORD_BCRYPT]   = self::PASSWORD_TYPE_BCRYPT;
 
