@@ -608,17 +608,24 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerC
         $dockerPath = \CliTools\Utility\DockerUtility::searchDockerDirectoryRecursive();
 
         if (!empty($dockerPath)) {
-            $this->output->writeln('<info>Running docker containers:</info>');
+            $this->output->writeln('<info>Found docker-compose.yml</info>');
 
-            // Docker instance found
-            $docker = new CommandBuilder('docker', 'ps');
-            $docker->executeInteractive();
+            try {
+                $this->output->writeln('<info>Trying to detect running docker containers ...</info>');
 
-            $answer = ConsoleUtility::questionYesNo('Are these running containers the right ones?', 'no');
+                $docker = new CommandBuilder('docker', 'ps');
+                $docker->executeInteractive();
 
-            if (!$answer) {
-                throw new \CliTools\Exception\StopException(1);
+                $answer = ConsoleUtility::questionYesNo('Are these running containers the right ones?', 'no');
+            } catch (\CliTools\Exception\CommandExecutionException $e) {
+                $this->output->writeln('<warning>' . $e->getMessage() . '</warning>');
+
+                $answer = ConsoleUtility::questionYesNo('Continue anyway?', 'no');
             }
+        }
+
+        if (!$answer) {
+            throw new \CliTools\Exception\StopException(1);
         }
     }
 
