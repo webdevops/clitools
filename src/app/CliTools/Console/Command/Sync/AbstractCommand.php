@@ -624,7 +624,8 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerC
             }
         }
 
-        if (!$answer) {
+        if (empty($answer)) {
+            $this->output->writeln('<error>Aborting</error>');
             throw new \CliTools\Exception\StopException(1);
         }
     }
