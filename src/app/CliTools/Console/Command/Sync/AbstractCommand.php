@@ -622,11 +622,11 @@ abstract class AbstractCommand extends \CliTools\Console\Command\AbstractDockerC
 
                 $answer = ConsoleUtility::questionYesNo('Continue anyway?', 'no');
             }
-        }
 
-        if (empty($answer)) {
-            $this->output->writeln('<error>Aborting</error>');
-            throw new \CliTools\Exception\StopException(1);
+            if (empty($answer)) {
+                $this->output->writeln('<error>Aborting</error>');
+                throw new \CliTools\Exception\StopException(1);
+            }
         }
     }
 
